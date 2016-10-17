@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "callsite": "^1.0.0",
+    "modern-syslog": "^1.1.4",
     "tracekit": "~0.4.3"
   },
   "description": "A logger client for errors/exceptions in Meteor JS projects",
@@ -30,7 +31,15 @@
   },
   "engineStrict": true,
   "homepage": "https://github.com/FGM/filog",
-  "keywords": ["log", "logging", "meteor", "mongo", "sysadmin", "syslog", "tools"],
+  "keywords": [
+    "log",
+    "logging",
+    "meteor",
+    "mongo",
+    "sysadmin",
+    "syslog",
+    "tools"
+  ],
   "license": "GPL-3.0+",
   "main": "lib/index.js",
   "name": "filog",
@@ -39,7 +48,7 @@
     "url": "https://github.com/FGM/filog"
   },
   "scripts": {
-    "compile": "rm -r lib/* ../../node_modules/filog ; npm i && babel --presets es2015,stage-0 -d lib/ src/ && ( cd ../.. ; npm i ; touch * )",
+    "compile": "rm -r lib/* ; npm i && babel --presets es2015,stage-0 -d lib/ src/",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
     "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register"
   },

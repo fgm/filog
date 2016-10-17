@@ -12,7 +12,7 @@ export default class MongodbSender extends SenderBase {
   constructor(mongo, collectionName = 'logger') {
     super();
     this.mongo = mongo;
-    const collection = mongo.Collection.get(collectionName);
+    const collection = new mongo.Collection(collectionName);
     this.store = collection
       ? collection
       : new this.mongo.Collection(collectionName);

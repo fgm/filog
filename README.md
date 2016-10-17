@@ -1,5 +1,5 @@
-FiLog: a Meteor 1.3/1.4 logging package
-=======================================
+FiLog: a Meteor 1.4 logging package
+===================================
 
 Based upon NPM packages::
 

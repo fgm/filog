@@ -13,7 +13,7 @@ export default class MeteorClientHttpSender extends SenderBase {
     if (!Meteor || !Meteor.isClient) {
       throw new Error('MeteorClientHttpSender is only meant for Meteor client side.');
     }
-    if (!HTTP) {
+    if (typeof HTTP === "undefined") {
       throw new Error('MeteorClientHttpSender needs the Meteor http package to be active.');
     }
 
