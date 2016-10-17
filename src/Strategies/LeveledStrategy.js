@@ -1,6 +1,7 @@
 import StrategyBase from './StrategyBase';
 import LogLevel from '../LogLevel';
 import SenderBase from '../Senders/SenderBase';
+import NullFn from '../NullFn';
 
 /**
  * As a start, we only have a trivial level-based strategy with a single
@@ -34,6 +35,14 @@ export default class LeveledStrategy extends StrategyBase {
     [low, medium, high].forEach(sender => {
       if (!sender instanceof SenderBase) {
         throw new Error('LeveledStrategy: senders must be instances of a Sender class.');
+      }
+    });
+  }
+
+  customizeLogger(logger) {
+    ['low', 'medium', 'high'].forEach(level => {
+      if (this[level].constructor.name === 'NullSender') {
+        logger.debug = NullFn;
       }
     });
   }

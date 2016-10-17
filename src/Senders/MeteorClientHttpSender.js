@@ -1,6 +1,5 @@
 import SenderBase from './SenderBase';
-
-const nullFn = () => {};
+import NullFn from '../NullFn';
 
 export default class MeteorClientHttpSender extends SenderBase {
   /**
@@ -35,6 +34,6 @@ export default class MeteorClientHttpSender extends SenderBase {
       data,
       headers: this.requestHeaders
     };
-    this.http.post(this.loggerUrl, options, nullFn);
+    this.http.post(this.loggerUrl, options, NullFn);
   }
 }

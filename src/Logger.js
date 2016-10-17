@@ -14,12 +14,17 @@ const Logger = class {
     this.processors = [];
     this.strategy = strategy;
     this.tk = TraceKit;
+
+    this.strategy.customizeLogger(this);
   }
 
   /**
    * The callback invoked by TraceKit
    *
    * @param {Error} e
+   *   Error on which to report.
+   *
+   * @returns {void}
    */
   report(e) {
     this.tk.report(e);

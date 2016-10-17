@@ -8,7 +8,7 @@ import NullSender from '../Senders/NullSender';
 export default class StrategyBase {
   constructor(init = true) {
     if (init) {
-      this.senders = new NullSender();
+      this.senders = [new NullSender()];
     }
   }
 
@@ -27,5 +27,13 @@ export default class StrategyBase {
    */
   selectSenders(level, message, context) {
     return this.senders;
+  }
+
+  /**
+   * This method may modify the logger methods, e.g. to do nothing on debug.
+   *
+   * @param {Logger} logger
+   */
+  customizeLogger(logger) {
   }
 }
