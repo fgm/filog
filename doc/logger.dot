@@ -1,0 +1,124 @@
+digraph logger {
+  rankdir = LR;
+  node [ shape="octagon", color="#c0c0c0" ];
+    Client;
+    Server;
+  
+  node [ shape="record", color="#c0c0c0" ];
+
+  subgraph cluster_processors {
+    label = "Processors\nModify messages";
+    
+	BrowserProcessor;
+	MeteorUserProcessor;
+	ProcessorBase;
+    RoutingProcessor;
+  }
+  
+  subgraph cluster_senders {
+    label = "Senders\nTransmit messages somewhere";
+    
+    ConsoleSender [ label="ConsoleSender\nDisplays on console" ];
+    MeteorClientHttpSender [ label="MeteorClientHttpSender\nPOSTs to Meteor server" ];
+    MongodbSender [ label="MongodbSender\nStores in MongoDB" ];
+    NullSender [ label="NullSender\nDrops everything." ];
+    SenderBase;
+  }
+  
+  subgraph cluster_strategies {
+    label = "Strategies\nConfigure message sending and processing";
+    
+    LeveledStrategy [ label="<label>LeveledStrategy|<constructor>construct(init = true)" ];
+    StrategyBase [ label="<label>StrategyBase|<constructor>construct(low, mid, high, minLow, maxHigh)|<customize>customizeLogger()|<select>selectSenders(level, msg, ctx)" ];
+  }
+ 
+  subgraph cluster_loggers {
+    label = "Loggers\nProvide a way for the application to emit messages";
+    
+    ClientLogger;
+    Logger [ label="<label>Logger|<processors>\{ProcessorBase[]\} processors|<strategy>\{StrategyBase\} strategy|<constructor>construct(strategy)|log(level, msg, ctx)|debug(msg, ctx)|info(msg, ctx)|warn(msg, ctx)|error(msg, ctx)"];
+    ServerLogger;
+  }
+  
+  LogLevel [ label="LogLevel\nLevel names and values" ];
+
+  // Misc relations
+  // Instantiation.
+  edge [ color="#2030c0:#2030c0:#2030c0" ];
+  Client -> ClientLogger;
+  Client -> ProcessorBase;
+  Client -> SenderBase;
+  Client -> StrategyBase;
+  
+  Server -> ProcessorBase:s;
+  Server -> SenderBase;
+  Server -> ServerLogger;
+  Server -> StrategyBase;
+  
+  // Inheritance
+  edge [ color="#ffbb88::invis:#ffbb88" ];
+  
+  BrowserProcessor -> ProcessorBase;
+  MeteorUserProcessor -> ProcessorBase;
+  RoutingProcessor -> ProcessorBase;
+
+  ConsoleSender -> SenderBase;
+  MeteorClientHttpSender -> SenderBase;
+  MongodbSender -> SenderBase;
+  NullSender -> SenderBase;    
+  
+  LeveledStrategy -> StrategyBase;
+  
+  ClientLogger -> Logger:label;
+  ServerLogger -> Logger:label;
+
+  // Dependency.  
+  edge [ color="#c0c0c0" ];
+  // ClientLogger -> LogLevel;
+  // ServerLogger -> LogLevel;
+
+  // ConsoleSender -> LogLevel;
+  // LeveledStrategy -> LogLevel;
+  // Logger -> LogLevel;
+  Logger:processors -> ProcessorBase;
+  Logger:strategy -> StrategyBase:label;
+  
+  LeveledStrategy:constructor -> SenderBase;
+  StrategyBase -> Logger:label;
+  StrategyBase:constructor -> SenderBase;
+
+  // Method return
+  edge [ color="limegreen" ];
+  StrategyBase:select -> SenderBase;
+
+  // Mutates
+  edge [ color="red" ];
+  StrategyBase:customize -> Logger:label;
+
+  subgraph cluster_caption { 
+    label = "Legend";
+    rank = sink;
+    style = invis;
+    node [shape=plaintext]
+    
+    key [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+      <tr><td align="right" port="i1">constructs</td></tr>
+      <tr><td align="right" port="i2">inherits</td></tr>
+      <tr><td align="right" port="i3">returns</td></tr>
+      <tr><td align="right" port="i4">mutates</td></tr>
+      <tr><td align="right" port="i5">uses</td></tr>
+      </table>>]
+    key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+      <tr><td port="i1">&nbsp;</td></tr>
+      <tr><td port="i2">&nbsp;</td></tr>
+      <tr><td port="i3">&nbsp;</td></tr>
+      <tr><td port="i4">&nbsp;</td></tr>
+      <tr><td port="i5">&nbsp;</td></tr>
+      </table>>]
+    key:i1:e -> key2:i1:w [color="#2030c0:#2030c0:#2030c0"];
+    key:i2:e -> key2:i2:w [color="#ffbb88:invis:#ffbb88"];
+    key:i3:e -> key2:i3:w [color=limegreen];
+    key:i4:e -> key2:i4:w [color=red];
+    key:i5:e -> key2:i5:w [color="#c0c0c0"];
+  }
+}
