@@ -1,8 +1,7 @@
 {
   "author": "",
   "dependencies": {
-    "callsite": "tj/callsite",
-    "lodash": "^4.12.0",
+    "callsite": "^1.0.0",
     "tracekit": "~0.4.3"
   },
   "description": "A logger client for errors/exceptions",
