@@ -17,14 +17,14 @@ const Logger = class {
   }
 
   reportSubscriber(e) {
-    console.info('RS', e);
+    this.log(3, e.message, e);
   }
 
   /**
    * Arm the report subscriber.
    */
   arm() {
-    this.tk.report.subscribe(this.reportSubscriber);
+    this.tk.report.subscribe(this.reportSubscriber.bind(this));
   }
 
   /**
