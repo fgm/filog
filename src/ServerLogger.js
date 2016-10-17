@@ -1,6 +1,5 @@
 import Logger from './Logger';
 import * as util from 'util';
-import * as _ from 'lodash';
 
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -63,29 +62,75 @@ class ServerLogger extends Logger {
     }
     res.writeHead(200);
 
-    // @TODO Node defaults to 10 listeners, but we need 11. Find out why.
+    // @TODO Node defaults to 10 listeners, but we need at least 11. Find out why.
     req.setMaxListeners(20);
 
     req.on('data', Meteor.bindEnvironment(buf => {
       const doc = JSON.parse(buf.toString('utf-8'));
       // RFC 5424 Table 2: 7 == debug
       const level = doc.level ? doc.level : 7;
-      let message = 'Message not set';
-      if (doc.message) {
-        if (typeof doc.message === 'string') {
-          message = doc.message;
-        }
-        else if (typeof doc.message.toString === 'function') {
-          message = doc.message.toString();
-        }
-        else {
-          message = util.inspect(doc);
-        }
-      }
-      const context = _.omit(doc, ['level', 'message']);
+      const message = ServerLogger.stringizeMessage(doc.message);
+      const context = ServerLogger.objectizeContext(doc.context);
       this.log(level, message, context);
     }, (e) => { console.log(e); }));
     res.end('');
+  }
+
+  /**
+   * Return a plain message string from any shape of document.
+   *
+   * @param {*} doc
+   *   Expect it to be an object with a "message" key with a string value, but
+   *   accept anything.
+   *
+   * @returns {*}
+   *   A string, as close to the string representation of doc.message as
+   *   feasible.
+   */
+  static stringizeMessage(doc) {
+    const rawMessage = doc.message;
+    let message;
+    if (rawMessage) {
+      if (typeof rawMessage === 'string') {
+        message = rawMessage;
+      }
+      else if (typeof rawMessage.toString === 'function') {
+        message = rawMessage.toString();
+      }
+    }
+    else {
+      message = util.inspect(doc);
+    }
+    return message;
+  }
+
+  /**
+   * Return a plain object for all types of context values.
+   *
+   * @param {*} rawContext
+   *   Expect a POJO but accept just about anything.
+   *
+   * @returns {{}}
+   *   - Contexts which are objects are returned as the same key/values, but as
+   *     POJOs, even for arrays.
+   *   - Scalar contexts are returned as { value: <original value> }
+   */
+  static objectizeContext(rawContext) {
+    let context = {};
+    // Arrays are already objects, but we want them as plain objects.
+    if (typeof rawContext === 'object') {
+      if (rawContext.constructor.name === 'Array') {
+        context = Object.assign({}, context);
+      }
+      else {
+        context = rawContext;
+      }
+    }
+    // Other data types are not objects, so we need to convert them.
+    else {
+      context = { value: rawContext };
+    }
+    return context;
   }
 
   setupMongo(mongo, collectionName) {
