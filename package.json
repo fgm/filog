@@ -30,19 +30,18 @@
   },
   "engineStrict": true,
   "homepage": "https://github.com/FGM/filog",
-  "keywords": ["logging", "meteor", "mongo", "sysadmin", "syslog", "tools"],
-  "license": "MIT",
+  "keywords": ["log", "logging", "meteor", "mongo", "sysadmin", "syslog", "tools"],
+  "license": "GPL-3.0+",
   "main": "lib/index.js",
   "name": "filog",
-  "readme": "README.md",
   "repository": {
     "type": "git",
-    "url": "file://var/www/fibo/fibo-reactor/app/modules/filog"
+    "url": "https://github.com/FGM/filog"
   },
   "scripts": {
     "compile": "rm -r lib/* ../../node_modules/filog ; npm i && babel --presets es2015,stage-0 -d lib/ src/ && ( cd ../.. ; npm i ; touch * )",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
     "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
