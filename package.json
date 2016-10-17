@@ -1,19 +1,25 @@
 {
-  "name": "filog",
-  "version": "0.0.1",
-  "description": "A logger client for errors/exceptions",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "",
-  "license": "MIT",
   "dependencies": {
     "tracekit": "~0.4.3"
   },
+  "description": "A logger client for errors/exceptions",
+  "engines#1": "We specify npm >= 2 to get proper local dependency support in",
+  "engines#2": "application itself ; this is not a package dependency per se.",
+  "engines": {
+    "npm": ">=3.0"
+  },
+  "engineStrict": true,
+  "license": "MIT",
+  "main": "index.js",
+  "name": "filog",
   "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "file://var/www/fibo/fibo-reactor/app/modules/filog"
-  }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.0.1"
 }
