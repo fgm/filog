@@ -1,0 +1,19 @@
+{
+  "name": "filog",
+  "version": "0.0.1",
+  "description": "A logger client for errors/exceptions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "tracekit": "~0.4.3"
+  },
+  "readme": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "file://var/www/fibo/fibo-reactor/app/modules/filog"
+  }
+}
