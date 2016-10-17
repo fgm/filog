@@ -69,8 +69,8 @@ class ServerLogger extends Logger {
       const doc = JSON.parse(buf.toString('utf-8'));
       // RFC 5424 Table 2: 7 == debug
       const level = doc.level ? doc.level : 7;
-      const message = ServerLogger.stringizeMessage(doc.message);
-      const context = ServerLogger.objectizeContext(doc.context);
+      const message = ServerLogger.stringifyMessage(doc.message);
+      const context = ServerLogger.objectifyContext(doc.context);
       this.log(level, message, context);
     }, (e) => { console.log(e); }));
     res.end('');
@@ -87,7 +87,7 @@ class ServerLogger extends Logger {
    *   A string, as close to the string representation of doc.message as
    *   feasible.
    */
-  static stringizeMessage(doc) {
+  static stringifyMessage(doc) {
     const rawMessage = doc.message;
     let message;
     if (rawMessage) {
@@ -115,18 +115,25 @@ class ServerLogger extends Logger {
    *     POJOs, even for arrays.
    *   - Scalar contexts are returned as { value: <original value> }
    */
-  static objectizeContext(rawContext) {
+  static objectifyContext(rawContext) {
     let context = {};
-    // Arrays are already objects, but we want them as plain objects.
     if (typeof rawContext === 'object') {
-      if (rawContext.constructor.name === 'Array') {
-        context = Object.assign({}, context);
+      // For some reason, JS null is an object: handle it like a scalar.
+      if (rawContext === null) {
+        context = { value: null };
+      }
+      else if (rawContext.constructor.name === 'Date') {
+        context = rawContext.toISOString();
+      }
+      // Arrays and classed objects need to be downgraded to POJOs.
+      else if (rawContext.constructor.name != 'Object') {
+        context = Object.assign({}, rawContext);
       }
       else {
         context = rawContext;
       }
     }
-    // Other data types are not objects, so we need to convert them.
+    // Other data types are scalars, so we need to wrap them in an object.
     else {
       context = { value: rawContext };
     }
