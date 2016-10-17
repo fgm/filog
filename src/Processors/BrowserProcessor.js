@@ -18,7 +18,6 @@ export default class BrowserProcessor extends ProcessorBase {
   process(context) {
     const unknown = 'unknown';
     const browserDefaults = {
-      plugins: [],
       platform: unknown,
       product: unknown,
       userAgent: unknown

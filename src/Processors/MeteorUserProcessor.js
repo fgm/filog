@@ -15,7 +15,7 @@ export default class MeteorUserProcessor extends ProcessorBase {
     const result = Object.assign({}, context, {
       meteor: {
         platform: 'client',
-        userId: this.meteor.user()
+        user: this.meteor.user()
       }
     });
     return result;
