@@ -6,7 +6,7 @@ import LogLevel from './LogLevel';
 const Logger = class {
   /**
    * @constructor
-   * 
+   *
    * @param {StrategyBase} strategy
    *   The sender selection strategy to apply.
    */
@@ -72,11 +72,33 @@ const Logger = class {
     return LogLevel.Names[numericLevel];
   }
 
-  log(level, message, rawContext) {
-    const context = this.processors.reduce((accu, current, processorIndex, processors) => {
-      const result = Object.assign(accu, processors[processorIndex].process(current));
-      return result;
-    }, rawContext);
+  /**
+   * Reduce callback for processors.
+   *
+   * @see Logger.log()
+   *
+   * @param {Object} accu
+   *   The reduction accumulator.
+   * @param {ProcessorBase} current
+   *   The current process to apply in the reduction.
+   * @param {Boolean} cooked
+   *   Optiona, default true. Apply processors to context before sending.
+   *
+   * @returns {Object}
+   *   The result of the current reduction step.
+   */
+  processorReducer(accu, current) {
+    const result = Object.assign(accu, current.process(accu));
+    return result;
+  }
+
+  log(level, message, rawContext = {}, cooked = true) {
+    const context = cooked
+      ? this.processors.reduce(this.processorReducer, rawContext)
+      : rawContext;
+
+    // A timestamp is required, so insert it forcefully.
+    context.timestamp = { log: Date.now() };
 
     const senders = this.strategy.selectSenders(level, message, context);
     senders.forEach(sender => {

@@ -12,37 +12,29 @@ class ServerLogger extends Logger {
   /**
    * @constructor
    *
-   * @param {object} mongo
-   *   The Meteor Mongo service.
+   * @param {StrategyBase} strategy
+   *   A logging strategy instance.
    * @param {object} webapp
    *   The Meteor WebApp service.
    * @param {Object} parameters
    *   - servePath: the path on which to expose the logger endpoint.
-   *   - collectionName: the collection in which to store log data
    */
-  constructor(mongo, webapp = null, parameters = {}) {
-    super();
+  constructor(strategy, webapp = null, parameters = {}) {
+    super(strategy);
     const defaultParameters = {
-      servePath: '/logger',
-      collectionName: 'logger'
+      servePath: '/logger'
     };
 
+    // Loop on defaults, not arguments, to avoid injecting any random junk.
     for (const key in defaultParameters) {
-      this[key] = (typeof parameters[key] !== 'undefined')
-        ? parameters[key]
-        : defaultParameters[key];
+      if (defaultParameters.hasOwnProperty(key)) {
+        this[key] = (typeof parameters[key] !== 'undefined')
+          ? parameters[key]
+          : defaultParameters[key];
+      }
     }
 
-    this.setupMongo(mongo, this.collectionName);
     this.setupConnect(webapp, this.servePath);
-  }
-
-  log(level, message, context) {
-    let doc = { level, message };
-    if (typeof context !== 'undefined') {
-      doc.context = context;
-    }
-    this.store.insert(doc);
   }
 
   /**
@@ -71,7 +63,7 @@ class ServerLogger extends Logger {
       const level = doc.level ? doc.level : 7;
       const message = ServerLogger.stringifyMessage(doc.message);
       const context = ServerLogger.objectifyContext(doc.context);
-      this.log(level, message, context);
+      this.log(level, message, context, false);
     }, (e) => { console.log(e); }));
     res.end('');
   }
@@ -138,12 +130,6 @@ class ServerLogger extends Logger {
       context = { value: rawContext };
     }
     return context;
-  }
-
-  setupMongo(mongo, collectionName) {
-    this.mongo = mongo;
-    let collection = this.mongo.Collection.get(collectionName);
-    this.store = collection ? collection : new this.mongo.Collection(collectionName);
   }
 
   setupConnect(webapp, servePath) {

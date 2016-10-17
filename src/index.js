@@ -11,6 +11,7 @@ import LeveledStrategy from './Strategies/LeveledStrategy';
 import NullSender from './Senders/NullSender';
 import ConsoleSender from './Senders/ConsoleSender';
 import MeteorClientHttpSender from './Senders/MeteorClientHttpSender';
+import MongodbSender from './Senders/MongodbSender';
 
 export {
   LogLevel,
@@ -26,5 +27,6 @@ export {
 
   NullSender,
   ConsoleSender,
-  MeteorClientHttpSender
+  MeteorClientHttpSender,
+  MongodbSender
 };
