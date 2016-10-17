@@ -4,6 +4,7 @@ import TraceKit from 'tracekit';
 
 const Logger = class {
   constructor() {
+    this.processors = [];
     this.tk = TraceKit;
   }
 

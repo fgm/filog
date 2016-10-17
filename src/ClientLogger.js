@@ -25,6 +25,10 @@ class ClientLogger extends Logger {
     if (typeof context !== 'undefined') {
       data.context = context;
     }
+    data.context = this.processors.reduce((accu, current, processorIndex, processors) => {
+      const result = Object.assign(accu, processors[processorIndex].process(context));
+      return result;
+    });
 
     let options = {
       data,
