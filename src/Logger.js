@@ -72,8 +72,16 @@ const Logger = class {
     return LogLevel.Names[numericLevel];
   }
 
-  log(level, message, context) {
-    console.log("Log in Logger", Logger.levelName(level), message, context);
+  log(level, message, rawContext) {
+    const context = this.processors.reduce((accu, current, processorIndex, processors) => {
+      const result = Object.assign(accu, processors[processorIndex].process(current));
+      return result;
+    }, rawContext);
+
+    const senders = this.strategy.selectSenders(level, message, context);
+    senders.forEach(sender => {
+      sender.send(level, message, context);
+    });
   }
 
   debug() {
