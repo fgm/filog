@@ -1,5 +1,5 @@
-FiLog: a Meteor 1.3 logging package
-===================================
+FiLog: a Meteor 1.3/1.4 logging package
+=======================================
 
 Based upon NPM packages::
 
@@ -108,16 +108,15 @@ Typical use case:
 Format note
 -----------
 
-- Whatever processors are enabled, the `Logger.log()` method adds a
+- Whatever the enabled processors, the `Logger.log()` method adds a
   millisecond-level timestamp to each context, under the `timestamp.log` key.
-- Senders design to exit the system, like the MongoDB sender, or a syslog or
-  logstash sender, are expected to add another millisecond-level timestamp,
-  under the `timestamp.store` key.
+- Senders designed to exit the system, like the MongoDB sender, or a syslog or
+  logstash Beats forwarder, are expected to add another millisecond-level 
+  timestamp, under the `timestamp.store` key.
 
 These two timestamps are here to alleviate any issue resulting from a clock
 difference between clients and servers.
 
 Any sender can add extra keys to the context, under the `timestamp` main key,
 to enable timing diagnostics.
-
 

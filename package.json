@@ -1,10 +1,18 @@
 {
-  "author": "",
+  "author": {
+    "name": "Frederic G. MARAND",
+    "email": "fgm@osinet.fr",
+    "url": "http://blog.riff.org"
+  },
+  "bugs": {
+    "url": "https://github.com/FGM/filog/issues",
+    "email": "support@osinet.fr"
+  },
   "dependencies": {
     "callsite": "^1.0.0",
     "tracekit": "~0.4.3"
   },
-  "description": "A logger client for errors/exceptions",
+  "description": "A logger client for errors/exceptions in Meteor JS projects",
   "devDependencies": {
     "babel-cli": "^6.8.0",
     "babel-core": "^6.9.0",
@@ -21,6 +29,8 @@
     "npm": ">=2.0"
   },
   "engineStrict": true,
+  "homepage": "https://github.com/FGM/filog",
+  "keywords": ["logging", "meteor", "mongo", "sysadmin", "syslog", "tools"],
   "license": "MIT",
   "main": "lib/index.js",
   "name": "filog",
@@ -34,5 +44,5 @@
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
     "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register"
   },
-  "version": "0.0.1"
+  "version": "0.1.0"
 }
