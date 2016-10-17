@@ -55,7 +55,8 @@ const Logger = class {
     }, delay);
   }
 
-  /** Implements the standard Meteor logger methods.
+  /**
+   * Implements the standard Meteor logger methods.
    *
    * @param level
    *   debug, info, warn, or error
