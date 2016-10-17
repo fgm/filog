@@ -1,4 +1,5 @@
 import ProcessorBase from './ProcessorBase';
+import stack from 'callsite';
 
 export default class MeteorUserProcessor extends ProcessorBase {
   constructor(meteor = Meteor) {
@@ -44,6 +45,53 @@ export default class MeteorUserProcessor extends ProcessorBase {
   }
 
   /**
+   * Get this.userId on the logger caller.
+   *
+   * Builds on v8 internals, so only works server-side (nodejs) or browsers with
+   * a v8 engine.
+   *
+   * @TODO Assumes Error.stackTraceLimit is sufficient: default is 10, it
+   * usually needs only 8 to climb up to the log caller. Maybe
+   * check/increase/restore for safety ?
+   *
+   * @returns {String|undefined}
+   *   The user id.
+   */
+  v8getUserId() {
+    const stackValue = stack();
+    let state = 'below-logger';
+    let result;
+    for (const frame of stackValue) {
+      // Work around v8 bug 1164933005
+      const klass = frame.receiver
+        ? frame.getTypeName()
+        : null;
+
+      switch (state) {
+        case 'below-logger':
+          if (klass === 'ServerLogger') {
+            state = 'in-logger';
+          }
+          break;
+
+        case 1:
+          if (klass !== 'ServerLogger') {
+            state = 'in-caller';
+          }
+          break;
+
+        default:
+          break;
+      }
+      if (state === 'in-caller') {
+        result = frame.getThis().userId;
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
    * Return the current user information, as far as possible.
    *
    * @returns {Object}
@@ -56,23 +104,26 @@ export default class MeteorUserProcessor extends ProcessorBase {
     }
     // We ruled out other platforms beyond client and server in constructor.
     else {
-      const id = this.userId;
-      // In publish functions.
+      // In methods, get this.userId from logger caller.
+      const id = this.v8getUserId();
       if (typeof id !== 'undefined') {
         if (!this.userCache[id]) {
-          let user = this.meteor.users.findOne({});
+          let user = this.meteor.users.findOne({ _id: id });
           this.userCache[id] = (typeof user === 'undefined')
             ? result = this.getAnonymousAccount(id)
             : user;
         }
         result = this.userCache[id];
       }
+      // In publish functions, may work with reactive-publish
+      // @see https://github.com/meteor/meteor/issues/5462
       else {
         let user;
         try {
           user = this.meteor.user();
         }
         catch (e) {
+          // Worst case: provide a default anonymous account.
           user = this.getAnonymousAccount();
         }
         result = user;
