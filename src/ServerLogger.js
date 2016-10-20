@@ -82,17 +82,23 @@ class ServerLogger extends Logger {
   static stringifyMessage(doc) {
     const rawMessage = doc.message;
     let message;
+
     if (rawMessage) {
       if (typeof rawMessage === 'string') {
         message = rawMessage;
+
       }
       else if (typeof rawMessage.toString === 'function') {
         message = rawMessage.toString();
       }
     }
+    else if (typeof doc === 'string') {
+      message = doc;
+    }
     else {
       message = util.inspect(doc);
     }
+
     return message;
   }
 
