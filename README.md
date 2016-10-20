@@ -45,8 +45,9 @@ Typical use case:
       present at the URL defined by the Meteor-standard `ROOT_URL`
       environment variable.
     - `MongodbSender`: store the event in a collection in the Meteor MongoDB
-      database instance.
-    - `NullSender`: ignore the message
+      database instance (or the minimongo on the client).
+    - `NullSender`: ignore the message.
+    - `SyslogSender`: send the event to syslog (server) or ignore it (client).
   - instantiate a sending "strategy": instance of a class derived from
     `StrategyBase`. There are able to decide, based on an event, where it
     should be sent by available senders. They may also modify the logger
@@ -58,22 +59,24 @@ Typical use case:
       instance with each of these levels
   - constructs a `ClientLogger` instance, passing it the strategy instance, like:
 
-        let logger = new ClientLogger(new LeveledStrategy(
-          new NullSender(),
-          new ConsoleSender(),
-          new MeteorClientHttpSender(Meteor.absoluteUrl('/logger'))
-        ));
+          let logger = new ClientLogger(new LeveledStrategy(
+            new NullSender(),
+            new ConsoleSender(),
+            new MeteorClientHttpSender(Meteor.absoluteUrl('/logger'))
+          ));
 
   - adds processor instances to the logger instance, like:
 
-        logger.processors.push(
-          new BrowserProcessor(),
-          new RoutingProcessor(),
-          new MeteorUserProcessor(Meteor)
-        );
+          logger.processors.push(
+            new BrowserProcessor(),
+            new RoutingProcessor(),
+            new MeteorUserProcessor(Meteor)
+          );
+
   - is now able to log events, like:
 
-        logger.warn("Some warning condition", { foo: "bar" }
+          logger.warn("Some warning condition", { foo: "bar" });
+
   - with this configuration:
     - logger applies processors to add browser, user, and routing information
       to the message context
@@ -81,7 +84,7 @@ Typical use case:
       of the `LeveledStrategy` constructor), the logger passes the now-rich
       message to the Meteor server thanks to the `MeteorClientHttpSender`
       sender
-    - message arrive server-side.
+    - message arrives server-side.
 - `server/main.js`
   - is configured in much the same way as the client, so it has its own `logger`,
     typically configured with just a `MongodbSender` instance for all levels.
