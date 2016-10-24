@@ -34,7 +34,12 @@ export default class SyslogSender extends SenderBase {
    * @inheritDoc
    */
   send(level, message, context) {
-    let doc = { message };
+    let doc = {
+      message,
+      level: this.syslog.level[level],
+      facility: this.syslog.facility[this.facility]
+    };
+
     // It should already contain a timestamp object anyway.
     if (typeof context !== 'undefined') {
       doc.context = context;
