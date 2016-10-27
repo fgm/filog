@@ -32,7 +32,9 @@ export default class MeteorUserProcessor extends ProcessorBase {
    *
    * @param {String} id
    *   Optional. A user id.
-   * @returns {{_id: number, username: null, emails: Array, profile: {}, services: {}}}
+   * @returns {Object}
+   *   An account object initialized for anonymous.
+   *
    */
   getAnonymousAccount(id = 0) {
     return {
@@ -135,11 +137,18 @@ export default class MeteorUserProcessor extends ProcessorBase {
 
   /** @inheritdoc */
   process(context) {
+    let user = this.getUser();
+
+    // Cannot delete property from undefined or null.
+    if (user && user.services) {
+      delete user.services.resume;
+    }
+
     // Overwrite any previous userId information in context.
     const result = Object.assign({}, context, {
       meteor: {
         platform: this.platform,
-        user: this.getUser()
+        user
       }
     });
     return result;

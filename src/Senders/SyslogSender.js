@@ -3,6 +3,17 @@ import * as modernSyslog from 'modern-syslog';
 import * as util from 'util';
 import SenderBase from './SenderBase';
 
+/**
+ * SyslogSender sends messages to a syslog server.
+ *
+ * It does not check the length of the message, which is limited do 1kB in
+ * legacy RFC3164 syslog implementations, and could be limited to 2kB in
+ * RFC5424 and/or RFC6587 implementations.
+ *
+ * @see https://tools.ietf.org/html/rfc3164#section-4.1
+ * @see https://tools.ietf.org/html/rfc5424#section-6.1
+ * @see https://tools.ietf.org/html/rfc6587#section-3.4.1
+ */
 export default class SyslogSender extends SenderBase {
   /**
    * @constructor
