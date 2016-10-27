@@ -4,6 +4,7 @@ import ClientLogger from './ClientLogger';
 
 import BrowserProcessor from './Processors/BrowserProcessor';
 import MeteorUserProcessor from './Processors/MeteorUserProcessor';
+import MeteorUserFilterProcessor from './Processors/MeteorUserFilterProcessor';
 import RoutingProcessor from './Processors/RoutingProcessor';
 
 import LeveledStrategy from './Strategies/LeveledStrategy';
@@ -31,6 +32,7 @@ export {
 
   BrowserProcessor,
   MeteorUserProcessor,
+  MeteorUserFilterProcessor,
   RoutingProcessor,
 
   LeveledStrategy,
