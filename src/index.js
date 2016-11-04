@@ -12,6 +12,7 @@ import NullSender from './Senders/NullSender';
 import ConsoleSender from './Senders/ConsoleSender';
 import MeteorClientHttpSender from './Senders/MeteorClientHttpSender';
 import MongodbSender from './Senders/MongodbSender';
+import TeeSender from './Senders/TeeSender';
 
 /**
  * modern-syslog is not usable on the client side, because it fails to load
@@ -39,5 +40,6 @@ export {
   ConsoleSender,
   MeteorClientHttpSender,
   MongodbSender,
-  SyslogSender
+  SyslogSender,
+  TeeSender
 };

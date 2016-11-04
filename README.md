@@ -48,6 +48,8 @@ Typical use case:
       database instance (or the minimongo on the client).
     - `NullSender`: ignore the message.
     - `SyslogSender`: send the event to syslog (server) or ignore it (client).
+    - `TeeSender`: send the event to all sender instances passed to its 
+      constructor as an array. Useful to send logs to multiple destinations.
   - instantiate a sending "strategy": instance of a class derived from
     `StrategyBase`. There are able to decide, based on an event, where it
     should be sent by available senders. They may also modify the logger
@@ -108,6 +110,7 @@ Typical use case:
       applied, to add the Meteor user information to the event
     - the MongoDb sender instance stores the event.
 
+
 Format note
 -----------
 
@@ -122,4 +125,3 @@ difference between clients and servers.
 
 Any sender can add extra keys to the context, under the `timestamp` main key,
 to enable timing diagnostics.
-
