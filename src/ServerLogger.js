@@ -61,25 +61,25 @@ class ServerLogger extends Logger {
     // @TODO Node defaults to 10 listeners, but we need at least 11. Find out why.
     req.setMaxListeners(20);
 
-    let body = '';
+    let body = "";
     req.setEncoding('utf-8');
 
     req.on('data', chunk => { body += chunk; });
 
-    req.on('end', Meteor.bindEnvironment(() => {
+    req.on("end", Meteor.bindEnvironment(() => {
       let result;
       try {
         const doc = JSON.parse(body);
         // RFC 5424 Table 2: 7 == debug.
-        const level = (typeof doc.level !== 'undefined') ? parseInt(doc.level, 10) : 7;
-        const message = ServerLogger.stringifyMessage(doc.message);
+        const level = (typeof doc.level !== "undefined") ? parseInt(doc.level, 10) : 7;
+        const message = ServerLogger.stringifyMessage(doc);
         const context = ServerLogger.objectifyContext(doc.context);
         this.log(level, message, context, false);
         res.statusCode = 200;
-        result = '';
+        result = "";
       }
       catch (err) {
-        res.statusCode = 400;
+        res.statusCode = 422;
         result = `Could not parse JSON message: ${err.message}.`;
       }
       res.end(result);
@@ -103,15 +103,15 @@ class ServerLogger extends Logger {
     let message;
 
     if (rawMessage) {
-      if (typeof rawMessage === 'string') {
+      if (typeof rawMessage === "string") {
         message = rawMessage;
 
       }
-      else if (typeof rawMessage.toString === 'function') {
+      else if (typeof rawMessage.toString === "function") {
         message = rawMessage.toString();
       }
     }
-    else if (typeof doc === 'string') {
+    else if (typeof doc === "string") {
       message = doc;
     }
     else {
@@ -134,16 +134,16 @@ class ServerLogger extends Logger {
    */
   static objectifyContext(rawContext) {
     let context = {};
-    if (typeof rawContext === 'object') {
+    if (typeof rawContext === "object") {
       // For some reason, JS null is an object: handle it like a scalar.
       if (rawContext === null) {
         context = { value: null };
       }
-      else if (rawContext.constructor.name === 'Date') {
+      else if (rawContext.constructor.name === "Date") {
         context = rawContext.toISOString();
       }
       // Arrays and classed objects need to be downgraded to POJOs.
-      else if (rawContext.constructor.name != 'Object') {
+      else if (rawContext.constructor.name !== "Object") {
         context = Object.assign({}, rawContext);
       }
       else {
@@ -160,12 +160,12 @@ class ServerLogger extends Logger {
   setupConnect(webapp, servePath) {
     this.webapp = webapp;
     if (this.webapp) {
-      console.log('Serving logger on', servePath);
+      console.log("Serving logger on", servePath);
       let app = this.webapp.connectHandlers;
       app.use(this.servePath, this.handleClientLogRequest.bind(this));
     }
     else {
-      console.log('Not serving logger, path', servePath);
+      console.log("Not serving logger, path", servePath);
     }
   }
 }
