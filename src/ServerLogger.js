@@ -41,8 +41,13 @@ class ServerLogger extends Logger {
    * Handle a log message from the client.
    *
    * @param {IncomingMessage} req
+   *   The request.
    * @param {ServerResponse} res
+   *   The response.
    * @param {function} next
+   *   A callback, not used.
+   *
+   * @returns {void}
    */
   handleClientLogRequest(req, res, next) {
     const method = req.method.toUpperCase();
@@ -52,20 +57,34 @@ class ServerLogger extends Logger {
       res.end();
       return;
     }
-    res.writeHead(200);
 
     // @TODO Node defaults to 10 listeners, but we need at least 11. Find out why.
     req.setMaxListeners(20);
 
-    req.on('data', Meteor.bindEnvironment(buf => {
-      const doc = JSON.parse(buf.toString('utf-8'));
-      // RFC 5424 Table 2: 7 == debug
-      const level = doc.level ? doc.level : 7;
-      const message = ServerLogger.stringifyMessage(doc.message);
-      const context = ServerLogger.objectifyContext(doc.context);
-      this.log(level, message, context, false);
-    }, (e) => { console.log(e); }));
-    res.end('');
+    let body = '';
+    req.setEncoding('utf-8');
+
+    req.on('data', chunk => { body += chunk; });
+
+    req.on('end', Meteor.bindEnvironment(() => {
+      let result;
+      try {
+        const doc = JSON.parse(body);
+        // RFC 5424 Table 2: 7 == debug.
+        const level = (typeof doc.level !== 'undefined') ? parseInt(doc.level, 10) : 7;
+        const message = ServerLogger.stringifyMessage(doc.message);
+        const context = ServerLogger.objectifyContext(doc.context);
+        this.log(level, message, context, false);
+        res.statusCode = 200;
+        result = '';
+      }
+      catch (err) {
+        res.statusCode = 400;
+        result = `Could not parse JSON message: ${err.message}.`;
+      }
+      res.end(result);
+    },
+      (e) => { console.log(e); }));
   }
 
   /**
