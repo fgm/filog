@@ -55,5 +55,5 @@
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
     "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register -G -w"
   },
-  "version": "0.1.5"
+  "version": "0.1.6"
 }
