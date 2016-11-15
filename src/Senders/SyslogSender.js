@@ -55,6 +55,6 @@ export default class SyslogSender extends SenderBase {
     if (typeof context !== 'undefined') {
       doc.context = context;
     }
-    this.syslog.log(level, util.inspect(doc));
+    this.syslog.log(level, util.inspect(doc, { depth: null }));
   }
 }
