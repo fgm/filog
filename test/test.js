@@ -1,6 +1,8 @@
 import "babel-polyfill";
 import ServerLogger from "../src/ServerLogger";
+import SyslogSender from "../src/Senders/SyslogSender";
 
+const sinon = require("sinon");
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const assert = chai.assert;
@@ -201,6 +203,60 @@ function testNonJson() {
   });
 }
 
+
+
+function testSerializeDeepObject() {
+  const makeSyslog = () => ({
+    level: {
+      [logLevelWarn]: 'warn'
+    },
+    facility: {
+      [LOCAL0]: 'local0'
+    },
+    open: () => {},
+    log: () => {}
+  });
+
+  const deepContext = () => ({
+    level1: {
+      level2: {
+        level3: {
+          level4: {
+            level5: {
+              level6: 'world'
+            }
+          }
+        }
+      }
+    }
+  });
+  const LOCAL0 = 16;
+  const logLevelWarn = 3;
+
+
+  it('it should fail at serializing deep object', () => {
+    const syslog = makeSyslog();
+    const spy = sinon.spy(syslog, 'log');
+    // test with default options
+    const sender1 = new SyslogSender('test-sender', {}, LOCAL0, syslog);
+    sender1.send(logLevelWarn, 'hello', deepContext());
+    assert.equal(true, spy.calledOnce);
+    assert.equal(false, spy.calledWithMatch(logLevelWarn, /world/));
+    assert.equal(true, spy.calledWithMatch(logLevelWarn, /\[Object\]/));
+  });
+
+  it('it should serialize deep object', () => {
+    const syslog = makeSyslog();
+    const spy = sinon.spy(syslog, 'log');
+    // test with custom options (depth = 10)
+    const sender2 = new SyslogSender('test-sender', {}, LOCAL0, syslog, { depth: 10 });
+    sender2.send(logLevelWarn, 'hello', deepContext());
+    assert.equal(true, spy.calledOnce);
+    assert.equal(true, spy.calledWithMatch(logLevelWarn, /world/));
+    assert.equal(false, spy.calledWithMatch(logLevelWarn, /\[Object\]/));
+  });
+}
+
 describe("ServerLogger", function () {
   "use strict";
   describe("objectifyContext()", testObjectifyContext);
@@ -208,4 +264,5 @@ describe("ServerLogger", function () {
   describe("invalidMethod", testInvalidMethod);
   describe("validJson", testValidJson);
   describe("rejectNonJson", testNonJson);
+  describe("serializeDeepObject", testSerializeDeepObject);
 });

@@ -20,7 +20,7 @@ export default class SyslogSender extends SenderBase {
    *
    * @param {String} ident
    *   Optional: the syslog identifier. Used as a prefix on messages.
-   * @param {Object} syslogOption
+   * @param {Object} syslogOptions
    *   Optional: a bit-level OR of syslog.LOG* option constants.
    * @param {Number} syslogFacility
    *   Optional: one of the standard RFC5424 facilities.
@@ -29,7 +29,7 @@ export default class SyslogSender extends SenderBase {
    * @param {Object} formatOptions
    *   Optional : The options used to format the message (default to { depth: 5 }).
    */
-  constructor(ident = null, syslogOption = null, syslogFacility = null, syslog = null, formatOptions = null) {
+  constructor(ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null) {
     super();
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;
@@ -38,7 +38,7 @@ export default class SyslogSender extends SenderBase {
 
     this.facility = syslogFacility || this.syslog.facility.LOG_LOCAL0;
     this.ident = actualIdent;
-    this.option = syslogOption || (this.syslog.option.LOG_PID);
+    this.option = syslogOptions || (this.syslog.option.LOG_PID);
     this.formatOptions = formatOptions || { depth: 5 };
 
     this.syslog.open(this.ident, this.option, this.facility);

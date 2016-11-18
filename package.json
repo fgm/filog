@@ -25,7 +25,7 @@
     "chai-http": "^3.0.0",
     "growl": "^1.9.2",
     "mocha": "^2.5.2",
-    "sinon": "^1.17.4"
+    "sinon": "^1.17.6"
   },
   "engines#1": "We specify npm >= 2 to get proper local dependency support in",
   "engines#2": "application itself ; this is not a package dependency per se.",
