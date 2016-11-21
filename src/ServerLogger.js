@@ -5,6 +5,11 @@ import Logger from "./Logger";
 import * as util from "util";
 import { hostname } from "os";
 
+const serverCatcher = function (err) {
+  //Error.captureStackTrace(err);
+  console.log('Caught uE, err:', err);
+};
+
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
  *
@@ -44,6 +49,31 @@ class ServerLogger extends Logger {
     this.hostname = hostname();
 
     webapp && this.setupConnect(webapp, this.servePath);
+  }
+
+  /**
+   * Arm the report subscriber.
+   */
+  arm() {
+    console.log('Armed serverCatcher');
+    process.on('uncaughtException', serverCatcher);
+    // this.tk.report.subscribe(this.reportSubscriber.bind(this));
+  }
+
+  /**
+   * Disarm the subscriber.
+   *
+   * In most cases, we do not want to disarm immediately: a stack trace being
+   * build may take several hundred milliseconds, and we would lose it.
+   *
+   * @param delay
+   */
+  disarm(delay = 2000) {
+    console.log('Request to disarm serverCatcher');
+    setTimeout(() => {
+      console.log('Disarmed serverCatcher');
+      process.removeListener('uncaughtException', serverCatcher);
+    }, delay);
   }
 
   /**
