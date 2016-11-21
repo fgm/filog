@@ -6,16 +6,23 @@ export default class MongodbSender extends SenderBase {
    *
    * @param {Mongo} mongo
    *   The Meteor Mongo service.
-   * @param {String} collectionName
-   *   The name of the collection in which to log.
+   * @param {(String|Collection)} Collection or collection name
+   *   The collection or the name of the collection in which to log.
    */
-  constructor(mongo, collectionName = 'logger') {
+  constructor(mongo, collection = 'logger') {
     super();
     this.mongo = mongo;
-    const collection = new mongo.Collection(collectionName);
-    this.store = collection
-      ? collection
-      : new this.mongo.Collection(collectionName);
+    if (typeof collection === 'object') {
+      this.store = collection;
+    } else if (typeof collection === 'string') {
+      const collectionName = collection;
+      const newCollection = new mongo.Collection(collectionName);
+      this.store = newCollection
+        ? newCollection
+        : new this.mongo.Collection(collectionName);
+    } else {
+      throw new Error('MongodbSender requires a Collection or a collection name');
+    }
   }
 
   send(level, message, context) {
