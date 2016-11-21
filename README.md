@@ -125,3 +125,33 @@ difference between clients and servers.
 
 Any sender can add extra keys to the context, under the `timestamp` main key,
 to enable timing diagnostics.
+
+
+Running tests
+-------------
+
+The module contains tests. Some of them are unit tests and need nothing special
+to run, while others are currently implemented as integration tests and assume
+you have a working project using the module available at `http://localhost:3000`.
+
+You can run :
+
+* just unit tests with `meteor npm run test-unit` 
+* just integration tests with `meteor npm run test-integration`
+* both tests with `meteor npm run test`
+
+To run integration tests, you need to run your project in one terminal, and the
+tests in another one:
+
+#### Terminal 1
+
+    $ cd (my_project)
+    $ meteor run --port 3000
+
+#### Terminal 2
+
+    $ cd (my_project)
+    $ cd imports/filog
+    $ meteor npm run test-integration
+    $ meteor npm run test
+    

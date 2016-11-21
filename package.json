@@ -53,7 +53,9 @@
   "scripts": {
     "compile": "rm -r lib/* ; npm i && babel --presets es2015,stage-0 -d lib/ src/",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
-    "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register -G -w test/*"
+    "test-unit": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit",
+    "test-integration": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",
+    "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/*"
   },
   "version": "0.1.7"
 }
