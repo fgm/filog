@@ -53,7 +53,7 @@
   "scripts": {
     "compile": "rm -r lib/* ; npm i && babel --presets es2015,stage-0 -d lib/ src/",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
-    "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register -G -w"
+    "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register -G -w test/*"
   },
-  "version": "0.1.6"
+  "version": "0.1.7"
 }
