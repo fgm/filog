@@ -21,11 +21,13 @@ class ServerLogger extends Logger {
    * @param {Webapp} webapp
    *   The Meteor WebApp service.
    * @param {Object} parameters
-   *   - servePath: the path on which to expose the logger endpoint.
+   *   - logRequestHeaders: add request headers to the log context. Defaults to true.
+   *   - servePath: the path on which to expose the logger endpoint. Defaults to "/logger".
    */
   constructor(strategy, webapp = null, parameters = {}) {
     super(strategy);
     const defaultParameters = {
+      logRequestHeaders: true,
       servePath: "/logger"
     };
 
@@ -77,7 +79,13 @@ class ServerLogger extends Logger {
         // RFC 5424 Table 2: 7 == debug.
         const level = (typeof doc.level !== "undefined") ? parseInt(doc.level, 10) : 7;
         const message = ServerLogger.stringifyMessage(doc);
+        if (typeof doc.context === "undefined") {
+          doc.context = {};
+        }
         const context = ServerLogger.objectifyContext(doc.context);
+        if (this.logRequestHeaders) {
+          context.requestHeaders = req.headers;
+        }
         this.log(level, message, context, false);
         res.statusCode = 200;
         result = "";
