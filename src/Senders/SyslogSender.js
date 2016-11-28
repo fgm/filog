@@ -1,7 +1,10 @@
-import * as path from 'path';
-import * as modernSyslog from 'modern-syslog';
-import * as util from 'util';
-import SenderBase from './SenderBase';
+/**
+ * @fileOverview Syslog Sender class.
+ */
+import * as path from "path";
+import * as modernSyslog from "modern-syslog";
+import * as util from "util";
+import SenderBase from "./SenderBase";
 
 /**
  * SyslogSender sends messages to a syslog server.
@@ -13,30 +16,36 @@ import SenderBase from './SenderBase';
  * @see https://tools.ietf.org/html/rfc3164#section-4.1
  * @see https://tools.ietf.org/html/rfc5424#section-6.1
  * @see https://tools.ietf.org/html/rfc6587#section-3.4.1
+ *
+ * @extends SenderBase
  */
-export default class SyslogSender extends SenderBase {
+const SyslogSender = class extends SenderBase {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
    * @param {String} ident
    *   Optional: the syslog identifier. Used as a prefix on messages.
-   * @param {Object} option
+   * @param {Object} syslogOptions
    *   Optional: a bit-level OR of syslog.LOG* option constants.
-   * @param {Number} facility
+   * @param {Number} syslogFacility
    *   Optional: one of the standard RFC5424 facilities.
    * @param {Syslog} syslog
    *   The modern-syslog service or a compatible alternative.
+   * @param {Object} formatOptions
+   *   Optional : The options used to format the message (default to { depth: 5 }).
    */
-  constructor(ident = null, option = null, facility = null, syslog = null) {
+  constructor(ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null) {
     super();
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;
 
     this.syslog = syslog || modernSyslog;
 
-    this.facility = facility || this.syslog.facility.LOG_LOCAL0;
+    this.facility = syslogFacility || this.syslog.facility.LOG_LOCAL0;
     this.ident = actualIdent;
-    this.option = option || (this.syslog.option.LOG_PID);
+    this.option = syslogOptions || (this.syslog.option.LOG_PID);
+    this.formatOptions = formatOptions || { depth: 5 };
 
     this.syslog.open(this.ident, this.option, this.facility);
   }
@@ -52,9 +61,11 @@ export default class SyslogSender extends SenderBase {
     };
 
     // It should already contain a timestamp object anyway.
-    if (typeof context !== 'undefined') {
+    if (typeof context !== "undefined") {
       doc.context = context;
     }
-    this.syslog.log(level, util.inspect(doc));
+    this.syslog.log(level, util.inspect(doc, this.formatOptions));
   }
-}
+};
+
+export default SyslogSender;

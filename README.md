@@ -6,6 +6,8 @@ Based upon NPM packages::
 * Stack capture and standardization: https://www.npmjs.com/package/tracekit
 * Meteor user capture in call stack: https://www.npmjs.com/package/callsite
 
+Read the [Documentation](https://fgm.github.io/filog).
+
 Configuration and usage
 -----------------------
 
@@ -53,18 +55,22 @@ Typical use case:
   - instantiate a sending "strategy": instance of a class derived from
     `StrategyBase`. There are able to decide, based on an event, where it
     should be sent by available senders. They may also modify the logger
-    instance at the last step of its construction, A single concrete strategy is
+    instance at the last step of its construction, Two concrete strategies are
     currently available:
     - `LeveledStrategy`: based on the level of the message, it defines three
       severity levels: low, medium, and high, as well as the breakpoints
       between them in terms of RFC5424 levels, and associates a sender
       instance with each of these levels
+    - `TrivialStrategy` uses a single sender for all messages. Especially useful 
+      for early work client-side, where you want everything to be stored to 
+      collect as much information as possible from a limited number of clients.
+      May also be useful for tests, to simplify test setup.
   - constructs a `ClientLogger` instance, passing it the strategy instance, like:
 
           let logger = new ClientLogger(new LeveledStrategy(
             new NullSender(),
             new ConsoleSender(),
-            new MeteorClientHttpSender(Meteor.absoluteUrl('/logger'))
+            new MeteorClientHttpSender(Meteor.absoluteUrl('logger'))
           ));
 
   - adds processor instances to the logger instance, like:
@@ -125,3 +131,33 @@ difference between clients and servers.
 
 Any sender can add extra keys to the context, under the `timestamp` main key,
 to enable timing diagnostics.
+
+
+Running tests
+-------------
+
+The module contains tests. Some of them are unit tests and need nothing special
+to run, while others are currently implemented as integration tests and assume
+you have a working project using the module available at `http://localhost:3000`.
+
+You can run :
+
+* just unit tests with `meteor npm run test-unit` 
+* just integration tests with `meteor npm run test-integration`
+* both tests with `meteor npm run test`
+
+To run integration tests, you need to run your project in one terminal, and the
+tests in another one:
+
+#### Terminal 1
+
+    $ cd (my_project)
+    $ meteor run --port 3000
+
+#### Terminal 2
+
+    $ cd (my_project)
+    $ cd imports/filog
+    $ meteor npm run test-integration
+    $ meteor npm run test
+    

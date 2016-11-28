@@ -1,22 +1,41 @@
-import ProcessorBase from './ProcessorBase';
+/**
+ * @fileOverview Browser Processor class.
+ */
+import ProcessorBase from "./ProcessorBase";
 
 /**
  * Adds browser related information to an event context.
  *
  * - plugins, platform, product, userAgent
  * - memory information
+ *
+ * @extends ProcessorBase
  */
-export default class BrowserProcessor extends ProcessorBase {
+const BrowserProcessor = class extends ProcessorBase {
+  /**
+   * ProcessorBase ensures it is not being built outside a browser.
+   */
   constructor() {
     super();
     if (!navigator) {
-      throw new Error('BrowserProcessor is only usable on browser-run code.');
+      throw new Error("BrowserProcessor is only usable on browser-run code.");
     }
   }
 
-  /** @inheritdoc */
+  /**
+   * The only required method for processor implementations.
+   *
+   * It assumes passed contexts are not mutated, so they are either returned as
+   * such, as in this example implementation, or cloned à la Object.assign().
+   *
+   * @param {object} context
+   *   The context object for a log event.
+   *
+   * @returns {object}
+   *   The processed context object.
+   */
   process(context) {
-    const unknown = 'unknown';
+    const unknown = "unknown";
     const browserDefaults = {
       platform: unknown,
       product: unknown,
@@ -39,4 +58,6 @@ export default class BrowserProcessor extends ProcessorBase {
 
     return result;
   }
-}
+};
+
+export default BrowserProcessor;

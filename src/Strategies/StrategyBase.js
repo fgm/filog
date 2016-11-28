@@ -1,11 +1,17 @@
 /**
- * Strategies customize the active Sender instances for a given log event.
- *
+ * @fileOverview Base Strategy.
  */
 
-import NullSender from '../Senders/NullSender';
+import NullSender from "../Senders/NullSender";
 
-export default class StrategyBase {
+/**
+ * StrategyBase is an "abstract" strategy.
+ *
+ * Strategies customize the active Sender instances for a given log event.
+ *
+ * @see SenderBase
+ */
+const StrategyBase = class {
   constructor(init = true) {
     if (init) {
       this.senders = [new NullSender()];
@@ -33,7 +39,12 @@ export default class StrategyBase {
    * This method may modify the logger methods, e.g. to do nothing on debug.
    *
    * @param {Logger} logger
+   *   A logger service to customize.
+   *
+   * @returns {void}
    */
   customizeLogger(logger) {
   }
-}
+};
+
+export default StrategyBase;

@@ -1,5 +1,8 @@
-import Logger from './Logger';
-import * as util from 'util';
+/**
+ * @fileOverview Server-side Logger.
+ */
+import Logger from "./Logger";
+import * as util from "util";
 
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -9,26 +12,29 @@ import * as util from 'util';
  * @see ServerLogger.log
  */
 class ServerLogger extends Logger {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
    * @param {StrategyBase} strategy
    *   A logging strategy instance.
-   * @param {object} webapp
+   * @param {Webapp} webapp
    *   The Meteor WebApp service.
    * @param {Object} parameters
-   *   - servePath: the path on which to expose the logger endpoint.
+   * - logRequestHeaders: add request headers to the log context. Defaults to true.
+   * - servePath: the path on which to expose the logger endpoint. Defaults to "/logger".
    */
   constructor(strategy, webapp = null, parameters = {}) {
     super(strategy);
     const defaultParameters = {
-      servePath: '/logger'
+      logRequestHeaders: true,
+      servePath: "/logger"
     };
 
     // Loop on defaults, not arguments, to avoid injecting any random junk.
     for (const key in defaultParameters) {
       if (defaultParameters.hasOwnProperty(key)) {
-        this[key] = (typeof parameters[key] !== 'undefined')
+        this[key] = (typeof parameters[key] !== "undefined")
           ? parameters[key]
           : defaultParameters[key];
       }
@@ -51,7 +57,7 @@ class ServerLogger extends Logger {
    */
   handleClientLogRequest(req, res, next) {
     const method = req.method.toUpperCase();
-    if (method !== 'POST') {
+    if (method !== "POST") {
       // RFC2616: 405 means Method not allowed.
       res.writeHead(405);
       res.end();
@@ -62,9 +68,9 @@ class ServerLogger extends Logger {
     req.setMaxListeners(20);
 
     let body = "";
-    req.setEncoding('utf-8');
+    req.setEncoding("utf-8");
 
-    req.on('data', chunk => { body += chunk; });
+    req.on("data", chunk => { body += chunk; });
 
     req.on("end", Meteor.bindEnvironment(() => {
       let result;
@@ -73,7 +79,13 @@ class ServerLogger extends Logger {
         // RFC 5424 Table 2: 7 == debug.
         const level = (typeof doc.level !== "undefined") ? parseInt(doc.level, 10) : 7;
         const message = ServerLogger.stringifyMessage(doc);
+        if (typeof doc.context === "undefined") {
+          doc.context = {};
+        }
         const context = ServerLogger.objectifyContext(doc.context);
+        if (this.logRequestHeaders) {
+          context.requestHeaders = req.headers;
+        }
         this.log(level, message, context, false);
         res.statusCode = 200;
         result = "";
@@ -105,7 +117,6 @@ class ServerLogger extends Logger {
     if (rawMessage) {
       if (typeof rawMessage === "string") {
         message = rawMessage;
-
       }
       else if (typeof rawMessage.toString === "function") {
         message = rawMessage.toString();
@@ -157,6 +168,16 @@ class ServerLogger extends Logger {
     return context;
   }
 
+  /**
+   * Sets up the Connect routing within the Meteor webapp component.
+   *
+   * @param {Webapp} webapp
+   *   The Meteor webapp service (Connect wrapper).
+   * @param {String} servePath
+   *   The path on which to expose the server logger. Must NOT start by a "/".
+   *
+   * @returns {void}
+   */
   setupConnect(webapp, servePath) {
     this.webapp = webapp;
     if (this.webapp) {

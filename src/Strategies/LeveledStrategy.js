@@ -1,13 +1,19 @@
-import StrategyBase from './StrategyBase';
-import LogLevel from '../LogLevel';
-import SenderBase from '../Senders/SenderBase';
-import NullFn from '../NullFn';
+/**
+ * @fileOverview Level-based Strategy.
+ */
+
+import StrategyBase from "./StrategyBase";
+import LogLevel from "../LogLevel";
+import SenderBase from "../Senders/SenderBase";
+import NullFn from "../NullFn";
 
 /**
- * As a start, we only have a trivial level-based strategy with a single
- * sender per level.
+ * LeveledStrategy defines a single sender per level.
+ *
+ * @extends StrategyBase
  */
-export default class LeveledStrategy extends StrategyBase {
+const LeveledStrategy = class extends StrategyBase {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
@@ -33,15 +39,15 @@ export default class LeveledStrategy extends StrategyBase {
     this.maxHigh = maxHigh;
 
     [low, medium, high].forEach(sender => {
-      if (!sender instanceof SenderBase) {
-        throw new Error('LeveledStrategy: senders must be instances of a Sender class.');
+      if (!(sender instanceof SenderBase)) {
+        throw new Error("LeveledStrategy: senders must be instances of a Sender class.");
       }
     });
   }
 
   customizeLogger(logger) {
-    ['low', 'medium', 'high'].forEach(level => {
-      if (this[level].constructor.name === 'NullSender') {
+    ["low", "medium", "high"].forEach(level => {
+      if (this[level].constructor.name === "NullSender") {
         logger.debug = NullFn;
       }
     });
@@ -62,4 +68,6 @@ export default class LeveledStrategy extends StrategyBase {
 
     return [sender];
   }
-}
+};
+
+export default LeveledStrategy;
