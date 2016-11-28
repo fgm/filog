@@ -56,7 +56,7 @@
   },
   "scripts": {
     "compile": "rm -r lib/* ; npm i && babel --presets es2015,stage-0 -d lib/ src/",
-    "doc": "rm -fr out ; node_modules/.bin/jsdoc src/**/*",
+    "doc": "rm -fr out ; jsdoc -c jsdoc.json",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
     "test-unit": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit",
     "test-integration": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",

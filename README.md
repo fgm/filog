@@ -6,6 +6,8 @@ Based upon NPM packages::
 * Stack capture and standardization: https://www.npmjs.com/package/tracekit
 * Meteor user capture in call stack: https://www.npmjs.com/package/callsite
 
+Read the [Documentation](https://fgm.github.io/filog).
+
 Configuration and usage
 -----------------------
 

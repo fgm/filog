@@ -21,8 +21,8 @@ class ServerLogger extends Logger {
    * @param {Webapp} webapp
    *   The Meteor WebApp service.
    * @param {Object} parameters
-   *   - logRequestHeaders: add request headers to the log context. Defaults to true.
-   *   - servePath: the path on which to expose the logger endpoint. Defaults to "/logger".
+   * - logRequestHeaders: add request headers to the log context. Defaults to true.
+   * - servePath: the path on which to expose the logger endpoint. Defaults to "/logger".
    */
   constructor(strategy, webapp = null, parameters = {}) {
     super(strategy);
