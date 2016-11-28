@@ -1,12 +1,18 @@
-import StrategyBase from './StrategyBase';
+/**
+ * @fileOverview Trivial Strategy.
+ */
+
+import StrategyBase from "./StrategyBase";
 
 /**
  * This strategy uses a single sender for all configurations.
  *
  * As such, it is mostly meant for tests.
+ *
+ * @extends StrategyBase
  */
-export default class TrivialStrategy extends StrategyBase {
-
+const TrivialStrategy = class extends StrategyBase {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
@@ -17,4 +23,6 @@ export default class TrivialStrategy extends StrategyBase {
     super(false);
     this.senders = [sender];
   }
-}
+};
+
+export default TrivialStrategy;

@@ -1,12 +1,16 @@
+/**
+ * @fileOverview Package exported constants.
+ */
+
 const Names = [
-  'Emergency',
-  'Alert',
-  'Critical',
-  'Error',
-  'Warning',
-  'Notice',
-  'Informational',
-  'Debug'
+  "Emergency",
+  "Alert",
+  "Critical",
+  "Error",
+  "Warning",
+  "Notice",
+  "Informational",
+  "Debug"
 ];
 
 const EMERGENCY = 0;

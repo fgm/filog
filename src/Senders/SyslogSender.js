@@ -1,7 +1,10 @@
-import * as path from 'path';
-import * as modernSyslog from 'modern-syslog';
-import * as util from 'util';
-import SenderBase from './SenderBase';
+/**
+ * @fileOverview Syslog Sender class.
+ */
+import * as path from "path";
+import * as modernSyslog from "modern-syslog";
+import * as util from "util";
+import SenderBase from "./SenderBase";
 
 /**
  * SyslogSender sends messages to a syslog server.
@@ -13,8 +16,11 @@ import SenderBase from './SenderBase';
  * @see https://tools.ietf.org/html/rfc3164#section-4.1
  * @see https://tools.ietf.org/html/rfc5424#section-6.1
  * @see https://tools.ietf.org/html/rfc6587#section-3.4.1
+ *
+ * @extends SenderBase
  */
-export default class SyslogSender extends SenderBase {
+const SyslogSender = class extends SenderBase {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
@@ -55,9 +61,11 @@ export default class SyslogSender extends SenderBase {
     };
 
     // It should already contain a timestamp object anyway.
-    if (typeof context !== 'undefined') {
+    if (typeof context !== "undefined") {
       doc.context = context;
     }
     this.syslog.log(level, util.inspect(doc, this.formatOptions));
   }
-}
+};
+
+export default SyslogSender;

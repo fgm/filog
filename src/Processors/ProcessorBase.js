@@ -1,4 +1,13 @@
-export default class ProcessorBase {
+/**
+ * @fileOverview Base Processor class.
+ */
+
+/**
+ * An "abstract" processor base class.
+ *
+ * It exists only to document the processor interface.
+ */
+const ProcessorBase = class {
   /**
    * The only required method for processor implementations.
    *
@@ -14,4 +23,6 @@ export default class ProcessorBase {
   process(context) {
     return context;
   }
-}
+};
+
+export default ProcessorBase;

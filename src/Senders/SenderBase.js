@@ -1,4 +1,11 @@
-export default class SenderBase {
+/**
+ * @fileOverview Base Sender class.
+ */
+
+/**
+ * SenderBase is an "abstract" class defining the sender interface.
+ */
+const SenderBase = class {
   /**
    * The single method for a sender: send data somewhere.
    *
@@ -12,4 +19,6 @@ export default class SenderBase {
    */
   send(level, message, context) {
   }
-}
+};
+
+export default SenderBase;
