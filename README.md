@@ -53,18 +53,22 @@ Typical use case:
   - instantiate a sending "strategy": instance of a class derived from
     `StrategyBase`. There are able to decide, based on an event, where it
     should be sent by available senders. They may also modify the logger
-    instance at the last step of its construction, A single concrete strategy is
+    instance at the last step of its construction, Two concrete strategies are
     currently available:
     - `LeveledStrategy`: based on the level of the message, it defines three
       severity levels: low, medium, and high, as well as the breakpoints
       between them in terms of RFC5424 levels, and associates a sender
       instance with each of these levels
+    - `TrivialStrategy` uses a single sender for all messages. Especially useful 
+      for early work client-side, where you want everything to be stored to 
+      collect as much information as possible from a limited number of clients.
+      May also be useful for tests, to simplify test setup.
   - constructs a `ClientLogger` instance, passing it the strategy instance, like:
 
           let logger = new ClientLogger(new LeveledStrategy(
             new NullSender(),
             new ConsoleSender(),
-            new MeteorClientHttpSender(Meteor.absoluteUrl('/logger'))
+            new MeteorClientHttpSender(Meteor.absoluteUrl('logger'))
           ));
 
   - adds processor instances to the logger instance, like:
