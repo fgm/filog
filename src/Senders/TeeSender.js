@@ -1,9 +1,15 @@
-import SenderBase from './SenderBase';
+/**
+ * @fileOverview Tee Sender class.
+ */
+
+import SenderBase from "./SenderBase";
 
 /**
  * Like a UNIX tee(1), the TeeSender sends its input to multiple outputs.
+ *
+ * @extends SenderBase
  */
-export default class TeeSender extends SenderBase {
+const TeeSender = class extends SenderBase {
   /**
    * Constructor.
    *
@@ -20,4 +26,6 @@ export default class TeeSender extends SenderBase {
     const result = this.senders.map(sender => sender.send(level, message, context));
     return result;
   }
-}
+};
+
+export default TeeSender;

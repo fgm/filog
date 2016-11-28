@@ -1,9 +1,16 @@
-import TraceKit from 'tracekit';
-import LogLevel from './LogLevel';
+/**
+ * @fileOverview Base Logger class.
+ */
+import TraceKit from "tracekit";
+import LogLevel from "./LogLevel";
 
-// const logMethodNames = ['log', 'debug', 'info', 'warn', 'error', '_exception' ];
+// const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
+/**
+ * Logger is the base class for loggers.
+ */
 const Logger = class {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
@@ -30,12 +37,26 @@ const Logger = class {
     this.tk.report(e);
   }
 
+  /**
+   * Error-catching callback when the logger is arm()-ed.
+   *
+   * @param {Error} e
+   *   The error condition to log.
+   *
+   * @returns {void}
+   *
+   * @see Logger#arm
+   */
   reportSubscriber(e) {
     this.log(LogLevel.ERROR, e.message, e);
   }
 
   /**
    * Arm the report subscriber.
+   *
+   * @returns {void}
+   *
+   * @see Logger#reportSubscriber
    */
   arm() {
     this.tk.report.subscribe(this.reportSubscriber.bind(this));
@@ -47,7 +68,10 @@ const Logger = class {
    * In most cases, we do not want to disarm immediately: a stack trace being
    * build may take several hundred milliseconds, and we would lose it.
    *
-   * @param delay
+   * @param {Number} delay
+   *   The delay before actually disarming, in milliseconds.
+   *
+   * @returns {void}
    */
   disarm(delay = 2000) {
     setTimeout(() => {
@@ -58,15 +82,26 @@ const Logger = class {
   /**
    * Implements the standard Meteor logger methods.
    *
-   * @param level
+   * This method is an implementation detail: do not depend on it.
+   *
+   * @param {String} level
    *   debug, info, warn, or error
-   * @private
+   *
+   * @returns {void}
    *
    * @todo (or not ?) merge in the funky Meteor logic from the logging package.
    */
-  _meteorLog(level) {
-  }
+  _meteorLog(level) {}
 
+  /**
+   * Map a syslog level to its standard name.
+   *
+   * @param {Number} level
+   *   An RFC5424 level.
+   *
+   * @returns {String}
+   *   The english name for the level.
+   */
   static levelName(level) {
     let numericLevel = Math.round(level);
     if (numericLevel < LogLevel.EMERGENCY) {
@@ -87,8 +122,6 @@ const Logger = class {
    *   The reduction accumulator.
    * @param {ProcessorBase} current
    *   The current process to apply in the reduction.
-   * @param {Boolean} cooked
-   *   Optiona, default true. Apply processors to context before sending.
    *
    * @returns {Object}
    *   The result of the current reduction step.
@@ -98,6 +131,23 @@ const Logger = class {
     return result;
   }
 
+  /**
+   * Log an event. This is the *MAIN* method in the whole package.
+   *
+   * @param {Number} level
+   *   An RFC5424 severity level.
+   * @param {Object|String} message
+   *   - If it is a string, the message body
+   *   - Otherwise it must be an object with a "message" key.
+   *   It may contain placeholders to be substituted with values from the
+   *   context object, as in PSR-3.
+   * @param {Object} rawContext
+   *   An object complementing the message.
+   * @param {Boolean} cooked
+   *   Is the context already reduced ?
+   *
+   * @returns {void}
+   */
   log(level, message, rawContext = {}, cooked = true) {
     const context = cooked
       ? this.processors.reduce(this.processorReducer, rawContext)
@@ -112,15 +162,46 @@ const Logger = class {
     });
   }
 
+  /**
+   * Implementation compatibility to replace Meteor.debug.
+   *
+   * @returns {void}
+   *
+   * @see Meteor.debug
+   */
   debug() {
     this.log(LogLevel.DEBUG, ...arguments);
   }
+
+  /**
+   * Implementation compatibility to replace Meteor.info.
+   *
+   * @returns {void}
+   *
+   * @see Meteor.info
+   */
   info() {
     this.log(LogLevel.INFORMATIONAL, ...arguments);
   }
+
+  /**
+   * Implementation compatibility to replace Meteor.warn.
+   *
+   * @returns {void}
+   *
+   * @see Meteor.warn
+   */
   warn() {
     this.log(LogLevel.WARNING, ...arguments);
   }
+
+  /**
+   * Implementation compatibility to replace Meteor.error.
+   *
+   * @returns {void}
+   *
+   * @see Meteor.error
+   */
   error() {
     this.log(LogLevel.ERROR, ...arguments);
   }

@@ -1,6 +1,15 @@
-import SenderBase from './SenderBase';
+/**
+ * @fileOverview MongoDB Sender class.
+ */
+import SenderBase from "./SenderBase";
 
-export default class MongodbSender extends SenderBase {
+/**
+ * MongodbSender sends logs to the Meteor standard database.
+ *
+ * @extends SenderBase
+ */
+const MongodbSender = class extends SenderBase {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
@@ -9,7 +18,7 @@ export default class MongodbSender extends SenderBase {
    * @param {String} collectionName
    *   The name of the collection in which to log.
    */
-  constructor(mongo, collectionName = 'logger') {
+  constructor(mongo, collectionName = "logger") {
     super();
     this.mongo = mongo;
     const collection = new mongo.Collection(collectionName);
@@ -21,10 +30,12 @@ export default class MongodbSender extends SenderBase {
   send(level, message, context) {
     let doc = { level, message };
     // It should already contain a timestamp object anyway.
-    if (typeof context !== 'undefined') {
+    if (typeof context !== "undefined") {
       doc.context = context;
     }
     doc.context.timestamp.store = Date.now();
     this.store.insert(doc);
   }
-}
+};
+
+export default MongodbSender;

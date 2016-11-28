@@ -83,7 +83,7 @@
     //
     "comma-dangle": 2, // disallow or enforce trailing commas
     "no-cond-assign": 2, // disallow assignment in conditional expressions
-    "no-console": 1, // disallow use of console (off by default in the node environment)
+    "no-console": 0, // disallow use of console (off by default in the node environment)
     "no-constant-condition": 2, // disallow use of constant expressions in conditions
     "no-control-regex": 2, // disallow control characters in regular expressions
     "no-debugger": 2, // disallow use of debugger
@@ -225,7 +225,7 @@
     "no-underscore-dangle": 1, // disallow dangling underscores in identifiers
     "object-curly-spacing": [2, "always"],
     "one-var": [2, "never"], // allow just one var statement per function (off by default)
-    "operator-assignment": [1, "never"], // require assignment operator shorthand where possible or prohibit it entirely (off by default)
+    "operator-assignment": [1, "always"], // require assignment operator shorthand where possible or prohibit it entirely (off by default)
     "padded-blocks": [1, "never"], // enforce padding within blocks (off by default)
     "quotes": [1, "double"], // specify whether double or single quotes should be used
     "semi": [2, "always"], // require or disallow use of semicolons instead of ASI

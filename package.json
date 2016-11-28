@@ -24,7 +24,11 @@
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
     "growl": "^1.9.2",
+    "ink-docstrap": "^1.3.0",
+    "install": "^0.8.2",
+    "jsdoc": "^3.4.3",
     "mocha": "^2.5.2",
+    "npm": "^4.0.2",
     "sinon": "^1.17.6"
   },
   "engines#1": "We specify npm >= 2 to get proper local dependency support in",
@@ -52,6 +56,7 @@
   },
   "scripts": {
     "compile": "rm -r lib/* ; npm i && babel --presets es2015,stage-0 -d lib/ src/",
+    "doc": "rm -fr out ; node_modules/.bin/jsdoc src/**/*",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
     "test-unit": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit",
     "test-integration": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",

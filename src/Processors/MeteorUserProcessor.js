@@ -1,27 +1,39 @@
-import ProcessorBase from './ProcessorBase';
-import stack from 'callsite';
+/**
+ * @fileOverview Meteor user Processor class.
+ */
+import ProcessorBase from "./ProcessorBase";
+import stack from "callsite";
 
-export default class MeteorUserProcessor extends ProcessorBase {
+/**
+ * MeteorUserProcessor adds Meteor server-side account information to log events.
+ *
+ * @extends ProcessorBase
+ */
+const MeteorUserProcessor = class extends ProcessorBase {
+  /**
+   * @param {Meteor} meteor
+   *   The Meteor service.
+   */
   constructor(meteor = Meteor) {
     super();
     if (!meteor) {
-      throw new Error('Meteor processor is only meant for Meteor code.');
+      throw new Error("Meteor processor is only meant for Meteor code.");
     }
     if (meteor.isClient) {
-      this.platform = 'client';
-      if (!meteor.user || meteor.user.constructor.name !== 'Function') {
-        throw new Error('Meteor client-side processor need an accounts package to be active.');
+      this.platform = "client";
+      if (!meteor.user || meteor.user.constructor.name !== "Function") {
+        throw new Error("Meteor client-side processor need an accounts package to be active.");
       }
     }
     else if (meteor.isServer) {
-      this.platform = 'server';
-      const accounts = Package['accounts-base'];
-      if (typeof accounts === 'undefined' || !accounts.AccountsServer) {
-        throw new Error('Meteor server-side processor need an accounts package to be active.');
+      this.platform = "server";
+      const accounts = Package["accounts-base"];
+      if (typeof accounts === "undefined" || !accounts.AccountsServer) {
+        throw new Error("Meteor server-side processor need an accounts package to be active.");
       }
     }
     else {
-      throw new Error('This version of the meteor user processor only supports client and server platforms.');
+      throw new Error("This version of the meteor user processor only supports client and server platforms.");
     }
     this.meteor = meteor;
     this.userCache = {};
@@ -61,7 +73,7 @@ export default class MeteorUserProcessor extends ProcessorBase {
    */
   v8getUserId() {
     const stackValue = stack();
-    let state = 'below-logger';
+    let state = "below-logger";
     let result;
     for (const frame of stackValue) {
       // Work around v8 bug 1164933005
@@ -70,22 +82,22 @@ export default class MeteorUserProcessor extends ProcessorBase {
         : null;
 
       switch (state) {
-        case 'below-logger':
-          if (klass === 'ServerLogger') {
-            state = 'in-logger';
+        case "below-logger":
+          if (klass === "ServerLogger") {
+            state = "in-logger";
           }
           break;
 
         case 1:
-          if (klass !== 'ServerLogger') {
-            state = 'in-caller';
+          if (klass !== "ServerLogger") {
+            state = "in-caller";
           }
           break;
 
         default:
           break;
       }
-      if (state === 'in-caller') {
+      if (state === "in-caller") {
         result = frame.getThis().userId;
         break;
       }
@@ -108,10 +120,10 @@ export default class MeteorUserProcessor extends ProcessorBase {
     else {
       // In methods, get this.userId from logger caller.
       const id = this.v8getUserId();
-      if (typeof id !== 'undefined') {
+      if (typeof id !== "undefined") {
         if (!this.userCache[id]) {
           let user = this.meteor.users.findOne({ _id: id });
-          this.userCache[id] = (typeof user === 'undefined')
+          this.userCache[id] = (typeof user === "undefined")
             ? result = this.getAnonymousAccount(id)
             : user;
         }
@@ -153,4 +165,6 @@ export default class MeteorUserProcessor extends ProcessorBase {
     });
     return result;
   }
-}
+};
+
+export default MeteorUserProcessor;

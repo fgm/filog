@@ -1,7 +1,17 @@
-import SenderBase from './SenderBase';
-import NullFn from '../NullFn';
+/**
+ * @fileOverview Meteor Client HTTP Sender class.
+ */
 
-export default class MeteorClientHttpSender extends SenderBase {
+import SenderBase from "./SenderBase";
+import NullFn from "../NullFn";
+
+/**
+ * MeteorClientHttpSender send data from the client to the server over HTTP.
+ *
+ * @extends SenderBase
+ */
+const MeteorClientHttpSender = class extends SenderBase {
+  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
@@ -11,22 +21,22 @@ export default class MeteorClientHttpSender extends SenderBase {
   constructor(loggerUrl) {
     super();
     if (!Meteor || !Meteor.isClient) {
-      throw new Error('MeteorClientHttpSender is only meant for Meteor client side.');
+      throw new Error("MeteorClientHttpSender is only meant for Meteor client side.");
     }
     if (typeof HTTP === "undefined") {
-      throw new Error('MeteorClientHttpSender needs the Meteor http package to be active.');
+      throw new Error("MeteorClientHttpSender needs the Meteor http package to be active.");
     }
 
     this.http = HTTP;
     this.loggerUrl = loggerUrl;
     this.requestHeaders = {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json"
     };
   }
 
   send(level, message, context) {
     let data = { level, message };
-    if (typeof context !== 'undefined') {
+    if (typeof context !== "undefined") {
       data.context = context;
     }
 
@@ -36,4 +46,6 @@ export default class MeteorClientHttpSender extends SenderBase {
     };
     this.http.post(this.loggerUrl, options, NullFn);
   }
-}
+};
+
+export default MeteorClientHttpSender;
