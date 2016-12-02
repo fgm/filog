@@ -91,7 +91,7 @@ const Logger = class {
    *
    * @todo (or not ?) merge in the funky Meteor logic from the logging package.
    */
-  _meteorLog(level) {}
+  _meteorLog() {}
 
   /**
    * Map a syslog level to its standard name.

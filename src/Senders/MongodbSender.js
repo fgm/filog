@@ -20,22 +20,23 @@ const MongodbSender = class extends SenderBase {
    */
   constructor(mongo, collection = "logger") {
     super();
-    this.mongo = mongo;
     if (collection instanceof mongo.Collection) {
       this.store = collection;
-    } else if (typeof collection === "string") {
+    }
+    else if (typeof collection === "string") {
       const collectionName = collection;
       this.store = new mongo.Collection(collectionName);
-    } else {
-      throw new Error('MongodbSender requires a Collection or a collection name');
+    }
+    else {
+      throw new Error("MongodbSender requires a Collection or a collection name");
     }
   }
 
   send(level, message, context) {
     let doc = { level, message };
     // It should already contain a timestamp object anyway.
-    if (typeof context !== "undefined") {
-      doc.context = context;
+    if (typeof context === "undefined" || typeof context.timestamp === "undefined") {
+      doc.context = { timestamp: {} };
     }
     doc.context.timestamp.store = Date.now();
     this.store.insert(doc);

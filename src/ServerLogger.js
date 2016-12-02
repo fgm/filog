@@ -51,11 +51,11 @@ class ServerLogger extends Logger {
    * @param {ServerResponse} res
    *   The response.
    * @param {function} next
-   *   A callback, not used.
+   *   A callback, not used currently.
    *
    * @returns {void}
    */
-  handleClientLogRequest(req, res, next) {
+  handleClientLogRequest(req, res) {
     const method = req.method.toUpperCase();
     if (method !== "POST") {
       // RFC2616: 405 means Method not allowed.

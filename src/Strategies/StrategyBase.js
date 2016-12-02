@@ -31,7 +31,7 @@ const StrategyBase = class {
    * @returns {function[]}
    *   An array of senders to use for this event.
    */
-  selectSenders(level, message, context) {
+  selectSenders() {
     return this.senders;
   }
 
@@ -43,8 +43,7 @@ const StrategyBase = class {
    *
    * @returns {void}
    */
-  customizeLogger(logger) {
-  }
+  customizeLogger() {}
 };
 
 export default StrategyBase;

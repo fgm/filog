@@ -17,8 +17,7 @@ const SenderBase = class {
    *   A log event context object.
    * @returns {void}
    */
-  send(level, message, context) {
-  }
+  send() {}
 };
 
 export default SenderBase;
