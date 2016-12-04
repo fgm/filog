@@ -33,11 +33,14 @@ const MongodbSender = class extends SenderBase {
   }
 
   send(level, message, context) {
+    let defaultedContext = context || {};
     let doc = { level, message };
-    // It should already contain a timestamp object anyway.
-    if (typeof context === "undefined" || typeof context.timestamp === "undefined") {
-      doc.context = { timestamp: {} };
+
+    // It should contain a timestamp object if it comes from ClientLogger.
+    if (typeof defaultedContext.timestamp === "undefined") {
+      defaultedContext.timestamp = {};
     }
+    doc.context = defaultedContext;
     doc.context.timestamp.store = Date.now();
     this.store.insert(doc);
   }

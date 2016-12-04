@@ -1,7 +1,12 @@
 # FiLog changelog
 ## 0.1 series
 
-### 0.1.9
+### 0.1.11
+
+* Exposed TrivialStrategy to module consumers
+* Fixed incorrect default timestamp generation.
+
+### 0.1.10 / 0.1.9
 
 * MongoDbSender can now take an existing collection instead of just a name
 * Allow logging client request headers
@@ -11,12 +16,13 @@
 * JsDoc standard applies to all code to support the documentation site
 * ES5 (compiled) files are no longer maintained in repo
 * ES6 (source) files are no longer included in the version published on NPM
+* 0.1.9 incorrectly packaged release: deprecated
 
 ### 0.1.8 / 0.1.7
 
 * Allow serializing objects with depth > 2
 * Split tests between "unit" and "integration".
-* 0.1.7 incorrectly published release: deprecated
+* 0.1.7 incorrectly packaged release: deprecated
 
 ### 0.1.6
 
