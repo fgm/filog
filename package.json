@@ -4,6 +4,12 @@
     "email": "fgm@osinet.fr",
     "url": "http://blog.riff.org"
   },
+  "contributors": [
+    {
+      "name": "Ilari Patrikka",
+      "email": "ilari@patrikka.fi"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/FGM/filog/issues",
     "email": "support@osinet.fr"
