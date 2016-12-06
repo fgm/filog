@@ -22,7 +22,7 @@
     "bcrypt": "^0.8.7",
     "callsite": "^1.0.0",
     "modern-syslog": "^1.1.4",
-    "tracekit": "~0.4.3"
+    "tracekit": "~0.4.4"
   },
   "description": "A logger client for errors/exceptions in Meteor JS projects",
   "devDependencies": {

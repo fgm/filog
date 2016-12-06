@@ -5,6 +5,7 @@
 
 * Exposed TrivialStrategy to module consumers
 * Fixed incorrect default timestamp generation.
+* Upgraded TraceKit to 0.4.4.
 * Contributors are now listed.
 
 ### 0.1.10 / 0.1.9
