@@ -3,4 +3,7 @@ lib/
 node_modules/
 npm-debug.log
 out/
+
+# Version lock files
+npm-shrinkwrap.json
 yarn.lock

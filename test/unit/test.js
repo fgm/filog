@@ -36,14 +36,31 @@ function testMongoDbSender() {
       new MongoDbSender(mongo, collection);
     }, Error);
   });
-  it("should add a \"store\" timestamp to context", function () {
+  it("should add a \"store\" timestamp to empty context", function () {
     const collection = new mongo.Collection("fake");
     const sender = new MongoDbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
-
-    // First set: valid context.
     const before = +new Date();
     const inboundArgs = [0, "message", {}];
+
+    sender.send(...inboundArgs);
+    const after = +new Date();
+    assert.equal(insertSpy.calledOnce, true, "Collection.insert was called once.");
+    const callArgs = insertSpy.firstCall.args[0];
+    assert.equal(callArgs.level, inboundArgs[0], "Level is passed");
+    assert.equal(callArgs.message, inboundArgs[1], "Level is passed");
+    const timestamp = callArgs.context.timestamp.store;
+    assert.equal(typeof timestamp, "number", "A numeric store timestamp is passed");
+    assert.equal(timestamp >= before, true, "Timestamp is later than 'before'");
+    assert.equal(timestamp <= after, true, "Timestamp is earlier than 'after'");
+  });
+  it("should add a \"store\" timestamp to non-empty context", function () {
+    const collection = new mongo.Collection("fake");
+    const sender = new MongoDbSender(mongo, collection);
+    const insertSpy = sinon.spy(sender.store, "insert");
+    const before = +new Date();
+    const inboundArgs = [0, "message", { timestamp: { whatever: 1480849124018 } }];
+
     sender.send(...inboundArgs);
     const after = +new Date();
     assert.equal(insertSpy.calledOnce, true, "Collection.insert was called once.");

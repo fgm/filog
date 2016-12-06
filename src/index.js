@@ -7,6 +7,7 @@ import MeteorUserProcessor from "./Processors/MeteorUserProcessor";
 import RoutingProcessor from "./Processors/RoutingProcessor";
 
 import LeveledStrategy from "./Strategies/LeveledStrategy";
+import TrivialStrategy from "./Strategies/TrivialStrategy";
 
 import NullSender from "./Senders/NullSender";
 import ConsoleSender from "./Senders/ConsoleSender";
@@ -34,6 +35,7 @@ export {
   RoutingProcessor,
 
   LeveledStrategy,
+  TrivialStrategy,
 
   NullSender,
   ConsoleSender,
