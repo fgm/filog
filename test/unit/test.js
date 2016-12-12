@@ -1,5 +1,7 @@
 import "babel-polyfill";
+import LogLevel from "../../src/LogLevel";
 import MongoDbSender from "../../src/Senders/MongodbSender";
+import Logger from "../../src/Logger";
 import ServerLogger from "../../src/ServerLogger";
 import SyslogSender from "../../src/Senders/SyslogSender";
 
@@ -9,6 +11,22 @@ const chaiHttp = require("chai-http");
 const assert = chai.assert;
 
 chai.use(chaiHttp);
+
+function testImmutableContext() {
+  "use strict";
+  const strategy = {
+    customizeLogger: () => [],
+    selectSenders: () => []
+  };
+  it("should not modify context in log() calls", function () {
+    const logger = new Logger(strategy);
+    const originalContext = {};
+    const context = { ...originalContext };
+    assert.equal(JSON.stringify(context), JSON.stringify(originalContext), "Pre-log context matches original context");
+    logger.log(LogLevel.DEBUG, "some message", context);
+    assert.equal(JSON.stringify(context), JSON.stringify(originalContext), "Post-log context matches original context");
+  });
+}
 
 function testMongoDbSender() {
   const mongo = {
@@ -230,6 +248,10 @@ function testSerializeDeepObject() {
 }
 
 describe("Unit", () => {
+  describe("Logger", function () {
+    "use strict";
+    describe("logging does not modify context", testImmutableContext);
+  });
   describe("ServerLogger", function () {
     "use strict";
     describe("objectifyContext()", testObjectifyContext);

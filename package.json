@@ -61,7 +61,6 @@
   "main": "lib/index.js",
   "name": "filog",
   "optionalDependencies": {},
-  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FGM/filog.git"

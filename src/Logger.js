@@ -142,15 +142,15 @@ const Logger = class {
    *   It may contain placeholders to be substituted with values from the
    *   context object, as in PSR-3.
    * @param {Object} rawContext
-   *   An object complementing the message.
+   *   (Optional). An object complementing the message.
    * @param {Boolean} cooked
-   *   Is the context already reduced ?
+   *   (Optional). Is the context already reduced ?
    *
    * @returns {void}
    */
   log(level, message, rawContext = {}, cooked = true) {
     const context = cooked
-      ? this.processors.reduce(this.processorReducer, rawContext)
+      ? this.processors.reduce(this.processorReducer, { ...rawContext })
       : rawContext;
 
     // A timestamp is required, so insert it forcefully.

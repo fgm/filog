@@ -1,6 +1,11 @@
 # FiLog changelog
 ## 0.1 series
 
+### 0.1.12
+
+* Loggers no longer modify the message context (#25)
+* Removed incorrect `readme` clause in `package.json`.
+
 ### 0.1.11
 
 * Exposed TrivialStrategy to module consumers
