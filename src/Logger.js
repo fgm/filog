@@ -17,12 +17,17 @@ const Logger = class {
    *
    * @param {StrategyBase} strategy
    *   The sender selection strategy to apply.
+   * @param {Processor[]} processors
+   *   An array of processor instances.
    */
-  constructor(strategy) {
-    this.processors = [];
+  constructor(strategy, processors) {
+    this.processors = processors;
     this.strategy = strategy;
     this.tk = TraceKit;
 
+    this.formatOptions = {
+      trustedKeys: this.processors.reduce(this.processorTrustReducer, [])
+    };
     this.strategy.customizeLogger(this);
   }
 
@@ -133,6 +138,24 @@ const Logger = class {
   }
 
   /**
+   * Reduce callback for processor trust.
+   *
+   * @see Logger.constructor()
+   *
+   * @param {Object} accu
+   *   The reduction accumulator.
+   * @param {ProcessorBase} current
+   *   The current process to apply in the reduction.
+   *
+   * @returns {Object}
+   *   The result of the current reduction step.
+   */
+  processorTrustReducer(accu, current) {
+    const result = [...accu, ...current.getTrustedKeys()];
+    return result;
+  }
+
+  /**
    * Log an event. This is the *MAIN* method in the whole package.
    *
    * @param {Number} level
@@ -145,7 +168,9 @@ const Logger = class {
    * @param {Object} rawContext
    *   (Optional). An object complementing the message.
    * @param {Boolean} cooked
-   *   (Optional). Is the context already reduced ?
+   *   (Optional). Is the context already reduced ? This is typically the case
+   *   on the server logger when it comes from the client logger: it should not
+   *   usually be set by the user.
    *
    * @returns {void}
    *
@@ -169,7 +194,7 @@ const Logger = class {
 
     const senders = this.strategy.selectSenders(level, message, context);
     senders.forEach(sender => {
-      sender.send(level, message, context);
+      sender.send(level, message, context, this.formatOptions);
     });
   }
 

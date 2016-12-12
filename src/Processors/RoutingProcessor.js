@@ -19,6 +19,11 @@ const RoutingProcessor = class extends ProcessorBase {
     }
   }
 
+  /** @inheritdoc */
+  getTrustedKeys() {
+    return ['routing'];
+  }
+
   /**
    * Overwrite any previous routing information in context.
    *

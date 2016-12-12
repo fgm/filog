@@ -3,7 +3,8 @@
 
 ### 0.1.12
 
-- LeveledStrategy.constructor() no longer accepts non-Senders as sender arguments.
+* Messages are now stored serialized by default in MongoDB too, not just Syslog (#23).
+* LeveledStrategy.constructor() no longer accepts non-Senders as sender arguments.
 * Logger.log() no longer accepts invalid log levels (#26), to match PSR-3.
 * Loggers no longer modify the message context (#25).
 * Removed incorrect `readme` clause in `package.json`.
