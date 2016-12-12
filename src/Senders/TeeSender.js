@@ -13,18 +13,22 @@ const TeeSender = class extends SenderBase {
   /**
    * Constructor.
    *
+   * @param {ProcessorBase[]} processors
+   *   Processors to be applied by this sender instead of globally.
    * @param {Array} senders
    *   An array of senders to which to send the input.
    */
-  constructor(senders) {
-    super();
+  constructor(processors = [], senders) {
+    console.log("Tee sender", processors);
+    super(processors);
     this.senders = senders;
   }
 
   /** @inheritdoc */
   send(level, message, context) {
-    const result = this.senders.map(sender => sender.send(level, message, context));
-    return result;
+    const processedContext = super.send(level, message, context);
+    this.senders.map(sender => sender.send(level, message, processedContext));
+    return processedContext;
   }
 };
 

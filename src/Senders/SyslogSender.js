@@ -24,6 +24,8 @@ const SyslogSender = class extends SenderBase {
   /**
    * @constructor
    *
+   * @param {ProcessorBase[]} processors
+   *   Processors to be applied by this sender instead of globally.
    * @param {String} ident
    *   Optional: the syslog identifier. Used as a prefix on messages.
    * @param {Object} syslogOptions
@@ -42,7 +44,7 @@ const SyslogSender = class extends SenderBase {
    * @see serializeDefault
    * @see modern-syslog/core.cc
    */
-  constructor(ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null, serialize = null) {
+  constructor(processors = [], ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null) {
     super();
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;
@@ -68,12 +70,14 @@ const SyslogSender = class extends SenderBase {
       facility: this.syslog.facility[this.facility],
     };
 
+    const processedContext = super.send(level, message, context);
     // It should already contain a timestamp object anyway.
-    if (typeof context !== "undefined") {
-      doc.context = context;
+    if (typeof processedContext !== "undefined") {
+      doc.context = processedContext;
     }
 
     this.syslog.log(level, this.serialize(doc));
+    return processedContext;
   }
 
   /**

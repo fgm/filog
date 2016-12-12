@@ -16,9 +16,11 @@ const Logger = class {
    *
    * @param {StrategyBase} strategy
    *   The sender selection strategy to apply.
+   * @param {ProcessorBase[]} processors
+   *   An array of processor instances.
    */
-  constructor(strategy) {
-    this.processors = [];
+  constructor(strategy, processors = []) {
+    this.processors = processors;
     this.strategy = strategy;
     this.tk = TraceKit;
 
@@ -196,7 +198,7 @@ const Logger = class {
 
     const senders = this.strategy.selectSenders(level, message, finalContext);
     senders.forEach(sender => {
-      sender.send(level, message, finalContext);
+      sender.send(level, message, finalContext, this.formatOptions);
     });
   }
 

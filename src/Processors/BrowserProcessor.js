@@ -34,6 +34,11 @@ const BrowserProcessor = class extends ProcessorBase {
     this.window = actualWin;
   }
 
+  /** @inheritdoc */
+  getTrustedKeys() {
+    return ['browser'];
+  }
+
   /**
    * The only required method for processor implementations.
    *

@@ -8,6 +8,7 @@
  * It exists only to document the processor interface.
  */
 const ProcessorBase = class {
+
   /**
    * The only required method for processor implementations.
    *
@@ -22,6 +23,17 @@ const ProcessorBase = class {
    */
   process(context) {
     return context;
+  }
+
+  /**
+   * Provide the list of context keys this processor recommends not serializing.
+   *
+   * @returns {Array}
+   *   An array of context keys which will not be serialized by default if this
+   *   processor is involved.
+   */
+  getTrustedKeys() {
+    return [];
   }
 };
 

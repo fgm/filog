@@ -1,6 +1,11 @@
 # FiLog changelog
 ## 0.1 series
 
+### Upcoming
+
+* Messages are now stored serialized by default in MongoDB too, not just Syslog (#23, #24).
+* New SourceProcessor to gather context parts under client/server context keys and identify source.
+
 ### 0.1.18
 
 * Logger processors can now delete from the context, not just add/modify keys (#52).

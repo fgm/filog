@@ -1,6 +1,8 @@
 /**
  * @fileOverview MongoDB Sender class.
  */
+
+import * as util from "util";
 import SenderBase from "./SenderBase";
 
 /**
@@ -13,13 +15,18 @@ const MongodbSender = class extends SenderBase {
   /**
    * @constructor
    *
+   * @param {ProcessorBase[]} processors
+   *   Processors to be applied by this sender instead of globally.
    * @param {Mongo} mongo
    *   The Meteor Mongo service.
    * @param {(String|Collection)} collection
    *   The collection or the name of the collection in which to log.
+   * @param {Object} formatOptions
+   *   Optional : The options used to format the message (default to { depth: 5 }).
    */
-  constructor(mongo, collection = "logger") {
-    super();
+  constructor(processors = [], mongo, collection = "logger", formatOptions = null) {
+    console.log("Monfo sender", processors);
+    super(processors);
     if (collection instanceof mongo.Collection) {
       this.store = collection;
     }
@@ -30,19 +37,57 @@ const MongodbSender = class extends SenderBase {
     else {
       throw new Error("MongodbSender requires a Collection or a collection name");
     }
+
+    this.formatOptions = formatOptions || {
+      depth: 5,
+      rawKeys: []
+    };
   }
 
   send(level, message, context) {
-    let defaultedContext = context || {};
+    const defaultedContext = context || {};
+    const processedContext = super.send(level, message, defaultedContext);
     let doc = { level, message };
 
+    const serializedContext = this.serializeContext(processedContext);
+
     // It should contain a timestamp object if it comes from ClientLogger.
-    if (typeof defaultedContext.timestamp === "undefined") {
-      defaultedContext.timestamp = {};
+    if (typeof serializedContext.timestamp === "undefined") {
+      serializedContext.timestamp = {};
     }
-    doc.context = defaultedContext;
+    doc.context = serializedContext;
     doc.context.timestamp.store = Date.now();
-    this.store.insert(doc);
+    try {
+      this.store.insert(doc);
+    }
+    catch (e) {
+      doc.context = util.inspect(doc, this.formatOptions);
+      this.store.insert(doc);
+    }
+    return serializedContext;
+  }
+
+  /**
+   * Serialize the untrusted parts of a context, keeping the trusted ones.
+   *
+   * @param {object} context
+   *   The raw context to semi-serialize.
+   *
+   * @returns {object}
+   *   The context, with the non-trusted keys serialized together under the
+   *   "serialized" key.
+   */
+  serializeContext(context) {
+    let cloned = Object.assign({}, context);
+    let trusted = {};
+    this.processorKeys.forEach((value, index) => {
+      trusted[index] = cloned[index];
+      delete cloned[index];
+    });
+    const result = Object.assign(trusted, {
+      serialized: JSON.stringify(cloned)
+    });
+    return result;
   }
 };
 
