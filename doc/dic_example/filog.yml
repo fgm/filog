@@ -1,0 +1,75 @@
+# Use client-side:
+# const logger = dic.get('logger.client')
+#
+# Use server-side:
+# const logger = dic.get('logger.server')
+
+parameters:
+  filog:
+    mongo:
+      collection: 'logger'
+    syslog:
+      depth: 10
+      facility: 'verso-ranking'
+
+services:
+  # Pre-defined services: Meteor, Mongo, Webapp.
+  # These come from as globals from Meteor packaging.
+
+  filog.client.sender.console:
+    class: 'ConsoleSender'
+
+  filog.client.sender.meteor_http_client:
+    class: 'MeteorHttpClientSender'
+
+  filog.client.processor.browser:
+    class: 'BrowserProcessor',
+
+  filog.client.processor.routing:
+    class: 'RoutingProcessor'
+
+  filog.client.processor.meteor_user:
+    class: 'MeteorUserProcessor'
+    arguments: ['@Meteor']
+
+  filog.client.sender:
+    class: 'TeeSender'
+    arguments: ['@filog.client.sender.console', '@filog.client.meteor_http_client']
+
+  filog.client.strategy:
+    class: 'TrivialStrategy'
+    arguments: ['@filog.client.sender']
+
+  logger.client:
+    class: 'ClientLogger'
+    arguments: ['@filog.client.strategy']
+    calls:
+      - ['push', ['@filog.client.processor.browser', '@filog.client.processor.routing', '@filog.client.processor.meteor_user']]
+      - ['arm']
+
+  filog.server.sender.mongo:
+    class: 'MongodbSender'
+    arguments: ['@Mongo', '%filog.mongo.collection%']
+
+  filog.server.sender.syslog:
+    class: 'SyslogSender'
+    arguments: [ '%filog.syslog.facility%', null, null, null, [ depth: '%filog.syslog.depth%' ] ]
+
+  filog.server.sender:
+    class: 'TeeSender'
+    arguments: ['@filog.server.sender.mongo', '@filog.server.sender.syslog']
+
+  filog.server.strategy:
+    class: 'TrivialStrategy'
+    arguments: ['@filog.server.sender', '@Webapp']
+
+  filog.server.processor.meteor_user:
+    class: 'MeteorUserProcessor'
+    arguments: ['@Meteor']
+
+  logger.server:
+    class: 'ServerLogger'
+    arguments: ['@filog.server.strategy']
+    calls:
+      - ['push', ['@filog.server.processor.meteor_user']]
+      - ['arm']
