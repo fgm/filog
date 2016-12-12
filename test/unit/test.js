@@ -1,5 +1,6 @@
 import "babel-polyfill";
 import LogLevel from "../../src/LogLevel";
+import InvalidArgumentException from "../../src/InvalidArgumentException";
 import MongoDbSender from "../../src/Senders/MongodbSender";
 import Logger from "../../src/Logger";
 import ServerLogger from "../../src/ServerLogger";
@@ -25,6 +26,40 @@ function testImmutableContext() {
     assert.equal(JSON.stringify(context), JSON.stringify(originalContext), "Pre-log context matches original context");
     logger.log(LogLevel.DEBUG, "some message", context);
     assert.equal(JSON.stringify(context), JSON.stringify(originalContext), "Post-log context matches original context");
+  });
+}
+
+function testLogLevels() {
+  "use strict";
+  const strategy = {
+    customizeLogger: () => [],
+    selectSenders: () => []
+  };
+  it("log() should throw on non-integer levels", function () {
+    const logger = new Logger(strategy);
+    assert.throws(() => {
+      //noinspection Eslint
+      logger.log(4.2, "Not an integer", {});
+    }, InvalidArgumentException);
+    assert.throws(() => {
+      //noinspection Eslint
+      logger.log("5", "Not an integer", {});
+    }, InvalidArgumentException);
+    assert.throws(() => {
+      //noinspection Eslint
+      logger.log({}, "Not an integer", {});
+    }, InvalidArgumentException);
+  });
+  it ("log() should throw on integer levels out of range", function () {
+    const logger = new Logger(strategy);
+    assert.throws(() => {
+      //noinspection Eslint
+      logger.log(-1, "Not an integer", {});
+    }, InvalidArgumentException);
+    assert.throws(() => {
+      //noinspection Eslint
+      logger.log(8, "Not an integer", {});
+    }, InvalidArgumentException);
   });
 }
 
@@ -250,6 +285,7 @@ function testSerializeDeepObject() {
 describe("Unit", () => {
   describe("Logger", function () {
     "use strict";
+    describe("validate log levels", testLogLevels);
     describe("logging does not modify context", testImmutableContext);
   });
   describe("ServerLogger", function () {
