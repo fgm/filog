@@ -44,6 +44,42 @@ const StrategyBase = class {
    * @returns {void}
    */
   customizeLogger() {}
+
+  /**
+   * Reduce callback for processors.
+   *
+   * @see Logger.log()
+   *
+   * @param {Object} accu
+   *   The reduction accumulator.
+   * @param {ProcessorBase} current
+   *   The current process to apply in the reduction.
+   *
+   * @returns {Object}
+   *   The result of the current reduction step.
+   */
+  processorReducer(accu, current) {
+    const result = Object.assign(accu, current.process(accu));
+    return result;
+  }
+
+  /**
+   * Reduce callback for processor trust.
+   *
+   * @see Logger.constructor()
+   *
+   * @param {Object} accu
+   *   The reduction accumulator.
+   * @param {ProcessorBase} current
+   *   The current process to apply in the reduction.
+   *
+   * @returns {Object}
+   *   The result of the current reduction step.
+   */
+  processorTrustReducer(accu, current) {
+    const result = [...accu, ...current.getTrustedKeys()];
+    return result;
+  }
 };
 
 export default StrategyBase;

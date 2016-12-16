@@ -11,15 +11,17 @@ import NullFn from "../NullFn";
  * @extends SenderBase
  */
 const MeteorClientHttpSender = class extends SenderBase {
-  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
+   * @param {ProcessorBase[]} processors
+   *   Processors to be applied by this sender instead of globally.
    * @param {String} loggerUrl
    *   The absolute URL of the logger server. Usually /logger on the Meteor app.
    */
-  constructor(loggerUrl) {
-    super();
+  constructor(processors = [], loggerUrl) {
+    super(processors);
+
     if (!Meteor || !Meteor.isClient) {
       throw new Error("MeteorClientHttpSender is only meant for Meteor client side.");
     }
@@ -35,9 +37,10 @@ const MeteorClientHttpSender = class extends SenderBase {
   }
 
   send(level, message, context) {
+    const processedContext = super.send(level, message, context);
     let data = { level, message };
-    if (typeof context !== "undefined") {
-      data.context = context;
+    if (typeof processedContext !== "undefined") {
+      data.context = processedContext;
     }
 
     let options = {
@@ -45,6 +48,7 @@ const MeteorClientHttpSender = class extends SenderBase {
       headers: this.requestHeaders
     };
     this.http.post(this.loggerUrl, options, NullFn);
+    return processedContext;
   }
 };
 

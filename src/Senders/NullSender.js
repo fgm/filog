@@ -1,5 +1,5 @@
 /**
- * @fileOverview NulllSender class.
+ * @fileOverview NullSender class.
  */
 
 

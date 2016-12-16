@@ -27,7 +27,6 @@ const BrowserProcessor = class extends ProcessorBase {
     return ['browser'];
   }
 
-
   /**
    * The only required method for processor implementations.
    *

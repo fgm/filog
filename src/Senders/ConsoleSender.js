@@ -10,8 +10,14 @@ import SenderBase from "./SenderBase";
  * @extends SenderBase
  */
 const ConsoleSender = class extends SenderBase {
-  constructor() {
-    super();
+  /**
+   * @constructor
+   *
+   * @param {ProcessorBase[]} processors
+   *   Optional. Processors to be applied by this sender instead of globally.
+   */
+  constructor(processors = []) {
+    super(processors);
     if (!console) {
       throw new Error("Console sender needs a console object.");
     }
@@ -30,8 +36,10 @@ const ConsoleSender = class extends SenderBase {
       console.log
     ];
 
+    const processedContext = super.send(level, message, context);
     const method = methods[level].bind(console);
-    method(LogLevel.Names[level], message, context);
+    method(LogLevel.Names[level], message, processedContext);
+    return processedContext;
   }
 };
 

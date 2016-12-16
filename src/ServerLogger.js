@@ -20,15 +20,15 @@ class ServerLogger extends Logger {
    *
    * @param {StrategyBase} strategy
    *   A logging strategy instance.
-   * @param {Processor[]} processors
-   *   An array of processor instances.
    * @param {Webapp} webapp
    *   The Meteor WebApp service.
+   * @param {Processor[]} processors
+   *   An array of processor instances.
    * @param {Object} parameters
    * - logRequestHeaders: add request headers to the log context. Defaults to true.
    * - servePath: the path on which to expose the logger endpoint. Defaults to "/logger".
    */
-  constructor(strategy, processors, webapp = null, parameters = {}) {
+  constructor(strategy, webapp = null, processors = [], parameters = {}) {
     super(strategy, processors);
     const defaultParameters = {
       logRequestHeaders: true,
