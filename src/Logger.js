@@ -15,16 +15,27 @@ const Logger = class {
   /**
    * @constructor
    *
+   * The forced 'timestamp' processorKey is needed because it is forcefully
+   * inserted during Logger.log().
+   *
+   * @see Logger#log
+   *
    * @param {StrategyBase} strategy
    *   The sender selection strategy to apply.
    * @param {ProcessorBase[]} processors
    *   An array of processor instances.
+   *
+   * @property {StrategyBase} strategy
    */
   constructor(strategy, processors = []) {
     this.processors = processors;
+    this.processorKeys = processors.reduce((accu, processor) => {
+      return [...accu, ...processor.getTrustedKeys()];
+    }, ['timestamp']);
     this.strategy = strategy;
     this.tk = TraceKit;
     this.strategy.customizeLogger(this);
+    this.strategy.customizeSenders(this.processorKeys);
   }
 
   /**
@@ -163,17 +174,17 @@ const Logger = class {
       throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
     }
 
+    const cloned = Object.assign({}, rawContext);
     const context = cooked
-      ? this.processors.reduce(this.processorReducer, rawContext)
-      : rawContext;
+      ? this.processors.reduce(this.processorReducer, cloned)
+      : cloned;
 
     // A timestamp is required, so insert it forcefully.
     context.timestamp = { log: Date.now() };
 
     const senders = this.strategy.selectSenders(level, message, context);
-    console.log("senders", senders);
     senders.forEach(sender => {
-      sender.send(level, message, context, this.formatOptions);
+      sender.send(level, message, context);
     });
   }
 

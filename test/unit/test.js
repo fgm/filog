@@ -46,6 +46,7 @@ function testImmutableContext() {
   "use strict";
   const strategy = {
     customizeLogger: () => [],
+    customizeSenders: () => [],
     selectSenders: () => []
   };
   it("should not modify context in log() calls", function () {
@@ -62,6 +63,7 @@ function testLogLevels() {
   "use strict";
   const strategy = {
     customizeLogger: () => [],
+    customizeSenders: () => [],
     selectSenders: () => []
   };
   it("log() should throw on non-integer levels", function () {
@@ -101,13 +103,13 @@ function testMongoDbSender() {
   };
   it("should accept a collection name", function () {
     const spy = sinon.spy(mongo, 'Collection');
-    const sender = new MongoDbSender(mongo, 'some_collection');
+    const sender = new MongoDbSender([], mongo, 'some_collection');
     assert.instanceOf(sender, MongoDbSender);
     assert.equal(spy.calledOnce, true);
   });
   it("should accept an existing collection", function () {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
+    const sender = new MongoDbSender([], mongo, collection);
     assert.instanceOf(sender, MongoDbSender);
     assert.equal(sender.store, collection);
   });
@@ -115,12 +117,12 @@ function testMongoDbSender() {
     const collection = 25;
     assert.throw(() => {
       //noinspection Eslint
-      new MongoDbSender(mongo, collection);
+      new MongoDbSender([], mongo, collection);
     }, Error);
   });
   it("should add a \"store\" timestamp to empty context", function () {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
+    const sender = new MongoDbSender([], mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
     const inboundArgs = [0, "message", {}];
@@ -138,7 +140,7 @@ function testMongoDbSender() {
   });
   it("should add a \"store\" timestamp to non-empty context", function () {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
+    const sender = new MongoDbSender([], mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
     const inboundArgs = [0, "message", { timestamp: { whatever: 1480849124018 } }];
@@ -242,9 +244,9 @@ function testStringifyMessage() {
     const o = new Printable(value);
 
     const expectations = [
-      [{message: "foo"}, "foo"],
-      [{message: 25}, "25"],
-      [{message: o}, JSON.stringify(value)],
+      [{ message: "foo" }, "foo"],
+      [{ message: 25 }, "25"],
+      [{ message: o }, JSON.stringify(value)],
       [{}, "{}"],
       [[], "[]"],
       ["foo", "foo"]
@@ -292,7 +294,7 @@ function testSerializeDeepObject() {
     const syslog = makeSyslog();
     const spy = sinon.spy(syslog, 'log');
     // test with default options
-    const sender1 = new SyslogSender('test-sender', {}, LOCAL0, syslog);
+    const sender1 = new SyslogSender([], 'test-sender', {}, LOCAL0, syslog);
     sender1.send(logLevelWarn, 'hello', deepContext());
     assert.equal(true, spy.calledOnce);
     assert.equal(false, spy.calledWithMatch(logLevelWarn, /world/));
@@ -303,7 +305,7 @@ function testSerializeDeepObject() {
     const syslog = makeSyslog();
     const spy = sinon.spy(syslog, 'log');
     // test with custom options (depth = 10)
-    const sender2 = new SyslogSender('test-sender', {}, LOCAL0, syslog, { depth: 10 });
+    const sender2 = new SyslogSender([], 'test-sender', {}, LOCAL0, syslog, { depth: 10 });
     sender2.send(logLevelWarn, 'hello', deepContext());
     assert.equal(true, spy.calledOnce);
     assert.equal(true, spy.calledWithMatch(logLevelWarn, /world/));

@@ -38,7 +38,6 @@ const SyslogSender = class extends SenderBase {
    *   Optional : The options used to format the message (default to { depth: 5 }).
    */
   constructor(processors = [], ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null) {
-    console.log("syslog sender", processors);
     super(processors);
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;

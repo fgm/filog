@@ -19,7 +19,6 @@ const TeeSender = class extends SenderBase {
    *   An array of senders to which to send the input.
    */
   constructor(processors = [], senders) {
-    console.log("Tee sender", processors);
     super(processors);
     this.senders = senders;
   }
@@ -29,6 +28,23 @@ const TeeSender = class extends SenderBase {
     const processedContext = super.send(level, message, context);
     this.senders.map(sender => sender.send(level, message, processedContext));
     return processedContext;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * The tee sender needs to propagate the keys it receives to its children.
+   *
+   * @param {string[]} processorKeys
+   *   An array of keys.
+   *
+   * @returns {void}
+   */
+  setProcessorKeys(processorKeys) {
+    this.processorKeys = processorKeys;
+    this.senders.forEach((sender) => {
+      sender.setProcessorKeys([...new Set([...sender.getProcessorKeys(), ...processorKeys])]);
+    });
   }
 };
 
