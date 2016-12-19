@@ -22,7 +22,7 @@ Main ideas:
   application.
 * Both client and server applications may capture exception stack traces and log
   them for plain errors (`window.onerror` handling) and exception reporting.
-  This is triggers by the `logger.arm()` method, and can be disabled by the
+  This is triggered by the `logger.arm()` method, and can be disabled by the
   `logger.disarm()` method.
 
 Typical use case:
