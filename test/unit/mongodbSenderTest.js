@@ -12,23 +12,23 @@ function testMongoDbSender() {
   };
   test("should accept a collection name", () => {
     const spy = sinon.spy(mongo, "Collection");
-    const sender = new MongoDbSender(mongo, "some_collection");
-    expect(sender).toBeInstanceOf(MongoDbSender);
-    expect(spy.calledOnce).toBe(true);
+    const sender = new MongoDbSender([], mongo, "some_collection");
+    assert.instanceOf(sender, MongoDbSender);
+    assert.equal(spy.calledOnce, true);
   });
   test("should accept an existing collection", () => {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
-    expect(sender).toBeInstanceOf(MongoDbSender);
-    expect(sender.store).toBe(collection);
+    const sender = new MongoDbSender([], mongo, collection);
+    assert.instanceOf(sender, MongoDbSender);
+    assert.equal(sender.store, collection);
   });
   test("should reject invalid collection values", () => {
     const collection = 25;
-    expect(() => new MongoDbSender(mongo, collection)).toThrowError(Error);
+    expect(() => new MongoDbSender([], mongo, collection)).toThrowError(Error);
   });
   test("should add a \"store\" timestamp to empty context", () => {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
+    const sender = new MongoDbSender([], mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
     const inboundArgs = [0, "message", {}];
@@ -54,7 +54,7 @@ function testMongoDbSender() {
   });
   test("should add a \"store\" timestamp to non-empty context", () => {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
+    const sender = new MongoDbSender([], mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
     const inboundArgs = [0, "message", { timestamp: { whatever: 1480849124018 } }];

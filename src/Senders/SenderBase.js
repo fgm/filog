@@ -20,17 +20,16 @@ const SenderBase = class {
     this.processorKeys = processors.reduce((accu, processor) => {
       return [...accu, ...processor.getTrustedKeys()];
     }, []);
-    console.log("SBC", processors, this.processorKeys);
   }
 
   /**
    * Getter.
    *
-   * @returns {ProcessorBase[]}
-   *   The array of processors for this sender.
+   * @returns {String[]}
+   *   The array of processor keys for this sender.
    */
-  getProcessors() {
-    return this.processors;
+  getProcessorKeys() {
+    return this.processorKeys;
   }
 
   /**
@@ -76,8 +75,8 @@ const SenderBase = class {
    * long-term storage, to ease searching on them: it is up to the sender to
    * decide how to handle them.
    *
-   * @param {Array} keys
-   *   An array of strings.
+   * @param {string[]} keys
+   *   An array of keys.
    *
    * @returns {void}
    */

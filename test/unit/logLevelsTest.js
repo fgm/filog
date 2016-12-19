@@ -5,6 +5,8 @@ import LL from "../../src/LogLevel";
 function testLogLevels() {
   const strategy = {
     customizeLogger: () => [],
+    customizeSenders: () => [],
+    selectSenders: () => [],
   };
   test("log() should throw on non-integer levels", () => {
     const logger = new Logger(strategy);

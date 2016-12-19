@@ -25,7 +25,6 @@ const MongodbSender = class extends SenderBase {
    *   Optional : The options used to format the message (default to { depth: 5 }).
    */
   constructor(processors = [], mongo, collection = "logger", formatOptions = null) {
-    console.log("Monfo sender", processors);
     super(processors);
     if (collection instanceof mongo.Collection) {
       this.store = collection;
@@ -81,8 +80,8 @@ const MongodbSender = class extends SenderBase {
     let cloned = Object.assign({}, context);
     let trusted = {};
     this.processorKeys.forEach((value, index) => {
-      trusted[index] = cloned[index];
-      delete cloned[index];
+      trusted[value] = cloned[value];
+      delete cloned[value];
     });
     const result = Object.assign(trusted, {
       serialized: JSON.stringify(cloned)

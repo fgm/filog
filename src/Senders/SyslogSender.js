@@ -45,7 +45,7 @@ const SyslogSender = class extends SenderBase {
    * @see modern-syslog/core.cc
    */
   constructor(processors = [], ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null) {
-    super();
+    super(processors);
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;
 

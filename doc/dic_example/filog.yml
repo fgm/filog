@@ -18,27 +18,34 @@ services:
 
   filog.client.sender.console:
     class: 'ConsoleSender'
+    public: false
 
   filog.client.sender.meteor_http_client:
     class: 'MeteorHttpClientSender'
+    public: false
 
   filog.client.processor.browser:
     class: 'BrowserProcessor',
+    public: false
 
   filog.client.processor.routing:
     class: 'RoutingProcessor'
+    public: false
 
   filog.client.processor.meteor_user:
     class: 'MeteorUserProcessor'
     arguments: ['@Meteor']
+    public: false
 
   filog.client.sender:
     class: 'TeeSender'
     arguments: ['@filog.client.sender.console', '@filog.client.meteor_http_client']
+    public: false
 
   filog.client.strategy:
     class: 'TrivialStrategy'
     arguments: ['@filog.client.sender']
+    public: false
 
   logger.client:
     class: 'ClientLogger'
@@ -50,22 +57,27 @@ services:
   filog.server.sender.mongo:
     class: 'MongodbSender'
     arguments: ['@Mongo', '%filog.mongo.collection%']
+    public: false
 
   filog.server.sender.syslog:
     class: 'SyslogSender'
     arguments: [ '%filog.syslog.facility%', null, null, null, [ depth: '%filog.syslog.depth%' ] ]
+    public: false
 
   filog.server.sender:
     class: 'TeeSender'
     arguments: ['@filog.server.sender.mongo', '@filog.server.sender.syslog']
+    public: false
 
   filog.server.strategy:
     class: 'TrivialStrategy'
     arguments: ['@filog.server.sender', '@Webapp']
+    public: false
 
   filog.server.processor.meteor_user:
     class: 'MeteorUserProcessor'
     arguments: ['@Meteor']
+    public: false
 
   logger.server:
     class: 'ServerLogger'

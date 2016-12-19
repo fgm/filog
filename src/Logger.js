@@ -14,17 +14,28 @@ const Logger = class {
   /**
    * @constructor
    *
+   * The forced 'timestamp' processorKey is needed because it is forcefully
+   * inserted during Logger.log().
+   *
+   * @see Logger#log
+   *
    * @param {StrategyBase} strategy
    *   The sender selection strategy to apply.
    * @param {ProcessorBase[]} processors
    *   An array of processor instances.
+   *
+   * @property {StrategyBase} strategy
    */
   constructor(strategy, processors = []) {
     this.processors = processors;
+    this.processorKeys = processors.reduce((accu, processor) => {
+      return [...accu, ...processor.getTrustedKeys()];
+    }, ['timestamp']);
     this.strategy = strategy;
     this.tk = TraceKit;
 
     this.strategy.customizeLogger(this);
+    this.strategy.customizeSenders(this.processorKeys);
   }
 
   /**

@@ -46,39 +46,17 @@ const StrategyBase = class {
   customizeLogger() {}
 
   /**
-   * Reduce callback for processors.
+   * Pass extra processor keys to each sender known by the strategy.
    *
-   * @see Logger.log()
+   * @param {string[]} processorKeys
+   *   The keys to add to the existing per-sender processor keys
    *
-   * @param {Object} accu
-   *   The reduction accumulator.
-   * @param {ProcessorBase} current
-   *   The current process to apply in the reduction.
-   *
-   * @returns {Object}
-   *   The result of the current reduction step.
+   * @returns {void}
    */
-  processorReducer(accu, current) {
-    const result = Object.assign(accu, current.process(accu));
-    return result;
-  }
-
-  /**
-   * Reduce callback for processor trust.
-   *
-   * @see Logger.constructor()
-   *
-   * @param {Object} accu
-   *   The reduction accumulator.
-   * @param {ProcessorBase} current
-   *   The current process to apply in the reduction.
-   *
-   * @returns {Object}
-   *   The result of the current reduction step.
-   */
-  processorTrustReducer(accu, current) {
-    const result = [...accu, ...current.getTrustedKeys()];
-    return result;
+  customizeSenders(processorKeys = []) {
+    this.senders.forEach(sender => {
+      sender.setProcessorKeys([...new Set([...sender.getProcessorKeys(), ...processorKeys])]);
+    });
   }
 };
 

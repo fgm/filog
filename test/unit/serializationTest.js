@@ -41,7 +41,7 @@ function testSerializeDeepObject() {
     const syslog = makeSyslog();
     const spy = sinon.spy(syslog, "log");
     // test with default options
-    const sender1 = new SyslogSender("test-sender", {}, LOCAL0, syslog);
+    const sender1 = new SyslogSender([], "test-sender", {}, LOCAL0, syslog);
     sender1.send(logLevelWarn, "hello", circularContext());
     expect(spy.calledOnce).toBe(true);
     expect(spy.calledWithMatch(logLevelWarn, /Cannot JSON.stringify logged data/)).toBe(true);
@@ -57,8 +57,8 @@ function testSerializeDeepObject() {
     const syslog = makeSyslog();
     const spy = sinon.spy(syslog, "log");
     // test with default options
-    const sender1 = new SyslogSender("test-sender", {}, LOCAL0, syslog);
-    sender1.send(logLevelWarn, "hello", deepContext());
+    const sender1 = new SyslogSender([], "test-sender", {}, LOCAL0, syslog);
+    sender1.send(logLevelWarn, 'hello', deepContext());
     expect(spy.calledOnce).toBe(true);
     expect(spy.calledWithMatch(logLevelWarn, /world/)).toBe(true);
     expect(spy.calledWithMatch(logLevelWarn, /\[Object\]/)).toBe(false);
@@ -68,7 +68,7 @@ function testSerializeDeepObject() {
     const syslog = makeSyslog();
     const spy = sinon.spy(syslog, "log");
     // test with custom options (depth = 10)
-    const sender2 = new SyslogSender("test-sender", {}, LOCAL0, syslog, { depth: 10 });
+    const sender2 = new SyslogSender([], "test-sender", {}, LOCAL0, syslog, { depth: 10 });
     sender2.send(logLevelWarn, "hello", deepContext());
     expect(spy.calledOnce).toBe(true);
     expect(spy.calledWithMatch(logLevelWarn, /world/)).toBe(true);
