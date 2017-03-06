@@ -157,7 +157,7 @@ const Logger = class {
    */
   log(level, message, rawContext = {}, cooked = true) {
     if (!Number.isInteger(level) || +level < LogLevel.EMERGENCY || +level > LogLevel.DEBUG) {
-      throw new InvalidArgumentException('The level argument to log() must be an RFC5424 level.');
+      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
     }
 
     const context = cooked

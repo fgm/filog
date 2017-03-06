@@ -73,5 +73,5 @@
     "test-integration": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",
     "test-unit": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit"
   },
-  "version": "0.1.11"
+  "version": "0.1.12"
 }

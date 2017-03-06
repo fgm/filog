@@ -1,7 +1,9 @@
 import "babel-polyfill";
+import LeveledStrategy from "../../src/Strategies/LeveledStrategy";
 import LogLevel from "../../src/LogLevel";
 import InvalidArgumentException from "../../src/InvalidArgumentException";
 import MongoDbSender from "../../src/Senders/MongodbSender";
+import NullSender from "../../src/Senders/NullSender";
 import Logger from "../../src/Logger";
 import ServerLogger from "../../src/ServerLogger";
 import SyslogSender from "../../src/Senders/SyslogSender";
@@ -12,6 +14,33 @@ const chaiHttp = require("chai-http");
 const assert = chai.assert;
 
 chai.use(chaiHttp);
+
+function testStrategyConstruction() {
+  "use strict";
+
+  it("Should accept correct senders", function () {
+    const nullSender = new NullSender();
+    const leveled = new LeveledStrategy(nullSender, nullSender, nullSender);
+    assert(leveled.constructor.name === 'LeveledStrategy', "Constructor returns a LeveledStrategyInstance");
+    assert(leveled.constructor.prototype === LeveledStrategy.prototype, "Constructor returns a LeveledStrategyInstance with the proper prototype");
+  });
+
+  it("Should reject non-senders passed as senders at any position", function () {
+    const nullSender = new NullSender();
+    assert.throws(() => {
+      //noinspection Eslint
+      new LeveledStrategy({}, nullSender, nullSender);
+    });
+    assert.throws(() => {
+      //noinspection Eslint
+      new LeveledStrategy(nullSender, {}, nullSender);
+    });
+    assert.throws(() => {
+      //noinspection Eslint
+      new LeveledStrategy(nullSender, nullSender, {});
+    });
+  });
+}
 
 function testImmutableContext() {
   "use strict";
@@ -283,6 +312,10 @@ function testSerializeDeepObject() {
 }
 
 describe("Unit", () => {
+  describe("LeveledStrategy", function () {
+    "use strict";
+    describe("reject non-senders in constructor", testStrategyConstruction);
+  });
   describe("Logger", function () {
     "use strict";
     describe("validate log levels", testLogLevels);
