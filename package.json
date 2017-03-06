@@ -68,7 +68,7 @@
   },
   "scripts": {
     "clean": "rm -fr coverage node_modules",
-    "compile": "rm -r lib/* ; npm i && babel --presets es2015,stage-0 -d lib/ src/",
+    "compile": "rm -r lib/* ; npm i && npm run test-compile",
     "cover": "npm run test-compile && time -p istanbul cover node_modules/.bin/_mocha -- --compilers js:babel-core/register test/**/*",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
     "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/*",
