@@ -3,6 +3,7 @@
  */
 import TraceKit from "tracekit";
 import LogLevel from "./LogLevel";
+import InvalidArgumentException from './InvalidArgumentException';
 
 // const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
@@ -142,15 +143,25 @@ const Logger = class {
    *   It may contain placeholders to be substituted with values from the
    *   context object, as in PSR-3.
    * @param {Object} rawContext
-   *   An object complementing the message.
+   *   (Optional). An object complementing the message.
    * @param {Boolean} cooked
-   *   Is the context already reduced ?
+   *   (Optional). Is the context already reduced ?
    *
    * @returns {void}
+   *
+   * @throws InvalidArgumentException
+   *   As per PSR-3, if level is not a valid RFC5424 level.
+   *
+   * @see https://tools.ietf.org/html/rfc5424
+   * @see http://www.php-fig.org/psr/psr-3/
    */
   log(level, message, rawContext = {}, cooked = true) {
+    if (!Number.isInteger(level) || +level < LogLevel.EMERGENCY || +level > LogLevel.DEBUG) {
+      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
+    }
+
     const context = cooked
-      ? this.processors.reduce(this.processorReducer, rawContext)
+      ? this.processors.reduce(this.processorReducer, { ...rawContext })
       : rawContext;
 
     // A timestamp is required, so insert it forcefully.

@@ -1,3 +1,4 @@
+import InvalidArgumentException from "./InvalidArgumentException";
 import LogLevel from "./LogLevel";
 import ServerLogger from "./ServerLogger";
 import ClientLogger from "./ClientLogger";
@@ -25,6 +26,7 @@ const SyslogSender = Meteor.isServer
   : NullSender;
 
 export {
+  InvalidArgumentException,
   LogLevel,
 
   ClientLogger,

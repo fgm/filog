@@ -22,7 +22,7 @@ Main ideas:
   application.
 * Both client and server applications may capture exception stack traces and log
   them for plain errors (`window.onerror` handling) and exception reporting.
-  This is triggers by the `logger.arm()` method, and can be disabled by the
+  This is triggered by the `logger.arm()` method, and can be disabled by the
   `logger.disarm()` method.
 
 Typical use case:
@@ -140,12 +140,17 @@ The module contains tests. Some of them are unit tests and need nothing special
 to run, while others are currently implemented as integration tests and assume
 you have a working project using the module available at `http://localhost:3000`.
 
-You can run :
+Start by compiling the package:
+
+* `meteor run compile`
+
+Then you can run :
 
 * just unit tests with `meteor npm run test-unit` 
 * just integration tests with `meteor npm run test-integration`
 * both tests with `meteor npm run test`
-
+* both tests including coverage generation with `meteor npm run cover`
+ 
 To run integration tests, you need to run your project in one terminal, and the
 tests in another one:
 
@@ -158,6 +163,6 @@ tests in another one:
 
     $ cd (my_project)
     $ cd imports/filog
+    $ meteor npm run compile
     $ meteor npm run test-integration
     $ meteor npm run test
-    

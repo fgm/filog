@@ -40,7 +40,7 @@ class ServerLogger extends Logger {
       }
     }
 
-    this.setupConnect(webapp, this.servePath);
+    webapp && this.setupConnect(webapp, this.servePath);
   }
 
   /**

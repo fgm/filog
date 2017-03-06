@@ -36,6 +36,7 @@
     "growl": "^1.9.2",
     "ink-docstrap": "^1.3.0",
     "install": "^0.8.2",
+    "istanbul": "1.1.0-alpha.1",
     "jsdoc": "^3.4.3",
     "mocha": "^2.5.2",
     "npm": "^4.0.2",
@@ -61,18 +62,19 @@
   "main": "lib/index.js",
   "name": "filog",
   "optionalDependencies": {},
-  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FGM/filog.git"
   },
   "scripts": {
-    "compile": "rm -r lib/* ; npm i && babel --presets es2015,stage-0 -d lib/ src/",
+    "clean": "rm -fr coverage node_modules",
+    "compile": "rm -r lib/* ; npm i && npm run test-compile",
+    "cover": "npm run test-compile && time -p istanbul cover node_modules/.bin/_mocha -- --compilers js:babel-core/register test/**/*",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
     "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/*",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
     "test-integration": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",
     "test-unit": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit"
   },
-  "version": "0.1.11"
+  "version": "0.1.12"
 }

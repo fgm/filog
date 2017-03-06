@@ -31,6 +31,7 @@ const LeveledStrategy = class extends StrategyBase {
   constructor(low, medium, high, minLow = LogLevel.DEBUG, maxHigh = LogLevel.WARNING) {
     // Do not initialize a default null sender.
     super(false);
+    this.senders = [low, medium, high];
 
     this.low = low;
     this.medium = medium;
@@ -38,7 +39,7 @@ const LeveledStrategy = class extends StrategyBase {
     this.minLow = minLow;
     this.maxHigh = maxHigh;
 
-    [low, medium, high].forEach(sender => {
+    this.senders.forEach(sender => {
       if (!(sender instanceof SenderBase)) {
         throw new Error("LeveledStrategy: senders must be instances of a Sender class.");
       }
