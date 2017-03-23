@@ -1,9 +1,14 @@
 # FiLog changelog
 ## 0.1 series
 
+### 0.1.13
+
+* Updated dependencies
+* Fixed a NPM packaging issue preventing installation in some cases.
+
 ### 0.1.12
 
-- LeveledStrategy.constructor() no longer accepts non-Senders as sender arguments.
+* LeveledStrategy.constructor() no longer accepts non-Senders as sender arguments.
 * Logger.log() no longer accepts invalid log levels (#26), to match PSR-3.
 * Loggers no longer modify the message context (#25).
 * Removed incorrect `readme` clause in `package.json`.
