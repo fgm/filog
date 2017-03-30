@@ -98,9 +98,13 @@ const SyslogSender = class extends SenderBase {
       const step1 = {
         level: doc.level,
         facility: doc.facility,
-        error: `JSON.stringify error: ${e1.message}.`,
+        logger_error: `Cannot JSON.stringify logged data: ${e1.message}.`,
         raw: util.inspect(doc, this.formatOptions)
       };
+
+      if (typeof doc.message === 'string') {
+        step1.message = doc.message;
+      }
 
       try {
         result = JSON.stringify(step1);

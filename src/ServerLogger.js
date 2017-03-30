@@ -3,6 +3,7 @@
  */
 import Logger from "./Logger";
 import * as util from "util";
+import { hostname } from "os";
 
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -39,6 +40,8 @@ class ServerLogger extends Logger {
           : defaultParameters[key];
       }
     }
+
+    this.hostname = hostname();
 
     webapp && this.setupConnect(webapp, this.servePath);
   }
@@ -97,6 +100,11 @@ class ServerLogger extends Logger {
       res.end(result);
     },
       (e) => { console.log(e); }));
+  }
+
+  log(level, message, rawContext = {}) {
+    rawContext.hostname = this.hostname;
+    super.log(level, message, rawContext);
   }
 
   /**
