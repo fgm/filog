@@ -1,5 +1,7 @@
 "use strict";
 
+// Note: to add debug to Sinon matches, look in Sinon call.js, not sinon*.js.
+
 import { testImmutableContext, testObjectifyContext } from './logContextTest';
 import { testLogLevels } from './logLevelsTest';
 import { testMongoDbSender } from './mongodbSenderTest';

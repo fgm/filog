@@ -33,9 +33,16 @@ const SyslogSender = class extends SenderBase {
    * @param {Syslog} syslog
    *   The modern-syslog service or a compatible alternative.
    * @param {Object} formatOptions
-   *   Optional : The options used to format the message (default to { depth: 5 }).
+   *   Optional : The options used to format the message. The contents depends
+   *   on the serializer used. Defaults to { depth: 5 }), for the default
+   *   "util.inspect" serializer.
+   * @param {Function} serialize
+   *   Optional: a serializer function converting a document to a string.
+   *
+   * @see serializeDefault
+   * @see modern-syslog/core.cc
    */
-  constructor(ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null) {
+  constructor(ident = null, syslogOptions = null, syslogFacility = null, syslog = null, formatOptions = null, serialize = null) {
     super();
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;
@@ -46,6 +53,7 @@ const SyslogSender = class extends SenderBase {
     this.ident = actualIdent;
     this.option = syslogOptions || (this.syslog.option.LOG_PID);
     this.formatOptions = formatOptions || { depth: 5 };
+    this.serialize = serialize || this.serializeDefault.bind(this);
 
     this.syslog.open(this.ident, this.option, this.facility);
   }
@@ -64,8 +72,49 @@ const SyslogSender = class extends SenderBase {
     if (typeof context !== "undefined") {
       doc.context = context;
     }
-    this.syslog.log(level, util.inspect(doc, this.formatOptions));
+
+    this.syslog.log(level, this.serialize(doc));
   }
+
+  /**
+   * Serialize a message to JSON. Handles circular documents with a fallback.
+   *
+   * @param {Object} doc
+   * - an object with 3 mandatory keys and an optional one:
+   *   - message: a string or object, as per Meteor Log package
+   *   - level: a numeric severity level, like modernSyslog.level.LOG_DEBUG
+   *   - facility: a syslog facility, like modernSyslog.facility.LOG_LOCAL0
+   *   - (Optional) context: an object of context values. Anything goes.
+   *
+   * @returns {string}
+   *   The serialized version of the doc argument under the formatOptions rules.
+   */
+  serializeDefault(doc) {
+    let result;
+    try {
+      result = JSON.stringify(doc);
+    }
+    catch (e1) {
+      const step1 = {
+        level: doc.level,
+        facility: doc.facility,
+        error: `JSON.stringify error: ${e1.message}.`,
+        raw: util.inspect(doc, this.formatOptions)
+      };
+
+      try {
+        result = JSON.stringify(step1);
+      }
+      catch (e2) {
+        // Critical problem: remove moving parts.
+        // RFC 5424: level 3 = error, facility 14 == log alert.
+        result = '{ "level":3, "facility":14, "error":"Serialization fallback error" }';
+      }
+    }
+
+    return result;
+  }
+
 };
 
 export default SyslogSender;
