@@ -46,7 +46,7 @@ function testSerializeDeepObject() {
     const sender1 = new SyslogSender('test-sender', {}, LOCAL0, syslog);
     sender1.send(logLevelWarn, 'hello', circularContext());
     assert.equal(true, spy.calledOnce);
-    assert.equal(true, spy.calledWithMatch(logLevelWarn, /JSON.stringify error/));
+    assert.equal(true, spy.calledWithMatch(logLevelWarn, /Cannot JSON.stringify logged data/));
 
     // Notice the non-quoted format used by util.inspect for keys, and single
     // quotes around strings: JSON would have double quotes around both.
