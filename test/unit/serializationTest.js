@@ -33,18 +33,40 @@ function testSerializeDeepObject() {
     }
   });
 
-  it('it should fail at serializing deep object', () => {
+  const circularContext = () => {
+    const c = {}
+    c.bad = c;
+    return c;
+  };
+
+  it('syslog should fallback to inspect when serializing circular objects', () => {
+    const syslog = makeSyslog();
+    const spy = sinon.spy(syslog, 'log');
+    // test with default options
+    const sender1 = new SyslogSender('test-sender', {}, LOCAL0, syslog);
+    sender1.send(logLevelWarn, 'hello', circularContext());
+    assert.equal(true, spy.calledOnce);
+    assert.equal(true, spy.calledWithMatch(logLevelWarn, /JSON.stringify error/));
+
+    // Notice the non-quoted format used by util.inspect for keys, and single
+    // quotes around strings: JSON would have double quotes around both.
+    assert.equal(true, spy.calledWithMatch(logLevelWarn, /\{ message: 'hello'/));
+
+    assert.equal(false, spy.calledWithMatch(logLevelWarn, /\[Object\]/));
+  });
+
+  it('syslog should serialize deep object even without configuration', () => {
     const syslog = makeSyslog();
     const spy = sinon.spy(syslog, 'log');
     // test with default options
     const sender1 = new SyslogSender('test-sender', {}, LOCAL0, syslog);
     sender1.send(logLevelWarn, 'hello', deepContext());
     assert.equal(true, spy.calledOnce);
-    assert.equal(false, spy.calledWithMatch(logLevelWarn, /world/));
-    assert.equal(true, spy.calledWithMatch(logLevelWarn, /\[Object\]/));
+    assert.equal(true, spy.calledWithMatch(logLevelWarn, /world/));
+    assert.equal(false, spy.calledWithMatch(logLevelWarn, /\[Object\]/));
   });
 
-  it('it should serialize deep object', () => {
+  it('syslog should serialize deep object if configured', () => {
     const syslog = makeSyslog();
     const spy = sinon.spy(syslog, 'log');
     // test with custom options (depth = 10)
