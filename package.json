@@ -68,13 +68,13 @@
   },
   "scripts": {
     "clean": "rm -fr coverage node_modules",
-    "compile": "rm -r lib/* ; npm i && npm run test-compile",
-    "cover": "npm run test-compile && time -p istanbul cover node_modules/.bin/_mocha -- --compilers js:babel-core/register test/**/*",
+    "compile": "rm -r lib/* ; meteor npm i && meteor npm run test-compile",
+    "cover": "meteor npm run test-compile && time -p istanbul cover node_modules/.bin/_mocha -- --compilers js:babel-core/register test/**/*",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
-    "test": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/*",
+    "test": "meteor npm run test-compile && time -p mocha --compilers js:babel-core/register test/*",
     "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
-    "test-integration": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",
-    "test-unit": "npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit"
+    "test-integration": "meteor npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",
+    "test-unit": "meteor npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit"
   },
-  "version": "0.1.13"
+  "version": "0.1.14"
 }
