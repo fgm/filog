@@ -34,8 +34,8 @@ const SyslogSender = class extends SenderBase {
    *   The modern-syslog service or a compatible alternative.
    * @param {Object} formatOptions
    *   Optional : The options used to format the message. The contents depends
-   *   on the serializer used. Defaults to { depth: 5 }), for the default
-   *   "util.inspect" serializer.
+   *   on the serializer used. Defaults to { depth: 5 }), for the legacy
+   *   "util.inspect" serializer, now available as serializeInspect().
    * @param {Function} serialize
    *   Optional: a serializer function converting a document to a string.
    *
@@ -119,6 +119,18 @@ const SyslogSender = class extends SenderBase {
     return result;
   }
 
+  /**
+   * Serialize a message to Node.js util.inspect format.
+   *
+   * @param {Object} doc
+   *   A document to serialize. Any structure.
+   *
+   * @returns {string}
+   *   The serialized version of the doc argument under the formatOptions rules.
+   */
+  serializeInspect(doc) {
+    return util.inspect(doc, this.formatOptions);
+  }
 };
 
 export default SyslogSender;

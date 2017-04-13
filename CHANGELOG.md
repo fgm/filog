@@ -1,6 +1,14 @@
 # FiLog changelog
 ## 0.1 series
 
+### 0.1.14
+
+* Switched the default serialization format to JSON, with a safety fallback for
+  circular structures which JSON cannot represent.
+* Legacy "inspect" serialization is now called serializeInspect.
+* Package.json commands now use "meteor npm" instead of plain "npm".
+* ServerLogger now inserts the hostname in logged messages.
+
 ### 0.1.13
 
 * Updated dependencies
