@@ -21,10 +21,40 @@ function testImmutableContext() {
   });
 }
 
+function testMessageContext() {
+  "use strict";
+  let result;
+  const referenceContext = { a: "A" };
+  const sender = new class {
+    send(level, message, context) {
+      result = { level, message, context };
+    }
+  };
+
+  const strategy = {
+    customizeLogger: () => [],
+    selectSenders: () => [sender]
+  };
+
+  it("should add the message argument to message_details", function () {
+    const logger = new Logger(strategy);
+    result = null;
+    logger.log(LogLevel.DEBUG, "some message", referenceContext);
+    assert.equal(true, result.context.message_details.a === 'A', 'Message details is set');
+  });
+
+  it("should not add the message arguments to context root", function () {
+    const logger = new Logger(strategy);
+    result = null;
+    logger.log(LogLevel.DEBUG, "some message", referenceContext);
+    assert.equal(false, result.context.hasOwnProperty('a'), 'Message details is set');
+  });
+}
+
 function testObjectifyContext() {
   const objectifyContext = ServerLogger.objectifyContext;
 
-  it("should convert arrays to POJOs", () => {
+  it("should convert arrays to POJOs", function () {
     const a = ["a", "b"];
     const o = objectifyContext(a);
     assert.equal(typeof o, "object");
@@ -53,7 +83,7 @@ function testObjectifyContext() {
     });
   });
 
-  it("should not modify existing POJOs", () => {
+  it("should not modify existing POJOs", function () {
     const raw = { a: "b" };
     const actual = objectifyContext(raw);
     assert.strictEqual(actual, raw);
@@ -90,6 +120,6 @@ function testObjectifyContext() {
 
 export {
   testImmutableContext,
+  testMessageContext,
   testObjectifyContext
 };
-

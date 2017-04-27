@@ -1,6 +1,10 @@
 # FiLog changelog
 ## 0.1 series
 
+### 0.1.15
+
+* Moved message details to message_details context key (#37).
+
 ### 0.1.14
 
 * Switched the default serialization format to JSON, with a safety fallback for

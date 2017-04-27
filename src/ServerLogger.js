@@ -102,9 +102,9 @@ class ServerLogger extends Logger {
       (e) => { console.log(e); }));
   }
 
-  log(level, message, rawContext = {}) {
+  log(level, message, rawContext = {}, cooked = true) {
     rawContext.hostname = this.hostname;
-    super.log(level, message, rawContext);
+    super.log(level, message, rawContext, cooked);
   }
 
   /**
