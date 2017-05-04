@@ -161,7 +161,7 @@ const Logger = class {
     }
 
     const context = cooked
-      ? this.processors.reduce(this.processorReducer, { ...rawContext })
+      ? this.processors.reduce(this.processorReducer, { message_details: rawContext })
       : rawContext;
 
     // A timestamp is required, so insert it forcefully.
