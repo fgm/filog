@@ -4,6 +4,7 @@
 
 import { testImmutableContext, testMessageContext, testObjectifyContext } from './logContextTest';
 import { testLogLevels } from './logLevelsTest';
+import { testMeteorUserProcessor } from './meteorUserProcessorTest';
 import { testMongoDbSender } from './mongodbSenderTest';
 import { testSerializeDeepObject } from './serializationTest';
 import { testStrategyConstruction } from './strategyTest';
@@ -26,4 +27,5 @@ describe("Unit", () => {
     describe("serializeDeepObject", testSerializeDeepObject);
   });
   describe("MongoDbSender", testMongoDbSender);
+  describe("MeteorUserProcessor", testMeteorUserProcessor);
 });

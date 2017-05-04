@@ -5,7 +5,7 @@ import ProcessorBase from "./ProcessorBase";
 import stack from "callsite";
 
 /**
- * MeteorUserProcessor adds Meteor server-side account information to log events.
+ * MeteorUserProcessor adds Meteor account information to log events.
  *
  * @extends ProcessorBase
  */
@@ -13,8 +13,10 @@ const MeteorUserProcessor = class extends ProcessorBase {
   /**
    * @param {Meteor} meteor
    *   The Meteor service.
+   * @param {Function} postProcess
+   *   Optional. A post-process callback to be invoked after the main process().
    */
-  constructor(meteor = Meteor) {
+  constructor(meteor = Meteor, postProcess = null) {
     super();
     if (!meteor) {
       throw new Error("Meteor processor is only meant for Meteor code.");
@@ -35,7 +37,9 @@ const MeteorUserProcessor = class extends ProcessorBase {
     else {
       throw new Error("This version of the meteor user processor only supports client and server platforms.");
     }
+
     this.meteor = meteor;
+    this.postProcess = postProcess;
     this.userCache = {};
   }
 
@@ -157,12 +161,17 @@ const MeteorUserProcessor = class extends ProcessorBase {
     }
 
     // Overwrite any previous userId information in context.
-    const result = Object.assign({}, context, {
+    let result = Object.assign({}, context, {
       meteor: {
         platform: this.platform,
         user
       }
     });
+
+    if (this.postProcess) {
+      result = this.postProcess(result);
+    }
+
     return result;
   }
 };

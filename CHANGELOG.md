@@ -3,6 +3,7 @@
 
 ### 0.1.15
 
+* Added an optional post-process callback to MeteorUserProcessor (#38).
 * Moved message details to message_details context key (#37).
 
 ### 0.1.14
