@@ -5,6 +5,7 @@
 
 * Added an optional post-process callback to MeteorUserProcessor (#38).
 * Moved message details to message_details context key (#37).
+* Fixed comment in Logger.log() describing the opposite of reality
 
 ### 0.1.14
 
