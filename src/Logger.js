@@ -145,7 +145,7 @@ const Logger = class {
    * @param {Object} rawContext
    *   (Optional). An object complementing the message.
    * @param {Boolean} cooked
-   *   (Optional). Is the context already reduced ?
+   *   (Optional). Apply processors to context before sending. Default == true.
    *
    * @returns {void}
    *
