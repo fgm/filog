@@ -27,18 +27,6 @@ const Logger = class {
   }
 
   /**
-   * The callback invoked by TraceKit
-   *
-   * @param {Error} e
-   *   Error on which to report.
-   *
-   * @returns {void}
-   */
-  report(e) {
-    this.tk.report(e);
-  }
-
-  /**
    * Error-catching callback when the logger is arm()-ed.
    *
    * @param {Error} e
