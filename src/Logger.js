@@ -22,6 +22,7 @@ const Logger = class {
     this.processors = [];
     this.strategy = strategy;
     this.tk = TraceKit;
+    this.tkReporter = this.reportSubscriber.bind(this);
 
     this.strategy.customizeLogger(this);
   }
@@ -60,7 +61,7 @@ const Logger = class {
    * @see Logger#reportSubscriber
    */
   arm() {
-    this.tk.report.subscribe(this.reportSubscriber.bind(this));
+    this.tk.report.subscribe(this.tkReporter);
   }
 
   /**
@@ -76,7 +77,7 @@ const Logger = class {
    */
   disarm(delay = 2000) {
     setTimeout(() => {
-      this.tk.report.unsubscribe(this.reportSubscriber);
+      this.tk.report.unsubscribe(this.tkReporter);
     }, delay);
   }
 
