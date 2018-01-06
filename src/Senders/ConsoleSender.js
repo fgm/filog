@@ -10,11 +10,19 @@ import SenderBase from "./SenderBase";
  * @extends SenderBase
  */
 const ConsoleSender = class extends SenderBase {
-  constructor() {
+  /**
+   * @constructor
+   *
+   * @param {String} devMode
+   *   Optional: Print only short logs, omitting the context
+   */
+  constructor(devMode = false) {
     super();
     if (!console) {
       throw new Error("Console sender needs a console object.");
     }
+
+    this.devMode = devMode;
   }
 
   /** @inheritDoc */
@@ -31,7 +39,12 @@ const ConsoleSender = class extends SenderBase {
     ];
 
     const method = methods[level].bind(console);
-    method(LogLevel.Names[level], message, context);
+
+    if (this.devMode) {
+      method(LogLevel.Names[level], message);
+    } else {
+      method(LogLevel.Names[level], message, context);
+    }
   }
 };
 
