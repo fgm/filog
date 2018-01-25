@@ -1,6 +1,11 @@
 # FiLog changelog
 ## 0.1 series
 
+### 0.1.16
+
+* Removed the no-longer needed dependency on the `bcrypt` package
+* Cleant up the .eslintrc globals, fixed typo in comments
+
 ### 0.1.15
 
 * Added an optional post-process callback to MeteorUserProcessor (#38).

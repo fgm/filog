@@ -7,40 +7,15 @@
   },
 
   "globals": {
-    "$": true,
-    "jQuery": true,
-    "React": true,
-    "ReactDOM": true,
-    "_": true,
-
     // Mocha.
     "describe": true,
     "it": true,
 
-    "Accounts": true,
-    "HTTP": true,
-    "Log": true,
-    "Match": true,
+    // The Meteor globals used by the package.
     "Meteor": true,
-    "Npm": true,
-    "Package": true,
-    "ServiceConfiguration": true,
-    "Session": true,
-    "Template": true,
-    "Tinytest": true,
-    "WebApp": true,
-    "check": true,
+    "Package": true
 
-    // The globals defined in this package.
-    "Drupal": true,
-    "DrupalBase": true,
-    "DrupalClient": true,
-    "DrupalConfiguration": true,
-    "DrupalServer": true,
-    "client": true,
-    "drupal": true,
-    "server": true,
-    "stream": true
+    // The globals defined in this package (none).
   },
 
   "plugins": ["react"],

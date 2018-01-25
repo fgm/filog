@@ -19,7 +19,7 @@ class ServerLogger extends Logger {
    *
    * @param {StrategyBase} strategy
    *   A logging strategy instance.
-   * @param {Webapp} webapp
+   * @param {WebApp} webapp
    *   The Meteor WebApp service.
    * @param {Object} parameters
    * - logRequestHeaders: add request headers to the log context. Defaults to true.
@@ -179,7 +179,7 @@ class ServerLogger extends Logger {
   /**
    * Sets up the Connect routing within the Meteor webapp component.
    *
-   * @param {Webapp} webapp
+   * @param {WebApp} webapp
    *   The Meteor webapp service (Connect wrapper).
    * @param {String} servePath
    *   The path on which to expose the server logger. Must NOT start by a "/".

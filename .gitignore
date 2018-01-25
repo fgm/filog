@@ -1,8 +1,12 @@
 # Generated files.
 coverage/
+lib/
 node_modules/
 npm-debug.log
 out/
+
+# NPM Pack
+filog*.tgz
 
 # Version lock files
 npm-shrinkwrap.json
