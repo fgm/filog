@@ -3,7 +3,7 @@
  */
 import TraceKit from "tracekit";
 import LogLevel from "./LogLevel";
-import InvalidArgumentException from './InvalidArgumentException';
+import InvalidArgumentException from "./InvalidArgumentException";
 
 // const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
@@ -11,7 +11,6 @@ import InvalidArgumentException from './InvalidArgumentException';
  * Logger is the base class for loggers.
  */
 const Logger = class {
-  // noinspection JSClassNamingConvention
   /**
    * @constructor
    *
@@ -161,7 +160,7 @@ const Logger = class {
     }
 
     const context = cooked
-      ? this.processors.reduce(this.processorReducer, { message_details: rawContext })
+      ? this.processors.reduce(this.processorReducer, { "message_details": rawContext })
       : rawContext;
 
     // A timestamp is required, so insert it forcefully.
@@ -217,5 +216,7 @@ const Logger = class {
     this.log(LogLevel.ERROR, ...arguments);
   }
 };
+
+Logger.METHOD = "filog:log";
 
 export default Logger;

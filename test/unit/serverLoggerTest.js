@@ -1,5 +1,7 @@
 "use strict";
 
+import NullFn from "../../src/NullFn";
+
 const chai = require("chai");
 const assert = chai.assert;
 
@@ -10,6 +12,7 @@ const testConstructor = function () {
     customizeLogger: () => [],
     selectSenders: () => []
   };
+  global.Meteor = { methods: NullFn };
 
   it("Should provide default parameters", function () {
     const logger = new ServerLogger(strategy);
