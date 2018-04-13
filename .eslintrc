@@ -7,9 +7,10 @@
   },
 
   "globals": {
-    // Mocha.
-    "describe": true,
-    "it": true,
+    // Jest.
+    "describe": false,
+    "expect": false,
+    "test": false,
 
     // The Meteor globals used by the package.
     "HTTP": false,

@@ -1,38 +1,38 @@
-"use strict";
-
 import NullFn from "../../src/NullFn";
-
-const chai = require("chai");
-const assert = chai.assert;
 
 import ServerLogger from "../../src/ServerLogger";
 
-const testConstructor = function () {
+const testConstructor = () => {
   const strategy = {
     customizeLogger: () => [],
     selectSenders: () => []
   };
   global.Meteor = { methods: NullFn };
 
-  it("Should provide default parameters", function () {
+  test("Should provide default parameters", () => {
     const logger = new ServerLogger(strategy);
-    assert.equal(logger.logRequestHeaders, true, "logRequestHeaders correctly defaulted");
-    assert.equal(logger.servePath, "/logger", "servePath correctly defaulted");
+    // logRequestHeaders correctly defaulted.
+    expect(logger.logRequestHeaders).toBe(true);
+    // servePath correctly defaulted.
+    expect(logger.servePath).toBe("/logger");
   });
 
-  it("Should not add unknown parameters", function () {
+  test("Should not add unknown parameters", () => {
     const logger = new ServerLogger(strategy, null, { foo: "bar" });
-    assert.typeOf(logger.foo, "undefined", "Unknown argument foo is not set on instance");
+    // Unknown argument foo is not set on instance.
+    expect(typeof logger.foo).toBe("undefined");
   });
 
-  it("Should not overwrite passed parameters", function () {
+  test("Should not overwrite passed parameters", () => {
     const options = {
       logRequestHeaders: "foo",
       servePath: 42
     };
     const logger = new ServerLogger(strategy, null, options);
-    assert.equal(logger.logRequestHeaders, options.logRequestHeaders, "logRequestHeaders not overwritten");
-    assert.equal(logger.servePath, options.servePath, "servePath not overwritten");
+    // logRequestHeaders not overwritten.
+    expect(logger.logRequestHeaders).toBe(options.logRequestHeaders);
+    // servePath not overwritten.
+    expect(logger.servePath).toBe(options.servePath);
   });
 };
 

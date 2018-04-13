@@ -1,22 +1,19 @@
-"use strict";
+import axios from 'axios';
 
-import "babel-polyfill";
-
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const assert = chai.assert;
-
-chai.use(chaiHttp);
-
-import { endPoint } from './harness';
+import endPoint from './harness';
 
 function testInvalidMethod() {
-  it("should reject GET requests", done => {
-    chai.request(endPoint)
-      .get("/logger")
-      .end((err, res) => {
-        assert.equal(res.status, 405, "ServerLogger rejects GET methods as invalid.");
-        done();
+  test("should reject GET requests", () => {
+    const url = endPoint + '/logger';
+
+    // toBeDefined() + toBe(405) == 2 assertions.
+    expect.assertions(2);
+    // ServerLogger rejects GET methods as invalid.
+    return axios.get(url)
+      .catch(err => {
+        const res = err.response;
+        expect(res).toBeDefined();
+        expect(res.status).toBe(405);
       });
   });
 }

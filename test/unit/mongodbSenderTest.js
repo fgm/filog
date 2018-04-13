@@ -1,36 +1,32 @@
-const chai = require("chai");
-const assert = chai.assert;
 const sinon = require("sinon");
 
 import MongoDbSender from "../../src/Senders/MongodbSender";
 
 function testMongoDbSender() {
   const mongo = {
+    // Do NOT replace by an arrow function: it breaks the Sinon spy.
     Collection: function (name) {
       this.insert = () => {};
       this.name = name;
     }
   };
-  it("should accept a collection name", function () {
+  test("should accept a collection name", () => {
     const spy = sinon.spy(mongo, 'Collection');
     const sender = new MongoDbSender(mongo, 'some_collection');
-    assert.instanceOf(sender, MongoDbSender);
-    assert.equal(spy.calledOnce, true);
+    expect(sender).toBeInstanceOf(MongoDbSender);
+    expect(spy.calledOnce).toBe(true);
   });
-  it("should accept an existing collection", function () {
+  test("should accept an existing collection", () => {
     const collection = new mongo.Collection("fake");
     const sender = new MongoDbSender(mongo, collection);
-    assert.instanceOf(sender, MongoDbSender);
-    assert.equal(sender.store, collection);
+    expect(sender).toBeInstanceOf(MongoDbSender);
+    expect(sender.store).toBe(collection);
   });
-  it("should reject invalid collection values", function () {
+  test("should reject invalid collection values", () => {
     const collection = 25;
-    assert.throw(() => {
-      //noinspection Eslint
-      new MongoDbSender(mongo, collection);
-    }, Error);
+    expect(() => new MongoDbSender(mongo, collection)).toThrowError(Error);
   });
-  it("should add a \"store\" timestamp to empty context", function () {
+  test("should add a \"store\" timestamp to empty context", () => {
     const collection = new mongo.Collection("fake");
     const sender = new MongoDbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
@@ -39,16 +35,24 @@ function testMongoDbSender() {
 
     sender.send(...inboundArgs);
     const after = +new Date();
-    assert.equal(insertSpy.calledOnce, true, "Collection.insert was called once.");
+    // Collection.insert was called once.
+    expect(insertSpy.calledOnce).toBe(true);
+
     const callArgs = insertSpy.firstCall.args[0];
-    assert.equal(callArgs.level, inboundArgs[0], "Level is passed");
-    assert.equal(callArgs.message, inboundArgs[1], "Level is passed");
+    // Level is passed.
+    expect(callArgs.level).toBe(inboundArgs[0]);
+    // Message is passed.
+    expect(callArgs.message).toBe(inboundArgs[1]);
+
     const timestamp = callArgs.context.timestamp.store;
-    assert.equal(typeof timestamp, "number", "A numeric store timestamp is passed");
-    assert.equal(timestamp >= before, true, "Timestamp is later than 'before'");
-    assert.equal(timestamp <= after, true, "Timestamp is earlier than 'after'");
+    // A numeric store timestamp is passed.
+    expect(typeof timestamp).toBe("number");
+    // Timestamp is later than 'before'.
+    expect(timestamp >= before).toBe(true);
+    // Timestamp is earlier than 'after'.
+    expect(timestamp <= after).toBe(true);
   });
-  it("should add a \"store\" timestamp to non-empty context", function () {
+  test("should add a \"store\" timestamp to non-empty context", () => {
     const collection = new mongo.Collection("fake");
     const sender = new MongoDbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
@@ -57,14 +61,20 @@ function testMongoDbSender() {
 
     sender.send(...inboundArgs);
     const after = +new Date();
-    assert.equal(insertSpy.calledOnce, true, "Collection.insert was called once.");
+    expect(insertSpy.calledOnce).toBe(true, "Collection.insert was called once.");
     const callArgs = insertSpy.firstCall.args[0];
-    assert.equal(callArgs.level, inboundArgs[0], "Level is passed");
-    assert.equal(callArgs.message, inboundArgs[1], "Level is passed");
+    // Level is passed.
+    expect(callArgs.level).toBe(inboundArgs[0]);
+    // Message is passed.
+    expect(callArgs.message).toBe(inboundArgs[1]);
+
     const timestamp = callArgs.context.timestamp.store;
-    assert.equal(typeof timestamp, "number", "A numeric store timestamp is passed");
-    assert.equal(timestamp >= before, true, "Timestamp is later than 'before'");
-    assert.equal(timestamp <= after, true, "Timestamp is earlier than 'after'");
+    // A numeric store timestamp is passed.
+    expect(typeof timestamp).toBe("number");
+    // Timestamp is later than 'before'.
+    expect(timestamp >= before).toBe(true);
+    // Timestamp is earlier than 'after'.
+    expect(timestamp <= after).toBe(true);
   });
 }
 

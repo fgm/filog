@@ -1,6 +1,3 @@
-const chai = require("chai");
-const assert = chai.assert;
-
 import MeteorUserProcessor from "../../src/Processors/MeteorUserProcessor";
 
 function testMeteorUserProcessor() {
@@ -20,7 +17,7 @@ function testMeteorUserProcessor() {
     return result;
   };
 
-  it("should accept a collection name", function () {
+  test("should accept a collection name", () => {
     const data = { anything: "goes" };
     global.Package = mockAccountsPackage;
     const processorRaw = new MeteorUserProcessor(mockMeteor);
@@ -28,19 +25,18 @@ function testMeteorUserProcessor() {
     const processorUpdater = new MeteorUserProcessor(mockMeteor, postProcessorUpdate);
     delete(global.PACKAGE);
 
-    assert.instanceOf(processorRaw, MeteorUserProcessor);
+    expect(processorRaw).toBeInstanceOf(MeteorUserProcessor);
     const resultRaw = processorRaw.process(data);
-    assert.isDefined(resultRaw.meteor.user.services);
+    expect(resultRaw.meteor.user.services).toBeDefined();
 
-    assert.instanceOf(processorDeletor, MeteorUserProcessor);
+    expect(processorDeletor).toBeInstanceOf(MeteorUserProcessor);
     const resultDeleted = processorDeletor.process(data);
-    assert.isUndefined(resultDeleted.meteor.user.services);
+    expect(resultDeleted.meteor.user.services).toBeUndefined();
 
-    assert.instanceOf(processorUpdater, MeteorUserProcessor);
+    expect(processorUpdater).toBeInstanceOf(MeteorUserProcessor);
     const resultUpdated = processorUpdater.process(data);
-    assert.equal(resultUpdated.meteor.user, forcedUserId);
+    expect(resultUpdated.meteor.user).toBe(forcedUserId);
   });
-
 }
 
 export {

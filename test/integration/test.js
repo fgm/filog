@@ -1,7 +1,3 @@
-"use strict";
-
-import "babel-polyfill";
-
 import { testInvalidMethod } from './httpMethodTest';
 import { testNonJson, testValidJson } from './jsonTest';
 

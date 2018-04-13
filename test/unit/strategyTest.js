@@ -1,33 +1,29 @@
-const chai = require("chai");
-const assert = chai.assert;
-
 import LeveledStrategy from "../../src/Strategies/LeveledStrategy";
 import NullSender from "../../src/Senders/NullSender";
 
 function testStrategyConstruction() {
   "use strict";
 
-  it("Should accept correct senders", function () {
+  test("Should accept correct senders", () => {
     const nullSender = new NullSender();
     const leveled = new LeveledStrategy(nullSender, nullSender, nullSender);
-    assert(leveled.constructor.name === 'LeveledStrategy', "Constructor returns a LeveledStrategyInstance");
-    assert(leveled.constructor.prototype === LeveledStrategy.prototype, "Constructor returns a LeveledStrategyInstance with the proper prototype");
+
+    let actual = leveled.constructor.name;
+    let expected = "LeveledStrategy";
+    // Constructor returns a LeveledStrategyInstance
+    expect(actual).toBe(expected);
+
+    actual = leveled.constructor.prototype;
+    expected = LeveledStrategy.prototype;
+    // Constructor returns a LeveledStrategyInstance with the proper prototype
+    expect(actual).toBe(expected);
   });
 
-  it("Should reject non-senders passed as senders at any position", function () {
+  test("Should reject non-senders passed as senders at any position", () => {
     const nullSender = new NullSender();
-    assert.throws(() => {
-      //noinspection Eslint
-      new LeveledStrategy({}, nullSender, nullSender);
-    });
-    assert.throws(() => {
-      //noinspection Eslint
-      new LeveledStrategy(nullSender, {}, nullSender);
-    });
-    assert.throws(() => {
-      //noinspection Eslint
-      new LeveledStrategy(nullSender, nullSender, {});
-    });
+    expect(() => new LeveledStrategy({}, nullSender, nullSender)).toThrow();
+    expect(() => new LeveledStrategy(nullSender, {}, nullSender)).toThrow();
+    expect(() => new LeveledStrategy(nullSender, nullSender, {}).toThrow());
   });
 }
 

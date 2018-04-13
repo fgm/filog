@@ -1,7 +1,3 @@
-"use strict";
-
-// Note: to add debug to Sinon matches, look in Sinon call.js, not sinon*.js.
-
 import { testImmutableContext, testMessageContext, testObjectifyContext } from './logContextTest';
 import { testLogLevels } from './logLevelsTest';
 import { testMeteorUserProcessor } from './meteorUserProcessorTest';
@@ -12,14 +8,14 @@ import { testStringifyMessage } from './stringifyTest';
 import { testConstructor } from './serverLoggerTest';
 
 describe("Unit", () => {
-  describe("LeveledStrategy", function () {
+  describe("LeveledStrategy", () => {
     describe("reject non-senders in constructor", testStrategyConstruction);
   });
-  describe("Logger", function () {
+  describe("Logger", () => {
     describe("validate log levels", testLogLevels);
     describe("logging does not modify context", testImmutableContext);
   });
-  describe("ServerLogger", function () {
+  describe("ServerLogger", () => {
     describe("constructor", testConstructor);
     describe("messageContext", testMessageContext);
     describe("objectifyContext", testObjectifyContext);

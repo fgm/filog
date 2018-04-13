@@ -1,19 +1,11 @@
-"use strict";
+import axios from 'axios';
 
-import "babel-polyfill";
-
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const assert = chai.assert;
-
-chai.use(chaiHttp);
-
-import { endPoint } from './harness';
+import endPoint from './harness';
 
 function testValidJson() {
-  it("should accept valid JSON posts", done => {
+  test("should accept valid JSON posts", () => {
     // Pseudo-random complex value from http://beta.json-generator.com/
-    let datum = [
+    let data = [
       {
         "repeat(5, 10)": {
           _id: "{{objectId()}}",
@@ -63,28 +55,36 @@ function testValidJson() {
       }
     ];
 
-    chai.request(endPoint)
-      .post("/logger")
-      .set("content-type", "application/json")
-      .send(datum)
-      .end(function (err, res) {
-        assert.equal(err, null, "Valid post does not cause an error");
-        assert.equal(res.status, 200, "Valid post is accepted");
-        done();
-      });
+    return axios({
+      method: "post",
+      baseURL: endPoint,
+      url: "/logger",
+      data,
+      headers: { "content-type": "application/json" }
+    }).then(response => {
+      // Valid post is accepted.
+      expect(response.status).toBe(200);
+    });
   });
 }
 
 function testNonJson() {
-  it("should reject non-JSON posts", done => {
-    chai.request(endPoint)
-      .post("/logger")
-      .field("foo", "bar")
-      .end(function (err, res) {
-        assert.notEqual(err, null);
-        assert.equal(res.status, 422);
-        done();
-      });
+  test("should reject non-JSON posts", () => {
+    // Ensure fail if the promise resolves.
+    expect.assertions(2);
+
+    return axios({
+      method: "post",
+      baseURL: endPoint,
+      url: "/logger",
+      data: "42",
+      headers: { "content-type": "application/x-www-form-urlencoded" }
+    }).catch(err => {
+      const response = err.response;
+      expect(response).toBeDefined();
+      // Invalid JSON is rejected.
+      expect(response.status).toBe(422);
+    });
   });
 }
 
