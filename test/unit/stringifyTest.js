@@ -1,12 +1,9 @@
 import ServerLogger from "../../src/ServerLogger";
 
-const chai = require("chai");
-const assert = chai.assert;
-
 function testStringifyMessage() {
   const stringify = ServerLogger.stringifyMessage;
 
-  it("should convert strings", () => {
+  test("should convert strings", () => {
     const value = "foo";
 
     class Printable {
@@ -22,23 +19,24 @@ function testStringifyMessage() {
     const o = new Printable(value);
 
     const expectations = [
-      [{message: "foo"}, "foo"],
-      [{message: 25}, "25"],
-      [{message: o}, JSON.stringify(value)],
+      [{ message: "foo" }, "foo"],
+      [{ message: 25 }, "25"],
+      [{ message: o }, JSON.stringify(value)],
       [{}, "{}"],
       [[], "[]"],
-      ["foo", "foo"]
+      ["foo", "foo"],
     ];
 
     for (const expectation of expectations) {
       const doc = expectation[0];
       const expected = expectation[1];
       const actual = stringify(doc);
-      assert.strictEqual(actual, expected, "Converting " + JSON.stringify(doc));
+      // Converting JSON.stringify(doc)).
+      expect(actual).toBe(expected);
     }
   });
 }
 
 export {
-  testStringifyMessage
+  testStringifyMessage,
 };

@@ -65,7 +65,7 @@ const SyslogSender = class extends SenderBase {
     let doc = {
       message,
       level: this.syslog.level[level],
-      facility: this.syslog.facility[this.facility]
+      facility: this.syslog.facility[this.facility],
     };
 
     // It should already contain a timestamp object anyway.
@@ -98,11 +98,11 @@ const SyslogSender = class extends SenderBase {
       const step1 = {
         level: doc.level,
         facility: doc.facility,
-        logger_error: `Cannot JSON.stringify logged data: ${e1.message}.`,
-        raw: util.inspect(doc, this.formatOptions)
+        "logger_error": `Cannot JSON.stringify logged data: ${e1.message}.`,
+        raw: util.inspect(doc, this.formatOptions),
       };
 
-      if (typeof doc.message === 'string') {
+      if (typeof doc.message === "string") {
         step1.message = doc.message;
       }
 
@@ -112,6 +112,7 @@ const SyslogSender = class extends SenderBase {
       catch (e2) {
         // Critical problem: remove moving parts.
         // RFC 5424: level 3 = error, facility 14 == log alert.
+        // eslint-disable-next-line quotes
         result = '{ "level":3, "facility":14, "error":"Serialization fallback error" }';
       }
     }

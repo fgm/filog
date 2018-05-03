@@ -138,7 +138,8 @@ Running tests
 
 The module contains tests. Some of them are unit tests and need nothing special
 to run, while others are currently implemented as integration tests and assume
-you have a working project using the module available at `http://localhost:3000`.
+you have a working harness project using Filog, exposed on 
+`http://localhost:3000`.
 
 Start by compiling the package:
 
@@ -151,8 +152,32 @@ Then you can run :
 * both tests with `meteor npm run test`
 * both tests including coverage generation with `meteor npm run cover`
  
-To run integration tests, you need to run your project in one terminal, and the
-tests in another one:
+To run integration tests, you need to run the harness project in one terminal, 
+and the tests in another one, and the project needs to have Filog configured.
+
+
+#### Example server-side code in the harness project
+
+    /**
+     * @file server/main.js
+     */
+        
+    import {
+      ServerLogger,
+      MongodbSender,
+      TrivialStrategy
+    } from "filog";
+    
+    Meteor.startup(() => {
+      const sender = new MongodbSender(Mongo);
+      const strategy = new TrivialStrategy(sender);
+      global.logger = new ServerLogger(strategy, WebApp);
+    });
+
+This file is needed to allow Filog to operate on the `/logger` URL: otherwise, 
+Meteor will handle it natively and return a 200 with the default application 
+page, failing the integration tests.
+
 
 #### Terminal 1
 
@@ -166,3 +191,4 @@ tests in another one:
     $ meteor npm run compile
     $ meteor npm run test-integration
     $ meteor npm run test
+    $ meteor npm run cover

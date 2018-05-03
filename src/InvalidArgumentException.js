@@ -1,5 +1,5 @@
 const InvalidArgumentException = function (message) {
-  this.name = 'InvalidArgumentException';
+  this.name = "InvalidArgumentException";
   this.message = message;
   this.stackj = (new Error()).stack;
 };

@@ -1,103 +1,197 @@
-const chai = require("chai");
-const assert = chai.assert;
-
 import LogLevel from "../../src/LogLevel";
 import Logger from "../../src/Logger";
 import ServerLogger from "../../src/ServerLogger";
 
 function testImmutableContext() {
-  "use strict";
   const strategy = {
     customizeLogger: () => [],
-    selectSenders: () => []
+    selectSenders: () => [],
   };
-  it("should not modify context in log() calls", function () {
+  test("should not modify context in log() calls", () => {
     const logger = new Logger(strategy);
     const originalContext = {};
     const context = { ...originalContext };
-    assert.equal(JSON.stringify(context), JSON.stringify(originalContext), "Pre-log context matches original context");
+
+    let actual = JSON.stringify(context);
+    let expected = JSON.stringify(originalContext);
+    // Pre-log context matches original context
+    expect(actual).toBe(expected);
+
     logger.log(LogLevel.DEBUG, "some message", context);
-    assert.equal(JSON.stringify(context), JSON.stringify(originalContext), "Post-log context matches original context");
+
+    actual = JSON.stringify(context);
+    expected = JSON.stringify(originalContext);
+    // Post-log context matches original context
+    expect(actual).toBe(expected);
   });
 }
 
 function testMessageContext() {
-  "use strict";
   let result;
   const referenceContext = { a: "A" };
   const sender = new class {
     send(level, message, context) {
       result = { level, message, context };
     }
-  };
+  }();
 
   const strategy = {
     customizeLogger: () => [],
-    selectSenders: () => [sender]
+    selectSenders: () => [sender],
   };
 
-  it("should add the message argument to message_details", function () {
+  const DETAILS_KEY = "message_details";
+
+  test(`should add the message argument to ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
     logger.log(LogLevel.DEBUG, "some message", referenceContext);
-    assert.equal(true, result.context.message_details.a === 'A', 'Message details is set');
+
+    const actual = result.context[DETAILS_KEY].a;
+    const expected = "A";
+    // Message details is set
+    expect(actual).toBe(expected);
   });
 
-  it("should not add the message arguments to context root", function () {
+  test(`should merge contents of existing ${DETAILS_KEY} context key`, () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    const actual = result.context[DETAILS_KEY];
+
+    // Original top-level key should be in top [DETAILS_KEY].
+    const expectedReference = "A";
+    expect(actual).toHaveProperty("a");
+    expect(actual.a).toBe(expectedReference);
+
+    // Key nested in original message_detail should also in top [DETAILS_KEY].
+    const expectedNested = "bar";
+    expect(actual).toHaveProperty("foo");
+    expect(actual.foo).toBe(expectedNested);
+  });
+
+  test(`should not merge existing ${DETAILS_KEY} context key itself`, () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    // Message+_details should not contain a nested [DETAILS_KEY].
+    const actual = result.context[DETAILS_KEY];
+    expect(actual).not.toHaveProperty(DETAILS_KEY);
+  });
+
+  test(`should keep the latest keys when merging existing ${DETAILS_KEY}`, () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign(referenceContext, { [DETAILS_KEY]: { a: "B" } });
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    // [DETAILS_KEY] should contain the newly added value for key "a", not the
+    // one present in the initial [DETAILS_KEY].
+    const actual = result.context[DETAILS_KEY];
+    const expected = "A";
+    // Message details is set
+    expect(actual).toHaveProperty("a");
+    expect(actual.a).toBe(expected);
+  });
+
+  test("should not add the message arguments to context root", () => {
     const logger = new Logger(strategy);
     result = null;
     logger.log(LogLevel.DEBUG, "some message", referenceContext);
-    assert.equal(false, result.context.hasOwnProperty('a'), 'Message details is set');
+
+    const actual = result.context.hasOwnProperty("a");
+    const expected = false;
+    // Message details is set
+    expect(actual).toBe(expected);
   });
 }
 
 function testObjectifyContext() {
   const objectifyContext = ServerLogger.objectifyContext;
 
-  it("should convert arrays to POJOs", function () {
+  test("should convert arrays to POJOs", () => {
     const a = ["a", "b"];
     const o = objectifyContext(a);
-    assert.equal(typeof o, "object");
-    assert.equal(o.constructor.name, "Object");
+
+    let actual = typeof o;
+    let expected = "object";
+    expect(actual).toBe(expected);
+
+    actual = o.constructor.name;
+    expected = "Object";
+    expect(actual).toBe(expected);
   });
 
-  it("should convert scalars to POJOs with a value key", () => {
+  test("should convert scalars to POJOs with a value key", () => {
     const scalars = [
       "Hello, world", "",
       42, +0, -0, 0, NaN, -Infinity, +Infinity,
       null,
       true, false,
       // eslint-disable-next-line no-undefined
-      undefined
+      undefined,
     ];
 
     scalars.forEach(v => {
-      const actual = objectifyContext(v);
-      const printable = JSON.stringify(actual);
-      assert.equal(typeof actual, "object", `Result type is "object" for ${printable}.`);
-      assert.equal(actual.constructor.name, "Object", `Result constructor is "Object" for ${printable}.`);
-      const actualKeys = Object.keys(actual);
-      assert.equal(actualKeys.length, 1, `Result has a single key for ${printable}.`);
-      assert.equal(actualKeys[0], "value", `Result key is called "value" for ${printable}.`);
-      assert.isTrue(Object.is(actual.value, v), `Result value is the original value for ${printable}.`);
+      const objectified = objectifyContext(v);
+      // const printable = JSON.stringify(objectified);
+
+      let actual = typeof objectified;
+      let expected = "object";
+      // `Result type is "object" for ${printable}.`);
+      expect(actual).toBe(expected);
+
+      actual = objectified.constructor.name;
+      expected = "Object";
+      // Result constructor is "Object" for ${printable}.
+      expect(actual).toBe(expected);
+
+      const actualKeys = Object.keys(objectified);
+      actual = actualKeys.length;
+      expected = 1;
+      // Result has a single key for ${printable}.
+      expect(actual).toBe(expected);
+
+      actual = actualKeys[0];
+      expected = "value";
+      // Result key is called "value" for ${printable}.
+      expect(actual).toBe(expected);
+
+      actual = objectified.value;
+      expected = v;
+      // Result value is the original value for ${printable}.
+      expect(actual).toBe(expected);
     });
   });
 
-  it("should not modify existing POJOs", function () {
+  test("should not modify existing POJOs", () => {
     const raw = { a: "b" };
     const actual = objectifyContext(raw);
-    assert.strictEqual(actual, raw);
+    const expected = raw;
+    expect(actual).toBe(expected);
   });
 
-  it("should convert date objects to ISO date strings", () => {
+  test("should convert date objects to ISO date strings", () => {
     const d = new Date(Date.UTC(2016, 5, 24, 16, 0, 30, 250));
-    const actual = objectifyContext(d);
-    assert.equal(typeof actual, "string", "Result for date object is a string");
-    assert.equal(actual, d.toISOString(), "2016-05-24T16:00:30.250Z : Result is the ISO representation of the date");
+    const objectified = objectifyContext(d);
+
+    let actual = typeof objectified;
+    let expected = "string";
+    // Result for date object is a string
+    expect(actual).toBe(expected);
+
+    actual = objectified;
+    expected = d.toISOString();
+    // 2016-05-24T16:00:30.250Z : Result is the ISO representation of the date
+    expect(actual).toBe(expected);
   });
 
   // TODO also check wrapper objects with no keys like new Number(25), new Boolean(true).
-  it("should downgrade miscellaneous classed objects to POJOs", () => {
+  test("should downgrade miscellaneous classed objects to POJOs", () => {
     const value = "foo";
     class Foo {
       constructor(v) {
@@ -105,21 +199,51 @@ function testObjectifyContext() {
       }
     }
     const initial = new Foo(value);
-    assert.equal(typeof initial, "object");
-    assert.equal(initial.constructor.name, "Foo");
 
-    const actual = objectifyContext(initial);
-    assert.equal(JSON.stringify(Object.keys(actual)), JSON.stringify(["k"]), "Result has same properties as initial object");
-    assert.equal(actual.k, value, "Result has same values as initial object");
-    assert.equal(typeof actual, "object", "Result is an object");
-    assert.equal(actual.constructor.name, "Object", "Result constructor is \"Object\".");
-    assert.notStrictEqual(actual, initial, "Result is not the initial object itself.");
-    assert.notEqual(actual, initial, "Result is not even equal to the initial object");
+    let actual = typeof initial;
+    let expected = "object";
+    expect(actual).toBe(expected);
+
+    actual = initial.constructor.name;
+    expected = "Foo";
+    expect(actual).toBe(expected);
+
+    const objectified = objectifyContext(initial);
+
+    actual = JSON.stringify(Object.keys(objectified));
+    expected = JSON.stringify(["k"]);
+    // Result has same properties as initial object
+    expect(actual).toBe(expected);
+
+    actual = objectified.k;
+    expected = value;
+    // Result has same values as initial object
+    expect(actual).toBe(expected);
+
+    actual = typeof objectified;
+    expected = "object";
+    // Result is an object
+    expect(actual).toBe(expected);
+
+    actual = objectified.constructor.name;
+    expected = "Object";
+    // Result constructor is \"Object\".
+    expect(actual).toBe(expected);
+
+    actual = objectified;
+    expected = initial;
+    // Result is not the initial object itself.
+    expect(actual).not.toBe(expected);
+
+    actual = objectified;
+    expected = initial;
+    // Result equals the initial object (Jest equal only compares values).
+    expect(actual).toEqual(expected);
   });
 }
 
 export {
   testImmutableContext,
   testMessageContext,
-  testObjectifyContext
+  testObjectifyContext,
 };

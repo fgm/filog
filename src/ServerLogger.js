@@ -4,6 +4,7 @@
 import Logger from "./Logger";
 import * as util from "util";
 import { hostname } from "os";
+import LogLevel from "./LogLevel";
 
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -24,12 +25,14 @@ class ServerLogger extends Logger {
    * @param {Object} parameters
    * - logRequestHeaders: add request headers to the log context. Defaults to true.
    * - servePath: the path on which to expose the logger endpoint. Defaults to "/logger".
+   * - enableMethod: enable the filog:log method or not. Defaults to true.
    */
   constructor(strategy, webapp = null, parameters = {}) {
     super(strategy);
     const defaultParameters = {
+      enableMethod: true,
       logRequestHeaders: true,
-      servePath: "/logger"
+      servePath: "/logger",
     };
 
     // Loop on defaults, not arguments, to avoid injecting any random junk.
@@ -43,7 +46,12 @@ class ServerLogger extends Logger {
 
     this.hostname = hostname();
 
-    webapp && this.setupConnect(webapp, this.servePath);
+    if (this.enableMethod) {
+      Meteor.methods({ [Logger.METHOD]: this.logMethod.bind(this) });
+    }
+    if (webapp) {
+      this.setupConnect(webapp, this.servePath);
+    }
   }
 
   /**
@@ -99,12 +107,31 @@ class ServerLogger extends Logger {
       }
       res.end(result);
     },
-      (e) => { console.log(e); }));
+    (e) => { console.log(e); }));
   }
 
+  /**
+   * @inheritDoc
+   */
   log(level, message, rawContext = {}, cooked = true) {
     rawContext.hostname = this.hostname;
     super.log(level, message, rawContext, cooked);
+  }
+
+  /**
+   * The Meteor server method registered a ${Logger.METHOD}.
+   *
+   * @param {number} level
+   *   The event level.
+   * @param {string} message
+   *   The event message.
+   * @param {Object} context
+   *   The event context: any additional data added to the message.
+   *
+   * @returns {void}
+   */
+  logMethod({ level = LogLevel.INFO, message = "", context = {} }) {
+    this.log(level, message, context, true);
   }
 
   /**

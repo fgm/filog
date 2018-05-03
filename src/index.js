@@ -1,5 +1,6 @@
 import InvalidArgumentException from "./InvalidArgumentException";
 import LogLevel from "./LogLevel";
+import Logger from "./Logger";
 import ServerLogger from "./ServerLogger";
 import ClientLogger from "./ClientLogger";
 
@@ -13,6 +14,7 @@ import TrivialStrategy from "./Strategies/TrivialStrategy";
 import NullSender from "./Senders/NullSender";
 import ConsoleSender from "./Senders/ConsoleSender";
 import MeteorClientHttpSender from "./Senders/MeteorClientHttpSender";
+import MeteorClientMethodSender from "./Senders/MeteorClientMethodSender";
 import MongodbSender from "./Senders/MongodbSender";
 import TeeSender from "./Senders/TeeSender";
 
@@ -29,6 +31,7 @@ export {
   InvalidArgumentException,
   LogLevel,
 
+  Logger,
   ClientLogger,
   ServerLogger,
 
@@ -42,7 +45,8 @@ export {
   NullSender,
   ConsoleSender,
   MeteorClientHttpSender,
+  MeteorClientMethodSender,
   MongodbSender,
   SyslogSender,
-  TeeSender
+  TeeSender,
 };

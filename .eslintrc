@@ -7,11 +7,13 @@
   },
 
   "globals": {
-    // Mocha.
-    "describe": true,
-    "it": true,
+    // Jest.
+    "describe": false,
+    "expect": false,
+    "test": false,
 
     // The Meteor globals used by the package.
+    "HTTP": false,
     "Meteor": true,
     "Package": true
 
@@ -56,7 +58,7 @@
     //
     // The following rules point out areas where you might have made mistakes.
     //
-    "comma-dangle": 2, // disallow or enforce trailing commas
+    "comma-dangle": [2, "always-multiline"], // disallow or enforce trailing commas
     "no-cond-assign": 2, // disallow assignment in conditional expressions
     "no-console": 0, // disallow use of console (off by default in the node environment)
     "no-constant-condition": 2, // disallow use of constant expressions in conditions
@@ -253,6 +255,6 @@
     "react/prop-types": 2, // Prevent missing props validation in a React component definition
     "react/react-in-jsx-scope": 0, // Prevent missing React when using JSX
     "react/self-closing-comp": 2, // Prevent extra closing tags for components without children
-    "react/wrap-multilines": 2 // Prevent missing parentheses around multilines JSX
+    "react/jsx-wrap-multilines": 2 // Prevent missing parentheses around multilines JSX
   }
 }

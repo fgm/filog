@@ -39,7 +39,7 @@ const BrowserProcessor = class extends ProcessorBase {
     const browserDefaults = {
       platform: unknown,
       product: unknown,
-      userAgent: unknown
+      userAgent: unknown,
     };
 
     // Ensure a browser key exists, using the contents from context if available.

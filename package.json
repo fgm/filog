@@ -25,21 +25,23 @@
   },
   "description": "A logger client for errors/exceptions in Meteor JS projects",
   "devDependencies": {
+    "axios": "^0.18.0",
     "babel-cli": "^6.24.0",
     "babel-core": "^6.24.0",
+    "babel-jest": "^22.4.3",
     "babel-polyfill": "^6.23.0",
-    "babel-preset-es2015": "^6.24.0",
+    "babel-preset-env": "^1.6.1",
     "babel-preset-stage-0": "^6.22.0",
-    "chai": "^3.5.0",
-    "chai-http": "^3.0.0",
+    "eslint": "^4.19.1",
+    "eslint-plugin-react": "^7.7.0",
     "growl": "^1.9.2",
     "ink-docstrap": "^1.3.0",
-    "install": "^0.8.7",
-    "istanbul": "1.1.0-alpha.1",
+    "install": "^0.11.0",
+    "jest": "^22.4.3",
     "jsdoc": "^3.4.3",
-    "mocha": "^3.2.0",
-    "npm": "^4.4.1",
-    "sinon": "^2.1.0"
+    "npm": "^6.0.0",
+    "regenerator-runtime": "^0.11.1",
+    "sinon": "^5.0.3"
   },
   "engineStrict": true,
   "engines": {
@@ -48,6 +50,11 @@
   "engines#1": "We specify npm >= 2 to get proper local dependency support in",
   "engines#2": "application itself ; this is not a package dependency per se.",
   "homepage": "https://github.com/FGM/filog",
+  "jest": {
+    "transform": {
+      "^.+\\.js?$": "babel-jest"
+    }
+  },
   "keywords": [
     "log",
     "logging",
@@ -67,13 +74,13 @@
   },
   "scripts": {
     "clean": "rm -fr coverage node_modules",
-    "compile": "rm -r lib/* ; meteor npm i && meteor npm run test-compile",
-    "cover": "meteor npm run test-compile && time -p istanbul cover node_modules/.bin/_mocha -- --compilers js:babel-core/register test/**/*",
+    "compile": "rm -fr lib/* ; rm -fr node_modules ; meteor npm i && meteor npm run test-compile",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
-    "test": "meteor npm run test-compile && time -p mocha --compilers js:babel-core/register test/*",
-    "test-compile": "time -p babel --presets es2015,stage-0 -d lib/ src/",
-    "test-integration": "meteor npm run test-compile && time -p mocha --compilers js:babel-core/register test/integration",
-    "test-unit": "meteor npm run test-compile && time -p mocha --compilers js:babel-core/register test/unit"
+    "test-compile": "time -p babel --presets env,stage-0 -d lib/ src/",
+    "test-integration": "meteor npm run test-compile && time -p jest test/integration",
+    "test-unit": "meteor npm run test-compile && time -p jest test/unit",
+    "test": "meteor npm run test-compile && time -p jest test/*",
+    "cover": "meteor npm run test-compile && time -p jest --coverage test/**/*"
   },
-  "version": "0.1.16"
+  "version": "0.1.17"
 }

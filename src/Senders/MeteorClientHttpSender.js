@@ -30,7 +30,7 @@ const MeteorClientHttpSender = class extends SenderBase {
     this.http = HTTP;
     this.loggerUrl = loggerUrl;
     this.requestHeaders = {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     };
   }
 
@@ -42,7 +42,7 @@ const MeteorClientHttpSender = class extends SenderBase {
 
     let options = {
       data,
-      headers: this.requestHeaders
+      headers: this.requestHeaders,
     };
     this.http.post(this.loggerUrl, options, NullFn);
   }
