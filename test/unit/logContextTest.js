@@ -51,6 +51,35 @@ function testMessageContext() {
     expect(actual).toBe(expected);
   });
 
+  test("should merge contents of existing message_details context key", () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign({ message_details: { foo: "bar" } }, referenceContext);
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    const actual = result.context.message_details;
+    const expectedReference = 'A';
+    // Original top-level key should be in top message_details.
+    expect(actual.a).toBe(expectedReference);
+
+    // Key nested in original message_detail should also in top message_details.
+    const expectedNested = "bar";
+    expect(actual).toHaveProperty("foo");
+    expect(actual.foo).toBe(expectedNested);
+  });
+
+  test("should not merge existing message_details context key itself", () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign({ message_details: { foo: "bar" } }, referenceContext);
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    const actual = result.context.message_details;
+
+    // Message+_details should not contain a nested message_details.
+    expect(actual).not.toHaveProperty("message_details");
+  });
+
   test("should not add the message arguments to context root", () => {
     const logger = new Logger(strategy);
     result = null;
