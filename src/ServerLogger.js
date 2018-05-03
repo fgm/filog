@@ -32,7 +32,7 @@ class ServerLogger extends Logger {
     const defaultParameters = {
       enableMethod: true,
       logRequestHeaders: true,
-      servePath: "/logger"
+      servePath: "/logger",
     };
 
     // Loop on defaults, not arguments, to avoid injecting any random junk.
@@ -110,6 +110,9 @@ class ServerLogger extends Logger {
     (e) => { console.log(e); }));
   }
 
+  /**
+   * @inheritDoc
+   */
   log(level, message, rawContext = {}, cooked = true) {
     rawContext.hostname = this.hostname;
     super.log(level, message, rawContext, cooked);

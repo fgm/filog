@@ -28,5 +28,5 @@ function testStrategyConstruction() {
 }
 
 export {
-  testStrategyConstruction
+  testStrategyConstruction,
 };

@@ -5,7 +5,7 @@ import ServerLogger from "../../src/ServerLogger";
 const testConstructor = () => {
   const strategy = {
     customizeLogger: () => [],
-    selectSenders: () => []
+    selectSenders: () => [],
   };
   global.Meteor = { methods: NullFn };
 
@@ -26,7 +26,7 @@ const testConstructor = () => {
   test("Should not overwrite passed parameters", () => {
     const options = {
       logRequestHeaders: "foo",
-      servePath: 42
+      servePath: 42,
     };
     const logger = new ServerLogger(strategy, null, options);
     // logRequestHeaders not overwritten.
@@ -37,5 +37,5 @@ const testConstructor = () => {
 };
 
 export {
-  testConstructor
+  testConstructor,
 };

@@ -29,5 +29,5 @@ function testLogLevels() {
 }
 
 export {
-  testLogLevels
+  testLogLevels,
 };

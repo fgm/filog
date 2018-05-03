@@ -1,16 +1,23 @@
 # FiLog changelog
 ## 0.1 series
 
+### 0.1.17
+
+* Added `MeteorClientMethodSender`, a zero-configuration client sender (#47).
+* Converted all tests from Mocha/Chai/Istanbul to Jest, and increased coverage.
+* Fixed nested `message_details`, `hostname`, `timestamp` introduced in 0.1.15 (#48).
+* Upgraded outdated dependencies to NPM 6.0.0 and Sinon 5.0.3.
+
 ### 0.1.16
 
-* Removed the no-longer needed dependency on the `bcrypt` package
-* Cleant up the .eslintrc globals, fixed typo in comments
+* Removed the no-longer needed dependency on the `bcrypt` package.
+* Cleant up the .eslintrc globals, fixed typo in comments.
 
 ### 0.1.15
 
 * Added an optional post-process callback to MeteorUserProcessor (#38).
 * Moved message details to message_details context key (#37).
-* Fixed comment in Logger.log() describing the opposite of reality
+* Fixed comment in Logger.log() describing the opposite of reality.
 
 ### 0.1.14
 
@@ -34,7 +41,7 @@
 
 ### 0.1.11
 
-* Exposed TrivialStrategy to module consumers
+* Exposed TrivialStrategy to module consumers.
 * Fixed incorrect default timestamp generation.
 * Upgraded TraceKit to 0.4.4.
 * Contributors are now listed.

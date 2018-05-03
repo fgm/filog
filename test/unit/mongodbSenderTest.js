@@ -8,11 +8,11 @@ function testMongoDbSender() {
     Collection: function (name) {
       this.insert = () => {};
       this.name = name;
-    }
+    },
   };
   test("should accept a collection name", () => {
-    const spy = sinon.spy(mongo, 'Collection');
-    const sender = new MongoDbSender(mongo, 'some_collection');
+    const spy = sinon.spy(mongo, "Collection");
+    const sender = new MongoDbSender(mongo, "some_collection");
     expect(sender).toBeInstanceOf(MongoDbSender);
     expect(spy.calledOnce).toBe(true);
   });
@@ -79,5 +79,5 @@ function testMongoDbSender() {
 }
 
 export {
-  testMongoDbSender
+  testMongoDbSender,
 };

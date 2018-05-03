@@ -10,7 +10,7 @@ const Names = [
   "Warning",
   "Notice",
   "Informational",
-  "Debug"
+  "Debug",
 ];
 
 const EMERGENCY = 0;
@@ -34,5 +34,5 @@ export default {
   NOTICE,
   INFO,
   INFORMATIONAL,
-  DEBUG
+  DEBUG,
 };

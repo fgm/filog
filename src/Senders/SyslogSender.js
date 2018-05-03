@@ -65,7 +65,7 @@ const SyslogSender = class extends SenderBase {
     let doc = {
       message,
       level: this.syslog.level[level],
-      facility: this.syslog.facility[this.facility]
+      facility: this.syslog.facility[this.facility],
     };
 
     // It should already contain a timestamp object anyway.
@@ -99,7 +99,7 @@ const SyslogSender = class extends SenderBase {
         level: doc.level,
         facility: doc.facility,
         "logger_error": `Cannot JSON.stringify logged data: ${e1.message}.`,
-        raw: util.inspect(doc, this.formatOptions)
+        raw: util.inspect(doc, this.formatOptions),
       };
 
       if (typeof doc.message === "string") {

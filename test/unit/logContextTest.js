@@ -5,7 +5,7 @@ import ServerLogger from "../../src/ServerLogger";
 function testImmutableContext() {
   const strategy = {
     customizeLogger: () => [],
-    selectSenders: () => []
+    selectSenders: () => [],
   };
   test("should not modify context in log() calls", () => {
     const logger = new Logger(strategy);
@@ -33,22 +33,69 @@ function testMessageContext() {
     send(level, message, context) {
       result = { level, message, context };
     }
-  };
+  }();
 
   const strategy = {
     customizeLogger: () => [],
-    selectSenders: () => [sender]
+    selectSenders: () => [sender],
   };
 
-  test("should add the message argument to message_details", () => {
+  const DETAILS_KEY = "message_details";
+
+  test(`should add the message argument to ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
     logger.log(LogLevel.DEBUG, "some message", referenceContext);
 
-    const actual = result.context.message_details.a;
-    const expected = 'A';
+    const actual = result.context[DETAILS_KEY].a;
+    const expected = "A";
     // Message details is set
     expect(actual).toBe(expected);
+  });
+
+  test(`should merge contents of existing ${DETAILS_KEY} context key`, () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    const actual = result.context[DETAILS_KEY];
+
+    // Original top-level key should be in top [DETAILS_KEY].
+    const expectedReference = "A";
+    expect(actual).toHaveProperty("a");
+    expect(actual.a).toBe(expectedReference);
+
+    // Key nested in original message_detail should also in top [DETAILS_KEY].
+    const expectedNested = "bar";
+    expect(actual).toHaveProperty("foo");
+    expect(actual.foo).toBe(expectedNested);
+  });
+
+  test(`should not merge existing ${DETAILS_KEY} context key itself`, () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    // Message+_details should not contain a nested [DETAILS_KEY].
+    const actual = result.context[DETAILS_KEY];
+    expect(actual).not.toHaveProperty(DETAILS_KEY);
+  });
+
+  test(`should keep the latest keys when merging existing ${DETAILS_KEY}`, () => {
+    const logger = new Logger(strategy);
+    result = null;
+    const originalContext = Object.assign(referenceContext, { [DETAILS_KEY]: { a: "B" } });
+    logger.log(LogLevel.DEBUG, "some message", originalContext);
+
+    // [DETAILS_KEY] should contain the newly added value for key "a", not the
+    // one present in the initial [DETAILS_KEY].
+    const actual = result.context[DETAILS_KEY];
+    const expected = "A";
+    // Message details is set
+    expect(actual).toHaveProperty("a");
+    expect(actual.a).toBe(expected);
   });
 
   test("should not add the message arguments to context root", () => {
@@ -56,7 +103,7 @@ function testMessageContext() {
     result = null;
     logger.log(LogLevel.DEBUG, "some message", referenceContext);
 
-    const actual = result.context.hasOwnProperty('a');
+    const actual = result.context.hasOwnProperty("a");
     const expected = false;
     // Message details is set
     expect(actual).toBe(expected);
@@ -86,7 +133,7 @@ function testObjectifyContext() {
       null,
       true, false,
       // eslint-disable-next-line no-undefined
-      undefined
+      undefined,
     ];
 
     scalars.forEach(v => {
@@ -198,5 +245,5 @@ function testObjectifyContext() {
 export {
   testImmutableContext,
   testMessageContext,
-  testObjectifyContext
+  testObjectifyContext,
 };

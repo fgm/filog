@@ -1,5 +1,5 @@
-import { testInvalidMethod } from './httpMethodTest';
-import { testNonJson, testValidJson } from './jsonTest';
+import { testInvalidMethod } from "./httpMethodTest";
+import { testNonJson, testValidJson } from "./jsonTest";
 
 describe("Integration", () => {
   describe("ServerLogger", function () {

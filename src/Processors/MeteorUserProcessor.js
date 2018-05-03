@@ -58,7 +58,7 @@ const MeteorUserProcessor = class extends ProcessorBase {
       username: null,
       emails: [],
       profile: {},
-      services: {}
+      services: {},
     };
   }
 
@@ -164,8 +164,8 @@ const MeteorUserProcessor = class extends ProcessorBase {
     let result = Object.assign({}, context, {
       meteor: {
         platform: this.platform,
-        user
-      }
+        user,
+      },
     });
 
     if (this.postProcess) {

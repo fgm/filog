@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios from "axios";
 
-import endPoint from './harness';
+import endPoint from "./harness";
 
 function testInvalidMethod() {
   test("should reject GET requests", () => {
-    const url = endPoint + '/logger';
+    const url = endPoint + "/logger";
 
     // toBeDefined() + toBe(405) == 2 assertions.
     expect.assertions(2);
@@ -19,5 +19,5 @@ function testInvalidMethod() {
 }
 
 export {
-  testInvalidMethod
+  testInvalidMethod,
 };

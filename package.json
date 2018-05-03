@@ -39,9 +39,9 @@
     "install": "^0.11.0",
     "jest": "^22.4.3",
     "jsdoc": "^3.4.3",
-    "npm": "^5.8.0",
+    "npm": "^6.0.0",
     "regenerator-runtime": "^0.11.1",
-    "sinon": "^4.5.0"
+    "sinon": "^5.0.3"
   },
   "engineStrict": true,
   "engines": {
@@ -82,5 +82,5 @@
     "test": "meteor npm run test-compile && time -p jest test/*",
     "cover": "meteor npm run test-compile && time -p jest --coverage test/**/*"
   },
-  "version": "0.1.16"
+  "version": "0.1.17"
 }

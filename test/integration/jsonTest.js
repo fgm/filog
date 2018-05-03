@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-import endPoint from './harness';
+import endPoint from "./harness";
 
 function testValidJson() {
   test("should accept valid JSON posts", () => {
@@ -18,7 +18,7 @@ function testValidJson() {
           eyeColor: "{{random('blue', 'brown', 'green')}}",
           name: {
             first: "{{firstName()}}",
-            last: "{{surname()}}"
+            last: "{{surname()}}",
           },
           company: "{{company().toUpperCase()}}",
           email: function (tags) {
@@ -33,16 +33,16 @@ function testValidJson() {
           longitude: "{{floating(-180.000001, 180)}}",
           tags: [
             {
-              "repeat(5)": "{{lorem(1, 'words')}}"
-            }
+              "repeat(5)": "{{lorem(1, 'words')}}",
+            },
           ],
           friends: [
             {
               "repeat(3)": {
                 id: "{{index()}}",
-                name: "{{firstName()}} {{surname()}}"
-              }
-            }
+                name: "{{firstName()}} {{surname()}}",
+              },
+            },
           ],
           greeting: function (tags) {
             return "Hello, " + this.name.first + "! You have " + tags.integer(5, 10) + " unread messages.";
@@ -50,9 +50,9 @@ function testValidJson() {
           favoriteFruit: function (tags) {
             const fruits = ["apple", "banana", "strawberry"];
             return fruits[tags.integer(0, fruits.length - 1)];
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     return axios({
@@ -60,7 +60,7 @@ function testValidJson() {
       baseURL: endPoint,
       url: "/logger",
       data,
-      headers: { "content-type": "application/json" }
+      headers: { "content-type": "application/json" },
     }).then(response => {
       // Valid post is accepted.
       expect(response.status).toBe(200);
@@ -78,7 +78,7 @@ function testNonJson() {
       baseURL: endPoint,
       url: "/logger",
       data: "42",
-      headers: { "content-type": "application/x-www-form-urlencoded" }
+      headers: { "content-type": "application/x-www-form-urlencoded" },
     }).catch(err => {
       const response = err.response;
       expect(response).toBeDefined();
@@ -90,5 +90,5 @@ function testNonJson() {
 
 export {
   testNonJson,
-  testValidJson
+  testValidJson,
 };
