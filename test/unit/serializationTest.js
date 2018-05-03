@@ -8,13 +8,13 @@ function testSerializeDeepObject() {
 
   const makeSyslog = () => ({
     level: {
-      [logLevelWarn]: "warn"
+      [logLevelWarn]: "warn",
     },
     facility: {
-      [LOCAL0]: "local0"
+      [LOCAL0]: "local0",
     },
     open: () => {},
-    log: () => {}
+    log: () => {},
   });
 
   const deepContext = () => ({
@@ -23,12 +23,12 @@ function testSerializeDeepObject() {
         level3: {
           level4: {
             level5: {
-              level6: "world"
-            }
-          }
-        }
-      }
-    }
+              level6: "world",
+            },
+          },
+        },
+      },
+    },
   });
 
   const circularContext = () => {
@@ -77,5 +77,5 @@ function testSerializeDeepObject() {
 }
 
 export {
-  testSerializeDeepObject
+  testSerializeDeepObject,
 };

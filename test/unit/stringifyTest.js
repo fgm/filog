@@ -24,7 +24,7 @@ function testStringifyMessage() {
       [{ message: o }, JSON.stringify(value)],
       [{}, "{}"],
       [[], "[]"],
-      ["foo", "foo"]
+      ["foo", "foo"],
     ];
 
     for (const expectation of expectations) {
@@ -38,5 +38,5 @@ function testStringifyMessage() {
 }
 
 export {
-  testStringifyMessage
+  testStringifyMessage,
 };

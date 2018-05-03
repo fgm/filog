@@ -48,5 +48,5 @@ export {
   MeteorClientMethodSender,
   MongodbSender,
   SyslogSender,
-  TeeSender
+  TeeSender,
 };

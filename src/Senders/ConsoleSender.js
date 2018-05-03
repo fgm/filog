@@ -27,7 +27,7 @@ const ConsoleSender = class extends SenderBase {
       console.warn,
       console.warn,
       console.info,
-      console.log
+      console.log,
     ];
 
     const method = methods[level].bind(console);

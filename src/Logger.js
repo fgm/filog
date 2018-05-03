@@ -159,9 +159,32 @@ const Logger = class {
       throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
     }
 
-    const context = cooked
-      ? this.processors.reduce(this.processorReducer, { "message_details": rawContext })
-      : rawContext;
+    let context = rawContext;
+
+    if (cooked) {
+      // Context may contain message_details and timsetamps from upstream. Merge them.
+      const DETAILS_KEY = "message_details";
+      const TS_KEY = "timestamp";
+      const HOST_KEY = "hostname";
+
+      const {
+        [DETAILS_KEY]: initialDetails,
+        [TS_KEY]: initialTs,
+        [HOST_KEY]: initialHost,
+        ...contextWithoutDetails
+      } = rawContext;
+
+      context = this.processors.reduce(this.processorReducer, { [DETAILS_KEY]: contextWithoutDetails });
+
+      // New context keys with the same name override existing ones.
+      context[DETAILS_KEY] = { ...initialDetails, ...context[DETAILS_KEY] };
+      context[TS_KEY] = { ...initialTs, ...context[TS_KEY] };
+
+      // Only add the initial [HOST_KEY] if none has been added and one existed.
+      if (typeof context[HOST_KEY] === "undefined" && typeof initialHost !== "undefined") {
+        context[HOST_KEY] = initialHost;
+      }
+    }
 
     // A timestamp is required, so insert it forcefully.
     context.timestamp = { log: Date.now() };

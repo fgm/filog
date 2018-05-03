@@ -1,11 +1,11 @@
-import { testImmutableContext, testMessageContext, testObjectifyContext } from './logContextTest';
-import { testLogLevels } from './logLevelsTest';
-import { testMeteorUserProcessor } from './meteorUserProcessorTest';
-import { testMongoDbSender } from './mongodbSenderTest';
-import { testSerializeDeepObject } from './serializationTest';
-import { testStrategyConstruction } from './strategyTest';
-import { testStringifyMessage } from './stringifyTest';
-import { testConstructor } from './serverLoggerTest';
+import { testImmutableContext, testMessageContext, testObjectifyContext } from "./logContextTest";
+import { testLogLevels } from "./logLevelsTest";
+import { testMeteorUserProcessor } from "./meteorUserProcessorTest";
+import { testMongoDbSender } from "./mongodbSenderTest";
+import { testSerializeDeepObject } from "./serializationTest";
+import { testStrategyConstruction } from "./strategyTest";
+import { testStringifyMessage } from "./stringifyTest";
+import { testConstructor } from "./serverLoggerTest";
 
 describe("Unit", () => {
   describe("LeveledStrategy", () => {

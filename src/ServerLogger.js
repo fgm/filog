@@ -32,7 +32,7 @@ class ServerLogger extends Logger {
     const defaultParameters = {
       enableMethod: true,
       logRequestHeaders: true,
-      servePath: "/logger"
+      servePath: "/logger",
     };
 
     // Loop on defaults, not arguments, to avoid injecting any random junk.

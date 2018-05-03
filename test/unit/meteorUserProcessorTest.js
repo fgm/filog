@@ -23,7 +23,7 @@ function testMeteorUserProcessor() {
     const processorRaw = new MeteorUserProcessor(mockMeteor);
     const processorDeletor = new MeteorUserProcessor(mockMeteor, postProcessorDelete);
     const processorUpdater = new MeteorUserProcessor(mockMeteor, postProcessorUpdate);
-    delete(global.PACKAGE);
+    delete global.PACKAGE;
 
     expect(processorRaw).toBeInstanceOf(MeteorUserProcessor);
     const resultRaw = processorRaw.process(data);
@@ -40,5 +40,5 @@ function testMeteorUserProcessor() {
 }
 
 export {
-  testMeteorUserProcessor
+  testMeteorUserProcessor,
 };
