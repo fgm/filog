@@ -1,6 +1,10 @@
 # FiLog changelog
 ## 0.1 series
 
+### Upcoming
+
+* Quality control: Travis CI and Bithound integration
+
 ### 0.1.17
 
 * Added `MeteorClientMethodSender`, a zero-configuration client sender (#47).

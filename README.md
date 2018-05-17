@@ -1,6 +1,11 @@
 FiLog: a Meteor 1.4-1.6 logging package
 =======================================
 
+[![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
+[![bitHound Overall Score](https://www.bithound.io/github/fgm/filog/badges/score.svg)](https://www.bithound.io/github/fgm/filog)
+[![bitHound Dependencies](https://www.bithound.io/github/fgm/filog/badges/dependencies.svg)](https://www.bithound.io/github/fgm/filog/master/dependencies/npm)
+[![bitHound Dev Dependencies](https://www.bithound.io/github/fgm/filog/badges/devDependencies.svg)](https://www.bithound.io/github/fgm/filog/master/dependencies/npm)
+
 Based upon NPM packages::
 
 * Stack capture and standardization: https://www.npmjs.com/package/tracekit
@@ -161,7 +166,11 @@ and the tests in another one, and the project needs to have Filog configured.
     /**
      * @file server/main.js
      */
-        
+
+    import { Meteor } from 'meteor/meteor';
+    import { Mongo } from "meteor/mongo";
+    import { WebApp } from "meteor/webapp";
+
     import {
       ServerLogger,
       MongodbSender,
