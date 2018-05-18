@@ -127,7 +127,7 @@ const Logger = class {
    *   The result of the current reduction step.
    */
   processorReducer(accu, current) {
-    const result = Object.assign(accu, current.process(accu));
+    const result = current.process(accu);
     return result;
   }
 
