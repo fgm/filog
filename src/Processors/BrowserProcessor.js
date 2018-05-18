@@ -54,7 +54,6 @@ const BrowserProcessor = class extends ProcessorBase {
     const unknown = "unknown";
     const browserDefaults = {
       platform: unknown,
-      product: unknown,
       userAgent: unknown,
     };
 
