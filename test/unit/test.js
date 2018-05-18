@@ -1,4 +1,7 @@
-import { testImmutableContext, testMessageContext, testObjectifyContext } from "./logContextTest";
+import {
+  testImmutableContext, testMessageContext, testObjectifyContext,
+  testProcessors
+} from "./logContextTest";
 import { testLogLevels } from "./logLevelsTest";
 import { testMeteorUserProcessor } from "./meteorUserProcessorTest";
 import { testMongoDbSender } from "./mongodbSenderTest";
@@ -15,6 +18,7 @@ describe("Unit", () => {
   describe("Logger", () => {
     describe("validate log levels", testLogLevels);
     describe("logging does not modify context", testImmutableContext);
+    describe("processors can build any context", testProcessors);
   });
   describe("ServerLogger", () => {
     describe("constructor", testConstructor);

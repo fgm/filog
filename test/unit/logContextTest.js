@@ -256,8 +256,54 @@ function testObjectifyContext() {
   });
 }
 
+function testProcessors() {
+  test("processors should be able to remove from context", () => {
+    const sender = new class {
+      constructor() {
+        this.logs = [];
+      }
+
+      send(level, message, context) {
+        this.logs.push([level, message, context]);
+      }
+    };
+    const strategy = {
+      customizeLogger: () => [],
+      selectSenders: () => [sender],
+    };
+
+    const addingProcessor = new class {
+      process(context) {
+        const result = Object.assign({ foo: "bar" }, context);
+        return result;
+      }
+    }();
+
+    const deletingProcessor = new class {
+      process(context) {
+        const { foo, ...rest } = context;
+        return rest;
+      }
+    }();
+
+    const logger = new Logger(strategy);
+    logger.processors.push(addingProcessor);
+    logger.processors.push(deletingProcessor);
+
+    const initialContext = { baz: "quux" };
+
+    expect(sender.logs.length).toBe(0);
+    logger.log(LogLevel.WARNING, "hello, world", initialContext);
+    expect(sender.logs.length).toBe(1);
+
+    const sentContext = sender.logs.pop()[2];
+    expect(sentContext.foo).toBeUndefined();
+  });
+}
+
 export {
   testImmutableContext,
   testMessageContext,
   testObjectifyContext,
+  testProcessors,
 };
