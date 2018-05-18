@@ -2,6 +2,7 @@ FiLog: a Meteor 1.4-1.6 logging package
 =======================================
 
 [![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/f380bfd73a491c472221/test_coverage)](https://codeclimate.com/github/fgm/filog/test_coverage)
 [![bitHound Overall Score](https://www.bithound.io/github/fgm/filog/badges/score.svg)](https://www.bithound.io/github/fgm/filog)
 [![bitHound Dependencies](https://www.bithound.io/github/fgm/filog/badges/dependencies.svg)](https://www.bithound.io/github/fgm/filog/master/dependencies/npm)
 [![bitHound Dev Dependencies](https://www.bithound.io/github/fgm/filog/badges/devDependencies.svg)](https://www.bithound.io/github/fgm/filog/master/dependencies/npm)
