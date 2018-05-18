@@ -76,7 +76,7 @@
     "clean": "rm -fr coverage node_modules",
     "compile": "rm -fr lib/* ; rm -fr node_modules ; meteor npm i && meteor npm run test-compile",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
-    "test-ci": "npm run test-compile && time -p jest test/unit",
+    "test-ci": "npm run test-compile && time -p jest --coverage test/unit",
     "test-compile": "time -p babel --presets env,stage-0 -d lib/ src/",
     "test-integration": "meteor npm run test-compile && time -p jest test/integration",
     "test-unit": "meteor npm run test-compile && time -p jest test/unit",

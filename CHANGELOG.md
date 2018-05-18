@@ -3,7 +3,8 @@
 
 ### Upcoming
 
-* Quality control: Travis CI and Bithound integration
+* ProcessorBase, SenderBase, StrategyBase are now exported to make custom versions easier
+* Quality control: Travis CI, CodeClimate, and Bithound integration
 
 ### 0.1.17
 
