@@ -63,9 +63,15 @@ const BrowserProcessor = class extends ProcessorBase {
       }
     }
 
-    result.browser.performance.memory = (this.window.performance && this.window.performance.memory)
-      ? this.window.performance.memory
-      : {};
+    result.browser.performance = (this.window.performance && this.window.performance.memory) ?
+      {
+        memory: {
+          jsHeapSizeLimit: this.window.performance.memory.jsHeapSizeLimit,
+          totalJSHeapSize: this.window.performance.memory.totalJSHeapSize,
+          usedJSHeapSize: this.window.performance.memory.usedJSHeapSize,
+        },
+      } : 
+      {};
 
     return result;
   }

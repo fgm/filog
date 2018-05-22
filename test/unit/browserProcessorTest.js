@@ -1,5 +1,8 @@
 import BrowserProcessor from "../../src/Processors/BrowserProcessor";
 
+/* This test hand-builds the MemoryInfo object in window.Performance, because
+ * that class is not defined outside Chrome.
+ */
 function testBrowserProcessor() {
   class Performance {
     constructor(values = {}) {
@@ -51,16 +54,17 @@ function testBrowserProcessor() {
     expect(actual).not.toHaveProperty("browser.product");
   });
 
-  /* This test hand-builds the MemoryInfo object in window.Performance, because
-   * that class is not defined outside Chrome.
-   */
   test("should serialize performance.memory correctly", () => {
     const keys = [
       "jsHeapSizeLimit",
       "totalJSHeapSize",
       "usedJSHeapSize",
     ];
-    const win = Object.assign({}, { performance: new Performance({ memory: {} }) });
+    const win = Object.assign({}, { performance: new Performance({ memory: {
+      jsHeapSizeLimit: 1,
+      totalJSHeapSize: 2,
+      usedJSHeapSize: 3,
+    } }) });
     const processor = new BrowserProcessor(navigator, win);
     expect(processor).toBeInstanceOf(BrowserProcessor);
 
