@@ -70,7 +70,7 @@ const BrowserProcessor = class extends ProcessorBase {
           totalJSHeapSize: this.window.performance.memory.totalJSHeapSize,
           usedJSHeapSize: this.window.performance.memory.usedJSHeapSize,
         },
-      } : 
+      } :
       {};
 
     return result;

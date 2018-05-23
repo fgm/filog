@@ -4,6 +4,7 @@
 ### Upcoming
 
 * ProcessorBase, SenderBase, StrategyBase are now exported to make custom versions easier
+* BrowserProcessor now provides actual window.performance.memory values
 * BrowserProcessor no longer provides obsolete "product" key
 * Quality control: Travis CI, CodeClimate, and Bithound integration
 
