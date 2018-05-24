@@ -54,7 +54,7 @@ const BrowserProcessor = class extends ProcessorBase {
     };
 
     // Ensure a browser key exists, using the contents from context if available.
-    let result = Object.assign({ browser: {} }, context);
+    let result = Object.assign({ browser: { performance: this.window.performance } }, context);
 
     // Overwrite existing browser keys in context, keeping non-overwritten ones.
     for (const key in browserDefaults) {
@@ -63,8 +63,8 @@ const BrowserProcessor = class extends ProcessorBase {
       }
     }
 
-    result.browser.performance = (this.window.performance && this.window.performance.memory)
-      ? window.performance.memory
+    result.browser.performance.memory = (this.window.performance && this.window.performance.memory)
+      ? this.window.performance.memory
       : {};
 
     return result;
