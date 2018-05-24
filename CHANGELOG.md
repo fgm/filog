@@ -4,6 +4,7 @@
 ### Upcoming
 
 * ProcessorBase, SenderBase, StrategyBase are now exported to make custom versions easier
+* BrowserProcessor no longer provides obsolete "product" key
 * Quality control: Travis CI, CodeClimate, and Bithound integration
 
 ### 0.1.17
