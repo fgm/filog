@@ -1,8 +1,10 @@
 import {
-  testImmutableContext, testMessageContext, testObjectifyContext,
-  testProcessors
+  testImmutableContext,
+  testMessageContext,
+  testObjectifyContext,
+  testProcessors,
 } from "./logContextTest";
-import { testLogLevels } from "./logLevelsTest";
+import { testLogLevelNames, testLogLevels } from "./logLevelsTest";
 import { testMeteorUserProcessor } from "./meteorUserProcessorTest";
 import { testMongoDbSender } from "./mongodbSenderTest";
 import { testSerializeDeepObject } from "./serializationTest";
@@ -17,6 +19,7 @@ describe("Unit", () => {
   });
   describe("Logger", () => {
     describe("validate log levels", testLogLevels);
+    describe("validate log level names", testLogLevelNames);
     describe("logging does not modify context", testImmutableContext);
     describe("processors can build any context", testProcessors);
   });

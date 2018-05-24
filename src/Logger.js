@@ -104,7 +104,7 @@ const Logger = class {
    */
   static levelName(level) {
     let numericLevel = Math.round(level);
-    if (numericLevel < LogLevel.EMERGENCY) {
+    if (numericLevel < LogLevel.EMERGENCY || isNaN(numericLevel)) {
       numericLevel = LogLevel.EMERGENCY;
     }
     else if (numericLevel > LogLevel.DEBUG) {
