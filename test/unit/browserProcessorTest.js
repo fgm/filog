@@ -1,6 +1,21 @@
 import BrowserProcessor from "../../src/Processors/BrowserProcessor";
 
+/* This test hand-builds the MemoryInfo object in window.Performance, because
+ * that class is not defined outside Chrome.
+ */
 function testBrowserProcessor() {
+  class Performance {
+    constructor(values = {}) {
+      for (const key of Object.keys(values)) {
+        this[key] = values[key];
+      }
+    }
+
+    toJSON() {
+      return { memory: {} };
+    }
+  }
+
   let initialContext;
   let navigator = {};
   let window = {};
@@ -8,7 +23,7 @@ function testBrowserProcessor() {
   beforeEach(() => {
     initialContext = { anything: "goes" };
     navigator = {};
-    window = {};
+    window = { performance: new Performance() };
   });
 
   test("should fail outside the browser", () => {
@@ -37,6 +52,40 @@ function testBrowserProcessor() {
     expect(actual).toHaveProperty("browser.platform");
     expect(actual).toHaveProperty("browser.userAgent");
     expect(actual).not.toHaveProperty("browser.product");
+  });
+
+  test("should serialize performance.memory correctly", () => {
+    const keys = [
+      "jsHeapSizeLimit",
+      "totalJSHeapSize",
+      "usedJSHeapSize",
+    ];
+    const win = Object.assign({}, { performance: new Performance({ memory: {
+      jsHeapSizeLimit: 1,
+      totalJSHeapSize: 2,
+      usedJSHeapSize: 3,
+    } }) });
+    const processor = new BrowserProcessor(navigator, win);
+    expect(processor).toBeInstanceOf(BrowserProcessor);
+
+    // Ensure sub-keys are actually present in the Performance object.
+    const processed = processor.process(initialContext);
+    expect(processed).toHaveProperty("browser");
+    expect(processed).toHaveProperty("browser.performance");
+    expect(processed).toHaveProperty("browser.performance.memory");
+    for (const key of keys) {
+      expect(processed).toHaveProperty(`browser.performance.memory.${key}`);
+    }
+
+    // Ensure they are available after serialization by parsing the serialized result.
+    const string = JSON.stringify(processed);
+    const actual = JSON.parse(string);
+    expect(actual).toHaveProperty("browser");
+    expect(actual).toHaveProperty("browser.performance");
+    expect(actual).toHaveProperty("browser.performance.memory");
+    for (const key of keys) {
+      expect(actual).toHaveProperty(`browser.performance.memory.${key}`);
+    }
   });
 }
 
