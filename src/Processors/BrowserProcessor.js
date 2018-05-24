@@ -14,12 +14,28 @@ import ProcessorBase from "./ProcessorBase";
 const BrowserProcessor = class extends ProcessorBase {
   /**
    * ProcessorBase ensures it is not being built outside a browser.
+   *
+   * @param {object} nav
+   *   window.Navigator.
+   * @param {object} win
+   *   window.
    */
-  constructor() {
+  constructor(nav, win) {
     super();
-    if (!navigator) {
-      throw new Error("BrowserProcessor is only usable on browser-run code.");
+    let actualNav = (typeof nav === "undefined" && typeof navigator === "object")
+      ? navigator
+      : nav;
+
+    let actualWin = (typeof win === "undefined" && typeof window === "object")
+      ? window
+      : win;
+
+    if (typeof actualNav !== "object" || typeof actualWin !== "object" || !actualNav || !actualWin) {
+      throw new ReferenceError("BrowserProcessor is only usable on browser-run code.");
     }
+
+    this.navigator = actualNav;
+    this.window = actualWin;
   }
 
   /**
@@ -48,11 +64,11 @@ const BrowserProcessor = class extends ProcessorBase {
     // Overwrite existing browser keys in context, keeping non-overwritten ones.
     for (const key in browserDefaults) {
       if (browserDefaults.hasOwnProperty(key)) {
-        result.browser[key] = navigator[key] ? navigator[key] : browserDefaults[key];
+        result.browser[key] = this.navigator[key] ? this.navigator[key] : browserDefaults[key];
       }
     }
 
-    result.browser.performance = (window.performance && window.performance.memory)
+    result.browser.performance = (this.window.performance && this.window.performance.memory)
       ? window.performance.memory
       : {};
 

@@ -6,6 +6,7 @@ import { testSerializeDeepObject } from "./serializationTest";
 import { testStrategyConstruction } from "./strategyTest";
 import { testStringifyMessage } from "./stringifyTest";
 import { testConstructor } from "./serverLoggerTest";
+import { testBrowserProcessor } from "./browserProcessorTest";
 
 describe("Unit", () => {
   describe("LeveledStrategy", () => {
@@ -24,4 +25,5 @@ describe("Unit", () => {
   });
   describe("MongoDbSender", testMongoDbSender);
   describe("MeteorUserProcessor", testMeteorUserProcessor);
+  describe("BrowserProcessor", testBrowserProcessor);
 });
