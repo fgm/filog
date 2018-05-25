@@ -32,6 +32,8 @@ class ServerLogger extends Logger {
     const defaultParameters = {
       enableMethod: true,
       logRequestHeaders: true,
+      // Preserve the legacy Filog default, but allow configuration.
+      maxReqListeners: 11,
       servePath: "/logger",
     };
 
@@ -75,8 +77,9 @@ class ServerLogger extends Logger {
       return;
     }
 
-    // @TODO Node defaults to 10 listeners, but we need at least 11. Find out why.
-    req.setMaxListeners(20);
+    // Early filog versions needed at least 11, while Node.JS is 10.
+    // This appears to no longer be needed, but ensure it can be configured.
+    req.setMaxListeners(this.maxReqListeners);
 
     let body = "";
     req.setEncoding("utf-8");

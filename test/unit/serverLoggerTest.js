@@ -15,6 +15,8 @@ const testConstructor = () => {
     expect(logger.logRequestHeaders).toBe(true);
     // servePath correctly defaulted.
     expect(logger.servePath).toBe("/logger");
+    // maxReqListeners correctly defaulted.
+    expect(logger.maxReqListeners).toBe(11);
   });
 
   test("Should not add unknown parameters", () => {
@@ -27,12 +29,13 @@ const testConstructor = () => {
     const options = {
       logRequestHeaders: "foo",
       servePath: 42,
+      maxReqListeners: 30,
     };
     const logger = new ServerLogger(strategy, null, options);
-    // logRequestHeaders not overwritten.
-    expect(logger.logRequestHeaders).toBe(options.logRequestHeaders);
-    // servePath not overwritten.
-    expect(logger.servePath).toBe(options.servePath);
+
+    for (const k of Object.keys(options)) {
+      expect(logger[k]).toBe(options[k]);
+    }
   });
 };
 
