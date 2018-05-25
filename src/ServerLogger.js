@@ -181,19 +181,34 @@ class ServerLogger extends Logger {
   static objectifyContext(rawContext) {
     let context = {};
     if (typeof rawContext === "object") {
-      // For some reason, JS null is an object: handle it like a scalar.
+      // JS null is an object: handle it like a scalar.
       if (rawContext === null) {
         context = { value: null };
       }
-      else if (rawContext.constructor.name === "Date") {
-        context = rawContext.toISOString();
-      }
-      // Arrays and classed objects need to be downgraded to POJOs.
-      else if (rawContext.constructor.name !== "Object") {
-        context = Object.assign({}, rawContext);
-      }
       else {
-        context = rawContext;
+        const className = rawContext.constructor.name;
+        switch (className) {
+          case "Date":
+            context = rawContext.toISOString();
+            break;
+
+          // Boxing wrappers need to be converted to the primitive value.
+          case "Boolean":
+          case "Number":
+          case "String":
+            context = rawContext.valueOf();
+            break;
+
+          // POJOs can be used as such.
+          case "Object":
+            context = rawContext;
+            break;
+
+          // Arrays and classed objects need to be downgraded to POJOs.
+          default:
+            context = Object.assign({}, rawContext);
+            break;
+        }
       }
     }
     // Other data types are scalars, so we need to wrap them in an object.

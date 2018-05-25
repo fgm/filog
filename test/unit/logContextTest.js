@@ -190,7 +190,21 @@ function testObjectifyContext() {
     expect(actual).toBe(expected);
   });
 
-  // TODO also check wrapper objects with no keys like new Number(25), new Boolean(true).
+  test("should downgrade boxing classes to underlying primitives", () => {
+    const expectations = [
+      // Class name, primitive, boxed.
+      [true, new Boolean(true)],
+      [1E15, new Number(1E15)],
+      ["😂 hello, α world", new String("😂 hello, α world")],
+    ];
+
+    for (const [primitive, boxed] of expectations) {
+      expect(typeof boxed).toBe("object");
+      const actual = objectifyContext(boxed);
+      expect(actual).toBe(primitive);
+    }
+  });
+
   test("should downgrade miscellaneous classed objects to POJOs", () => {
     const value = "foo";
     class Foo {
