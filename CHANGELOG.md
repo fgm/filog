@@ -3,6 +3,7 @@
 
 ### Upcoming
 
+* Logger processors can now delete from the context, not just add/modify keys (#52).
 * ProcessorBase, SenderBase, StrategyBase are now exported to make custom versions easier (#50, #51).
 * BrowserProcessor now provides actual window.performance.memory values (#55).
 * ServerLogger now preserves primitive values of boxed primitives on web-submitted logs (#57).
