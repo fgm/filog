@@ -371,9 +371,9 @@ function testProcessors() {
     expect(context).toHaveProperty("timestamp.log");
     const lag = ts - context.timestamp.log;
     expect(lag).toBeGreaterThanOrEqual(0);
-    // No sane machine should take more than 1 msec to return from log() with
+    // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration.
-    expect(lag).toBeLessThan(1);
+    expect(lag).toBeLessThan(100);
   });
 
   test("processors should not be able to modify the timestamp, but be able to modify the hostname", () => {
@@ -387,10 +387,10 @@ function testProcessors() {
     expect(context).toHaveProperty("timestamp.log");
     const lag = ts - context.timestamp.log;
     expect(lag).toBeGreaterThanOrEqual(0);
-    // No sane machine should take more than 1 msec to return from log() with
+    // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration. The TimeWarp processor attempts to
     // set the log timestamp to a much more remote value.
-    expect(lag).toBeLessThan(1);
+    expect(lag).toBeLessThan(100);
   });
 }
 
