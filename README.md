@@ -3,9 +3,7 @@ FiLog: a Meteor 1.4-1.6 logging package
 
 [![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/f380bfd73a491c472221/test_coverage)](https://codeclimate.com/github/fgm/filog/test_coverage)
-[![bitHound Overall Score](https://www.bithound.io/github/fgm/filog/badges/score.svg)](https://www.bithound.io/github/fgm/filog)
-[![bitHound Dependencies](https://www.bithound.io/github/fgm/filog/badges/dependencies.svg)](https://www.bithound.io/github/fgm/filog/master/dependencies/npm)
-[![bitHound Dev Dependencies](https://www.bithound.io/github/fgm/filog/badges/devDependencies.svg)](https://www.bithound.io/github/fgm/filog/master/dependencies/npm)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/fgm/filog/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/fgm/filog/?branch=master)
 
 Based upon NPM packages::
 
@@ -14,10 +12,11 @@ Based upon NPM packages::
 
 Read the [Documentation](https://fgm.github.io/filog).
 
+
 Configuration and usage
 -----------------------
 
-Main ideas:
+#### Main ideas:
 
 * A logged event is a `(level, message, context)` triplet, in which
     * `level` is an RFC5424 number (0..7)
@@ -31,7 +30,7 @@ Main ideas:
   This is triggered by the `logger.arm()` method, and can be disabled by the
   `logger.disarm()` method.
 
-Typical use case:
+#### Typical use case:
 
 - `client/main.js`:
   - instantiates any number of "processors": instances of classes derived from
