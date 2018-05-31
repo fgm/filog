@@ -1,0 +1,5 @@
+exclude_patterns:
+- "doc/"
+- "lib/"
+- "node_modules/"
+- "test/"

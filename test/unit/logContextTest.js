@@ -8,7 +8,7 @@ function testImmutableContext() {
     customizeLogger: () => [],
     selectSenders: () => [],
   };
-  test.skip("should not modify context in log() calls", () => {
+  test("should not modify context in log() calls", () => {
     const logger = new Logger(strategy);
     const originalContext = {};
     const context = { ...originalContext };
@@ -43,7 +43,7 @@ function testMessageContext() {
 
   const DETAILS_KEY = "message_details";
 
-  test.skip(`should add the message argument to ${DETAILS_KEY}`, () => {
+  test(`should add the message argument to ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
     logger.log(LogLevel.DEBUG, "some message", referenceContext);
@@ -54,7 +54,7 @@ function testMessageContext() {
     expect(actual).toBe(expected);
   });
 
-  test.skip(`should merge contents of existing ${DETAILS_KEY} context key`, () => {
+  test(`should merge contents of existing ${DETAILS_KEY} context key`, () => {
     const logger = new Logger(strategy);
     result = null;
     const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
@@ -73,7 +73,7 @@ function testMessageContext() {
     expect(actual.foo).toBe(expectedNested);
   });
 
-  test.skip(`should not merge existing ${DETAILS_KEY} context key itself`, () => {
+  test(`should not merge existing ${DETAILS_KEY} context key itself`, () => {
     const logger = new Logger(strategy);
     result = null;
     const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
@@ -84,7 +84,7 @@ function testMessageContext() {
     expect(actual).not.toHaveProperty(DETAILS_KEY);
   });
 
-  test.skip(`should keep the latest keys when merging existing ${DETAILS_KEY}`, () => {
+  test(`should keep the latest keys when merging existing ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
     const originalContext = Object.assign(referenceContext, { [DETAILS_KEY]: { a: "B" } });
@@ -99,7 +99,7 @@ function testMessageContext() {
     expect(actual.a).toBe(expected);
   });
 
-  test.skip("should not add the message arguments to context root", () => {
+  test("should not add the message arguments to context root", () => {
     const logger = new Logger(strategy);
     result = null;
     logger.log(LogLevel.DEBUG, "some message", referenceContext);
@@ -114,7 +114,7 @@ function testMessageContext() {
 function testObjectifyContext() {
   const objectifyContext = ServerLogger.objectifyContext;
 
-  test.skip("should convert arrays to POJOs", () => {
+  test("should convert arrays to POJOs", () => {
     const a = ["a", "b"];
     const o = objectifyContext(a);
 
@@ -127,7 +127,7 @@ function testObjectifyContext() {
     expect(actual).toBe(expected);
   });
 
-  test.skip("should convert scalars to POJOs with a value key", () => {
+  test("should convert scalars to POJOs with a value key", () => {
     const scalars = [
       "Hello, world", "",
       42, +0, -0, 0, NaN, -Infinity, +Infinity,
@@ -169,14 +169,14 @@ function testObjectifyContext() {
     });
   });
 
-  test.skip("should not modify existing POJOs", () => {
+  test("should not modify existing POJOs", () => {
     const raw = { a: "b" };
     const actual = objectifyContext(raw);
     const expected = raw;
     expect(actual).toBe(expected);
   });
 
-  test.skip("should convert date objects to ISO date strings", () => {
+  test("should convert date objects to ISO date strings", () => {
     const d = new Date(Date.UTC(2016, 5, 24, 16, 0, 30, 250));
     const objectified = objectifyContext(d);
 
@@ -191,7 +191,7 @@ function testObjectifyContext() {
     expect(actual).toBe(expected);
   });
 
-  test.skip("should downgrade boxing classes to underlying primitives", () => {
+  test("should downgrade boxing classes to underlying primitives", () => {
     const expectations = [
       // Primitive, boxed.
       [true, new Boolean(true)],
@@ -206,7 +206,7 @@ function testObjectifyContext() {
     }
   });
 
-  test.skip("should downgrade miscellaneous classed objects to POJOs", () => {
+  test("should downgrade miscellaneous classed objects to POJOs", () => {
     const value = "foo";
     class Foo {
       constructor(v) {

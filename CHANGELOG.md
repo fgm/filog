@@ -10,7 +10,7 @@
 * ServerLogger now allows the maximum number of listeners on requests to be configured.
 * BrowserProcessor no longer provides obsolete "product" key (#54).
 * Logger.levelName() now returns valid outputs on invalid inputs too.
-* Quality control: Travis CI, CodeClimate, and Scrutinizer integration.
+* Quality control: Travis CI, CodeClimate, Scrutinizer and Snyk integration.
 
 ### 0.1.17
 

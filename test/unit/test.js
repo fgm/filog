@@ -10,7 +10,7 @@ import { testMongoDbSender } from "./mongodbSenderTest";
 import { testSerializeDeepObject } from "./serializationTest";
 import { testStrategyConstruction } from "./strategyTest";
 import { testStringifyMessage } from "./stringifyTest";
-import { testConstructor } from "./serverLoggerTest";
+import { testConnect, testConstructor } from "./serverLoggerTest";
 import { testBrowserProcessor } from "./browserProcessorTest";
 
 describe("Unit", () => {
@@ -27,6 +27,7 @@ describe("Unit", () => {
     describe("constructor", testConstructor);
     describe("messageContext", testMessageContext);
     describe("objectifyContext", testObjectifyContext);
+    describe("setUpConnect", testConnect);
     describe("stringifyMessage", testStringifyMessage);
     describe("serializeDeepObject", testSerializeDeepObject);
   });

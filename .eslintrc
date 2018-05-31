@@ -14,6 +14,7 @@
     "beforeEach": false,
     "describe": false,
     "expect": false,
+    "jest": false,
     "test": false,
 
     // The Meteor globals used by the package.

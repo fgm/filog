@@ -53,9 +53,8 @@ class ServerLogger extends Logger {
     if (this.enableMethod) {
       Meteor.methods({ [Logger.METHOD]: this.logMethod.bind(this) });
     }
-    if (webapp) {
-      this.setupConnect(webapp, this.servePath);
-    }
+
+    this.setupConnect(webapp, this.servePath);
   }
 
   /**

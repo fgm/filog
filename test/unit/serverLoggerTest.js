@@ -1,3 +1,7 @@
+/** global: jest */
+
+const sinon = require("sinon");
+
 import NullFn from "../../src/NullFn";
 
 import ServerLogger from "../../src/ServerLogger";
@@ -39,6 +43,55 @@ const testConstructor = () => {
   });
 };
 
+const testConnect = () => {
+  let connectSpy;
+  const mockWebApp = {
+    connectHandlers: {
+      use: NullFn,
+    },
+  };
+
+  const strategy = {
+    customizeLogger: () => [],
+    selectSenders: () => [],
+  };
+
+  afterEach(() => {
+    connectSpy.resetHistory();
+  });
+
+  beforeAll(() => {
+    connectSpy = sinon.spy(ServerLogger.prototype, "setupConnect");
+  });
+
+  test("Should only register with connect when WebApp is passed", () => {
+    const loggerHappy = new ServerLogger(strategy, mockWebApp, {});
+    expect(loggerHappy.constructor.name).toBe("ServerLogger");
+    expect(connectSpy.calledOnce).toBe(true);
+
+    connectSpy.resetHistory();
+    const loggerSad = new ServerLogger(strategy, null, {});
+    expect(loggerSad.constructor.name).toBe("ServerLogger");
+    expect(connectSpy.calledOnce).toBe(true);
+  });
+
+  test("Should register with connect with default path", () => {
+    const logger = new ServerLogger(strategy, mockWebApp, {});
+    expect(logger.constructor.name).toBe("ServerLogger");
+    expect(connectSpy.alwaysCalledWith(mockWebApp, "/logger")).toBe(true);
+  });
+
+  test("Should register with connect with chosen path", () => {
+    const servePath = "/eightfold";
+    const logger = new ServerLogger(strategy, mockWebApp, { servePath });
+    expect(logger.constructor.name).toBe("ServerLogger");
+    expect(connectSpy.calledOnce).toBe(true);
+    expect(connectSpy.alwaysCalledWith(mockWebApp, servePath)).toBe(true);
+  });
+};
+
+
 export {
+  testConnect,
   testConstructor,
 };
