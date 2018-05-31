@@ -1,3 +1,5 @@
+/** global: Meteor */
+
 /**
  * @fileOverview Meteor Client Method Sender class.
  */
@@ -19,7 +21,7 @@ const MeteorClientMethodSender = class extends SenderBase {
    */
   constructor() {
     super();
-    if (!Meteor || !Meteor.isClient) {
+    if (typeof Meteor === "undefined" || !Meteor.isClient) {
       throw new Error("MeteorClientMethodSender is only meant for Meteor client side.");
     }
   }
