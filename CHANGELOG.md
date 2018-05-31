@@ -7,7 +7,7 @@
 * BrowserProcessor now provides actual window.performance.memory values (#55).
 * ServerLogger now preserves primitive values of boxed primitives on web-submitted logs (#57).
 * BrowserProcessor no longer provides obsolete "product" key (#54).
-* Quality control: Travis CI, CodeClimate, and Bithound integration.
+* Quality control: Travis CI, CodeClimate, and Scrutinizer integration.
 
 ### 0.1.17
 
