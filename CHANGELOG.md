@@ -1,7 +1,7 @@
 # FiLog changelog
 ## 0.1 series
 
-### Upcoming
+### 0.1.18
 
 * Logger processors can now delete from the context, not just add/modify keys (#52).
 * ProcessorBase, SenderBase, StrategyBase are now exported to make custom versions easier (#50, #51).

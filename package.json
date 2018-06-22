@@ -83,5 +83,5 @@
     "test": "meteor npm run test-compile && time -p jest test/*",
     "cover": "meteor npm run test-compile && time -p jest --coverage test/**/*"
   },
-  "version": "0.1.17"
+  "version": "0.1.18"
 }
