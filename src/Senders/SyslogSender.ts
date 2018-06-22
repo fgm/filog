@@ -6,6 +6,7 @@ import * as path from "path";
 import * as util from "util";
 import * as LogLevel from "../LogLevel";
 import SenderBase from "./SenderBase";
+import ServerLogger from "../ServerLogger";
 
 type Serializer = (doc: object) => string;
 
@@ -92,11 +93,18 @@ const SyslogSender = class extends SenderBase {
       message,
     };
 
-    // It should already contain a timestamp object anyway.
     if (typeof context !== "undefined") {
       doc.context = context;
     }
+    // It should contain a timestamp.{side} object if it comes from any Logger.
+    if (typeof doc.context[Logger.KEY_TS] === "undefined") {
+      doc.context[Logger.KEY_TS] = {
+        server: {},
+      };
+    }
 
+    // doc.context.timestamp.server is known to exist from above.
+    Logger.prototype.stamp.call({ side: ServerLogger.side }, doc.context, "send");
     this.syslog.log(level, this.serialize(doc));
   }
 

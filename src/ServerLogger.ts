@@ -3,6 +3,7 @@
  */
 import {IncomingMessage, ServerResponse} from "http";
 import {WebApp} from "meteor/webapp";
+import ClientLogger from './ClientLogger';
 import { hostname } from "os";
 import process from "process";
 import * as util from "util";
@@ -21,12 +22,18 @@ interface IServerLoggerConstructorParameters {
   servePath?: string;
 }
 
+const SIDE = "server";
+
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
  *
  * Its main method is log(level, message, context).
  *
  * @see ServerLogger.log
+ *
+ * @extends Logger
+ *
+ * @property {string} side
  */
 class ServerLogger extends Logger {
   /**
@@ -136,12 +143,14 @@ class ServerLogger extends Logger {
   ) {
     super(strategy);
     this.output = process.stdout;
+    this.side = SIDE;
     const defaultParameters: IServerLoggerConstructorParameters = {
       enableMethod: true,
       logRequestHeaders: true,
       // Preserve the legacy Filog default, but allow configuration.
       maxReqListeners: 11,
       servePath: "/logger",
+      verbose: false,
     };
 
     // Loop on defaults, not arguments, to avoid injecting any random junk.
@@ -163,6 +172,46 @@ class ServerLogger extends Logger {
     }
 
     this.setupConnect(webapp, this.servePath);
+  }
+
+  /**
+   * Build a context object from log() details.
+   *
+   * @protected
+   *
+   * @see Logger.log
+   *
+   * @param {Object} details
+   *   The message details passed to log().
+   * @param {string} source
+   *   The source for the event.
+   * @param {Object} context
+   *   Optional: a pre-existing context.
+   *
+   * @returns {Object}
+   *   The context with details moved to the message_details subkey.
+   */
+  buildContext(details, source, context = {}) {
+    // Ignore source and host keys from caller context.
+    const {
+      [Logger.KEY_DETAILS]: sourceDetails,
+      [Logger.KEY_SOURCE]: ignoredSource,
+      [Logger.KEY_HOST]: ignoredHostName,
+      [Logger.KEY_TS]: sourceTs,
+      ...context1
+    } = context;
+
+    // In case of conflict, argument details overwrites caller details.
+    const mergedDetails = { ...sourceDetails, ...details };
+
+    const context2 = {
+      ...super.buildContext(mergedDetails, source),
+      [source]: context1,
+      [Logger.KEY_HOST]: this.hostname,
+      [Logger.KEY_TS]: sourceTs,
+    };
+
+    return context2;
   }
 
   /**
@@ -210,7 +259,8 @@ class ServerLogger extends Logger {
           if (this.logRequestHeaders) {
             context.requestHeaders = req.headers;
           }
-          this.log(level, message, context, false);
+          const { [Logger.KEY_DETAILS]: details, ...nonDetails } = context;
+          this.logExtended(level, message, details, nonDetails, ClientLogger.side);
           res.statusCode = 200;
           result = "";
         } catch (err) {
@@ -233,6 +283,53 @@ class ServerLogger extends Logger {
   }
 
   /**
+   * Extended syntax for log() method.
+   *
+   * @private
+   *
+   * @param {number} level
+   *   The event level.
+   * @param {string} message
+   *   The event message.
+   * @param {Object} details
+   *   The details submitted with the message: any additional data added to
+   *   the message by the upstream (client/cordova) log() caller().
+   * @param {Object} context
+   *   The context added to the details by upstream processors.
+   * @param {string} source
+   *   The upstream sender type.
+   *
+   * @returns {void}
+   *
+   * @throws InvalidArgumentException
+   */
+  logExtended(level, message, details, context, source) {
+    this.validateLevel(level);
+    const context1 = this.buildContext(details, source, context);
+    const context2 = this.applyProcessors(context1);
+    const {
+      [Logger.KEY_DETAILS]: processedDetails,
+      [Logger.KEY_SOURCE]: processedSource,
+      [source]: processedSourceContext,
+      [Logger.KEY_HOST]: processedHost,
+      [Logger.KEY_TS]: processedTs,
+      ...serverContext
+    } = context2;
+
+    const context3 = {
+      [Logger.KEY_DETAILS]: processedDetails,
+      [Logger.KEY_SOURCE]: processedSource,
+      [source]: processedSourceContext,
+      [Logger.KEY_HOST]: processedHost,
+      [Logger.KEY_TS]: processedTs,
+      [ServerLogger.side]: serverContext,
+    };
+    this.stamp(context3, "log");
+
+    this.send(this.strategy, level, message, context3);
+  }
+
+  /**
    * The Meteor server method registered a ${Logger.METHOD}.
    *
    * @param {number} level
@@ -245,7 +342,7 @@ class ServerLogger extends Logger {
    * @returns {void}
    */
   public logMethod({ level = LogLevel.INFO, message = "", context = {} }) {
-    this.log(level, message, context, true);
+    this.logExtended(level, message, {}, context, ClientLogger.side);
   }
 
   /**
@@ -255,19 +352,24 @@ class ServerLogger extends Logger {
    *   The Meteor webapp service (Connect wrapper).
    * @param servePath
    *   The path on which to expose the server logger. Must NOT start by a "/".
-   *
-   * @returns {void}
    */
-  public setupConnect(webapp: OptionalWebApp, servePath: string) {
+  public setupConnect(webapp: OptionalWebApp, servePath: string): void {
     this.webapp = webapp;
     if (this.webapp) {
-      this.output.write(`Serving logger on ${servePath}.\n`);
-      const app = this.webapp.connectHandlers;
+      if (this.verbose) {
+        this.output.write(`Serving logger on ${servePath}.\n`);
+      }
+      let app = this.webapp.connectHandlers;
       app.use(this.servePath, this.handleClientLogRequest.bind(this));
-    } else {
-      this.output.write(`Not serving logger, path ${servePath}.\n`);
+    }
+    else {
+      if (this.verbose) {
+        this.output.write(`Not serving logger, path ${servePath}.\n`);
+      }
     }
   }
 }
+
+ServerLogger.side = SIDE;
 
 export default ServerLogger;

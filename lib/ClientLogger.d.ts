@@ -14,8 +14,13 @@ declare const ClientLogger: {
         processors: import("./Processors/IProcessor").IProcessor[];
         tk: any;
         strategy: import("./Strategies/IStrategy").IStrategy;
+        applyProcessors(rawContext: any): any;
+        doProcess(apply: any, contextToProcess: any): any;
+        processorReducer(accu: any, current: any): any;
         report(e: Error): void;
         reportSubscriber(e: Error): void;
+        send(strategy: any, level: any, message: any, sentContext: any): void;
+        validateLevel(requestedLevel: any): void;
         arm(): void;
         disarm(delay?: number): void;
         _meteorLog(): void;

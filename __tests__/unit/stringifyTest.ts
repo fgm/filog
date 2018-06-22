@@ -22,6 +22,7 @@ function testStringifyMessage() {
       [{ message: "foo" }, "foo"],
       [{ message: 25 }, "25"],
       [{ message: o }, JSON.stringify(value)],
+      [{ message: { toString: () => "Hello" } }, "Hello"],
       [{}, "{}"],
       [[], "[]"],
       ["foo", "foo"],

@@ -3,6 +3,7 @@
  */
 import {Mongo} from "meteor/mongo";
 import SenderBase from "./SenderBase";
+import ServerLogger from "../ServerLogger";
 
 /**
  * MongodbSender sends logs to the Meteor standard database.
@@ -41,12 +42,16 @@ const MongodbSender = class extends SenderBase {
     const defaultedContext: ISendingContext = { ...context, timestamp: {} };
     const doc = { level, message, context: {} as ISendingContext };
 
-    // It should contain a timestamp object if it comes from ClientLogger.
-    if (typeof defaultedContext.timestamp === "undefined") {
-      defaultedContext.timestamp = {};
+    // It should contain a timestamp.{side} object if it comes from any Logger.
+    if (typeof defaultedContext[Logger.KEY_TS] === "undefined") {
+      defaultedContext[Logger.KEY_TS] = {
+        server: {},
+      };
     }
     doc.context = defaultedContext;
-    doc.context.timestamp.store = Date.now();
+
+    // doc.context.timestamp.server is known to exist from above.
+    Logger.prototype.stamp.call({ side: ServerLogger.side }, doc.context, "send");
     this.store.insert(doc);
   }
 };

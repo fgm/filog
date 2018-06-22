@@ -9,6 +9,24 @@ declare const Logger: {
         processors: IProcessor[];
         tk: any;
         strategy: IStrategy;
+        applyProcessors(rawContext: any): any;
+        doProcess(apply: any, contextToProcess: any): any;
+        /**
+         * Reduce callback for processors.
+         *
+         * @private
+         * @see Logger.log()
+         *
+         * @param {Object} accu
+         *   The reduction accumulator.
+         * @param {ProcessorBase} current
+         *   The current process to apply in the reduction.
+         *
+         * @returns {Object}
+         *   The result of the current reduction step.
+         *
+         */
+        processorReducer(accu: any, current: any): any;
         /**
          * The callback invoked by TraceKit
          *
@@ -25,6 +43,36 @@ declare const Logger: {
          * @see Logger#arm
          */
         reportSubscriber(e: Error): void;
+        /**
+         * Actually send a message with a processed context using a strategy.
+         *
+         * @see Logger.log()
+         * @private
+         *
+         * @param {StrategyBase} strategy
+         *   The sending strategy.
+         * @param {number} level
+         *   An RFC5424 level.
+         * @param {string} message
+         *   The message template.
+         * @param {object} sentContext
+         *   A message context, possibly including a message_details key to separate
+         *   data passed to the log() call from data added by processors.
+         *
+         * @returns {void}
+         */
+        send(strategy: any, level: any, message: any, sentContext: any): void;
+        /**
+         * Ensure a log level is in the allowed value set.
+         *
+         * @see Logger.log()
+         *
+         * @param {*} requestedLevel
+         *   A possibly invalid severity level.
+         *
+         * @returns {void}
+         */
+        validateLevel(requestedLevel: any): void;
         /**
          * Arm the report subscriber.
          *

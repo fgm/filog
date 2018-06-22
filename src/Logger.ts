@@ -10,6 +10,8 @@ import {IStrategy} from "./Strategies/IStrategy";
 
 // const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
+const SIDE = "unknown";
+
 const DETAILS_KEY = "message_details";
 const HOST_KEY = "hostname";
 const TS_KEY = "timestamp";
@@ -24,6 +26,14 @@ interface ISendContext {
 
 /**
  * Logger is the base class for loggers.
+ *
+ * @property {string} side
+ *   Which logger is this? Expected values: "client", "server", "cordova".
+ * @property {string} KEY_DETAILS
+ * @property {string} KEY_HOST
+ * @property {string} KEY_SOURCE
+ * @property {string} KEY_TS
+ * @property {string} METHOD
  */
 const Logger = class implements ILogger {
   public static readonly METHOD = "filog:log";
@@ -56,34 +66,44 @@ const Logger = class implements ILogger {
    *
    * @param {StrategyBase} strategy
    *   The sender selection strategy to apply.
+   *
    */
   constructor(public strategy: IStrategy) {
     this.processors = [];
+    this.side = SIDE;
     this.tk = TraceKit;
 
     this.strategy.customizeLogger(this);
   }
 
   /**
-   * The callback invoked by TraceKit
+   * Apply processors to a context, preserving reserved keys.
    *
-   * @param e
-   *   Error on which to report.
+   * @protected
+   *
+   * @param {Object} rawContext
+   *   The context to process.
+   *
+   * @returns {Object}
+   *   The processed context.
    */
-  public report(e: Error): void {
-    this.tk.report(e);
-  }
+  applyProcessors(rawContext) {
+    const {
+      [Logger.KEY_TS]: initialTs,
+      [Logger.KEY_HOST]: initialHost,
+    } = rawContext;
 
-  /**
-   * Error-catching callback when the logger is arm()-ed.
-   *
-   * @param e
-   *   The error condition to log.
-   *
-   * @see Logger#arm
-   */
-  public reportSubscriber(e: Error): void {
-    this.log(LogLevel.ERROR, e.message, e);
+    const processedContext = this.processors.reduce(this.processorReducer, rawContext);
+
+    // Timestamp is protected against modifications, for traceability.
+    processedContext[Logger.KEY_TS] = { ...initialTs, ...processedContext[Logger.KEY_TS] };
+
+    // Only add the initial [Logger.KEY_HOST] if none has been added and one existed.
+    if (typeof processedContext[Logger.KEY_HOST] === "undefined" && typeof initialHost !== "undefined") {
+      processedContext[Logger.KEY_HOST] = initialHost;
+    }
+
+    return processedContext;
   }
 
   /**
@@ -95,6 +115,88 @@ const Logger = class implements ILogger {
    */
   public arm() {
     this.tk.report.subscribe(this.reportSubscriber.bind(this));
+  }
+
+  doProcess(apply, contextToProcess) {
+    const finalContext = apply ? this.applyProcessors(contextToProcess) : contextToProcess;
+
+    // A timestamp is required, so insert it forcefully.
+    finalContext.timestamp = { log: Date.now() };
+    return finalContext;
+  }
+
+  /**
+   * Reduce callback for processors.
+   *
+   * @private
+   * @see Logger.log()
+   *
+   * @param {Object} accu
+   *   The reduction accumulator.
+   * @param {ProcessorBase} current
+   *   The current process to apply in the reduction.
+   *
+   * @returns {Object}
+   *   The result of the current reduction step.
+   *
+   */
+  processorReducer(accu, current) {
+    const result = current.process(accu);
+    return result;
+  }
+
+  /**
+   * The callback invoked by TraceKit
+   *
+   * @param {Error} e
+   *   Error on which to report.
+   */
+  public report(e): void {
+    this.tk.report(e);
+  }
+
+  /**
+   * Error-catching callback when the logger is arm()-ed.
+   *
+   * @param {Error} e
+   *   The error condition to log.
+   *
+   * @see Logger#arm
+   */
+  public reportSubscriber(e): void {
+    this.log(LogLevel.ERROR, e.message, e);
+  }
+
+  /**
+   * Build a context object from log() details.
+   *
+   * @protected
+   *
+   * @see Logger.log
+   *
+   * @param {Object} details
+   *   The message details passed to log().
+   * @param {string} source
+   *   The source for the event.
+   * @param {Object} context
+   *   Optional: a pre-existing context.
+   *
+   * @returns {Object}
+   *   The context with details moved to the message_details subkey.
+   */
+  buildContext(details, source, context = {}) {
+    const context1 = {
+      ...context,
+      [Logger.KEY_DETAILS]: details,
+      [Logger.KEY_SOURCE]: source,
+    };
+
+    if (details[Logger.KEY_HOST]) {
+      context1[Logger.KEY_HOST] = details[Logger.KEY_HOST];
+      delete context1[Logger.KEY_DETAILS][Logger.KEY_HOST];
+    }
+
+    return context1;
   }
 
   /**
@@ -114,19 +216,10 @@ const Logger = class implements ILogger {
     }, delay);
   }
 
-  /**
-   * Implements the standard Meteor logger methods.
-   *
-   * This method is an implementation detail: do not depend on it.
-   *
-   * @param {String} level
-   *   debug, info, warn, or error
-   *
-   * @returns {void}
-   *
-   * @todo (or not ?) merge in the funky Meteor logic from the logging package.
-   */
-  public _meteorLog() { return; }
+  /** @inheritDoc */
+  public error(message: object|string, context: object = {}): void {
+    this.log(LogLevel.ERROR, message, context);
+  }
 
   /** @inheritDoc */
   public log(
@@ -135,68 +228,16 @@ const Logger = class implements ILogger {
     initialContext: object = {},
     process: boolean = true,
   ): void {
-    /**
-     * Reduce callback for processors.
-     *
-     * @see Logger.log()
-     *
-     * @param accu
-     *   The reduction accumulator.
-     * @param current
-     *   The current process to apply in the reduction.
-     *
-     * @returns
-     *   The result of the current reduction step.
-     */
-    const processorReducer = (accu: object, current: IProcessor): object => {
-      const result = current.process(accu);
-      return result;
-    };
+    this.validateLevel(level);
+    const context1 = this.buildContext(details, this.side);
 
-    const applyProcessors = (rawContext: ISendContext): {} => {
-      // Context may contain message_details and timestamps from upstream. Merge them.
+    const context2 = process
+      ? this.applyProcessors(context1)
+      : context1;
 
-      const {
-        [DETAILS_KEY]: initialDetails,
-        [TS_KEY]: initialTs,
-        [HOST_KEY]: initialHost,
-        // TS forbids trailing commas on rest parms, TSLint requires them...
-        // tslint:disable-next-line
-        ...contextWithoutDetails
-      } = rawContext;
+    this.stamp(context2, "log");
 
-      const processedContext: ISendContext = this.processors.reduce(processorReducer, {
-        [DETAILS_KEY]: contextWithoutDetails,
-      });
-
-      // New context details keys, if any, with the same name override existing ones.
-      const details = { ...initialDetails, ...processedContext[DETAILS_KEY] };
-      if (Object.keys(details).length > 0) {
-        processedContext[DETAILS_KEY] = details;
-      }
-      processedContext[TS_KEY] = { ...initialTs, ...processedContext[TS_KEY] };
-
-      // Only add the initial [HOST_KEY] if none has been added and one existed.
-      if (typeof processedContext[HOST_KEY] === "undefined" && typeof initialHost !== "undefined") {
-        processedContext[HOST_KEY] = initialHost;
-      }
-
-      return processedContext;
-    };
-
-    if (!Number.isInteger(level) || +level < LogLevel.EMERGENCY || +level > LogLevel.DEBUG) {
-      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
-    }
-
-    const finalContext: ISendContext = process ? applyProcessors(initialContext) : initialContext;
-
-    // A timestamp is required, so insert it forcefully.
-    finalContext.timestamp = { log: Date.now() };
-
-    const senders = this.strategy.selectSenders(level, String(message), finalContext);
-    senders.forEach((sender) => {
-      sender.send(level, String(message), finalContext);
-    });
+    this.send(this.strategy, level, message, context2);
   }
 
   /** @inheritDoc */
@@ -209,15 +250,48 @@ const Logger = class implements ILogger {
     this.log(LogLevel.INFORMATIONAL, message, context);
   }
 
+  /**
+   * Ensure a log level is in the allowed value set.
+   *
+   * @see Logger.log()
+   *
+   * @param {Number} requestedLevel
+   *   A RFC5424 level.
+   *
+   * @returns {void}
+   *
+   * @throws InvalidArgumentException
+   *   As per PSR-3, if level is not a valid RFC5424 level.
+   */
+  validateLevel(requestedLevel) {
+    if (!Number.isInteger(requestedLevel) || +requestedLevel < LogLevel.EMERGENCY || +requestedLevel > LogLevel.DEBUG) {
+      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
+    }
+  }
+
   /** @inheritDoc */
   public warn(message: object|string, context: object = {}): void {
     this.log(LogLevel.WARNING, message, context);
   }
 
-  /** @inheritDoc */
-  public error(message: object|string, context: object = {}): void {
-    this.log(LogLevel.ERROR, message, context);
-  }
+  /**
+   * Implements the standard Meteor logger methods.
+   *
+   * This method is an implementation detail: do not depend on it.
+   *
+   * @param {String} level
+   *   debug, info, warn, or error
+   *
+   * @todo (or not ?) merge in the funky Meteor logic from the logging package.
+   */
+  public _meteorLog(): void { return; }
 };
+
+Logger.KEY_DETAILS = "message_details";
+Logger.KEY_HOST = "hostname";
+Logger.KEY_SOURCE = "source";
+Logger.KEY_TS = "timestamp";
+Logger.METHOD = "filog:log";
+Logger.side = SIDE;
 
 export default Logger;

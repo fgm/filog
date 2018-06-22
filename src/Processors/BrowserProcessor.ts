@@ -55,7 +55,6 @@ const BrowserProcessor = class extends ProcessorBase implements IProcessor {
   constructor(nav: INavigator, win: IWindow) {
     super();
     const actualNav = nav || (typeof navigator === "object" && navigator);
-
     const actualWin = win || (typeof window === "object" && window);
 
     if (typeof actualNav !== "object" || typeof actualWin !== "object" || !actualNav || !actualWin) {
@@ -86,7 +85,7 @@ const BrowserProcessor = class extends ProcessorBase implements IProcessor {
     // Overwrite existing browser keys in context, keeping non-overwritten ones.
     for (const key in browserDefaults) {
       if (browserDefaults.hasOwnProperty(key)) {
-        result.browser[key as keyof IBrowserInfo] = this.navigator[key] || browserDefaults[key as keyof IBrowserInfo];
+        result.browser[key as keyof IBrowserInfo] = this.navigator[key] ? this.navigator[key] : browserDefaults[key as keyof IBrowserInfo];
       }
     }
 

@@ -4,6 +4,8 @@
 
 import Logger from "./Logger";
 
+const SIDE = "client";
+
 /**
  * ClientLogger is the client-side implementation of Logger.
  *
@@ -11,7 +13,16 @@ import Logger from "./Logger";
  * extension-specialization point.
  *
  * @extends Logger
+ *
+ * @property {string} side
  */
-const ClientLogger = class extends Logger {};
+const ClientLogger = class extends Logger {
+  constructor(strategy) {
+    super(strategy);
+    this.side = SIDE;
+  }
+};
+
+ClientLogger.side = SIDE;
 
 export default ClientLogger;

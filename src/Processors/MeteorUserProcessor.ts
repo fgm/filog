@@ -177,13 +177,14 @@ const MeteorUserProcessor = class extends ProcessorBase implements IProcessor {
       delete user.services.resume;
     }
 
-    // Overwrite any previous userId information in context.
-    let result: {} = Object.assign({}, context, {
-      meteor: {
-        platform: this.platform,
-        user,
-      },
-    });
+    // Overwrite any previous userId information in context. Unlike client or
+    // mobile information, a straight server-side log context is not rebuilt by
+    // a call to logExtended, so it needs to be set directly in place under a
+    // platform key.
+    const userContext = (context[Logger.KEY_SOURCE] === this.platform)
+      ? { [this.platform]: { user } }
+      : { user };
+    let result = Object.assign({}, context, userContext);
 
     if (this.postProcess) {
       result = this.postProcess(result);
