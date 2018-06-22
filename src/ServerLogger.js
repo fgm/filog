@@ -5,6 +5,7 @@ import Logger from "./Logger";
 import * as util from "util";
 import { hostname } from "os";
 import LogLevel from "./LogLevel";
+import process from "process";
 
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -29,9 +30,12 @@ class ServerLogger extends Logger {
    */
   constructor(strategy, webapp = null, parameters = {}) {
     super(strategy);
+    this.output = process.stdout;
     const defaultParameters = {
       enableMethod: true,
       logRequestHeaders: true,
+      // Preserve the legacy Filog default, but allow configuration.
+      maxReqListeners: 11,
       servePath: "/logger",
     };
 
@@ -49,9 +53,8 @@ class ServerLogger extends Logger {
     if (this.enableMethod) {
       Meteor.methods({ [Logger.METHOD]: this.logMethod.bind(this) });
     }
-    if (webapp) {
-      this.setupConnect(webapp, this.servePath);
-    }
+
+    this.setupConnect(webapp, this.servePath);
   }
 
   /**
@@ -75,39 +78,42 @@ class ServerLogger extends Logger {
       return;
     }
 
-    // @TODO Node defaults to 10 listeners, but we need at least 11. Find out why.
-    req.setMaxListeners(20);
+    // Early filog versions needed at least 11, while Node.JS is 10.
+    // This appears to no longer be needed, but ensure it can be configured.
+    req.setMaxListeners(this.maxReqListeners);
 
     let body = "";
     req.setEncoding("utf-8");
 
     req.on("data", chunk => { body += chunk; });
 
-    req.on("end", Meteor.bindEnvironment(() => {
-      let result;
-      try {
-        const doc = JSON.parse(body);
-        // RFC 5424 Table 2: 7 == debug.
-        const level = (typeof doc.level !== "undefined") ? parseInt(doc.level, 10) : 7;
-        const message = ServerLogger.stringifyMessage(doc);
-        if (typeof doc.context === "undefined") {
-          doc.context = {};
+    req.on("end", Meteor.bindEnvironment(
+      () => {
+        let result;
+        try {
+          const doc = JSON.parse(body);
+          // RFC 5424 Table 2: 7 == debug.
+          const level = (typeof doc.level !== "undefined") ? parseInt(doc.level, 10) : 7;
+          const message = ServerLogger.stringifyMessage(doc);
+          if (typeof doc.context === "undefined") {
+            doc.context = {};
+          }
+          const context = ServerLogger.objectifyContext(doc.context);
+          if (this.logRequestHeaders) {
+            context.requestHeaders = req.headers;
+          }
+          this.log(level, message, context, false);
+          res.statusCode = 200;
+          result = "";
         }
-        const context = ServerLogger.objectifyContext(doc.context);
-        if (this.logRequestHeaders) {
-          context.requestHeaders = req.headers;
+        catch (err) {
+          res.statusCode = 422;
+          result = `Could not parse JSON message: ${err.message}.`;
         }
-        this.log(level, message, context, false);
-        res.statusCode = 200;
-        result = "";
-      }
-      catch (err) {
-        res.statusCode = 422;
-        result = `Could not parse JSON message: ${err.message}.`;
-      }
-      res.end(result);
-    },
-    (e) => { console.log(e); }));
+        res.end(result);
+      },
+      console.log
+    ));
   }
 
   /**
@@ -146,24 +152,22 @@ class ServerLogger extends Logger {
    *   feasible.
    */
   static stringifyMessage(doc) {
+    if (typeof doc === "string") {
+      return doc;
+    }
+
     const rawMessage = doc.message;
-    let message;
 
     if (rawMessage) {
       if (typeof rawMessage === "string") {
-        message = rawMessage;
+        return rawMessage;
       }
       else if (typeof rawMessage.toString === "function") {
-        message = rawMessage.toString();
+        return rawMessage.toString();
       }
     }
-    else if (typeof doc === "string") {
-      message = doc;
-    }
-    else {
-      message = util.inspect(doc);
-    }
 
+    const message = util.inspect(doc);
     return message;
   }
 
@@ -179,7 +183,7 @@ class ServerLogger extends Logger {
    *   - Scalar contexts are returned as { value: <original value> }
    */
   static objectifyContext(rawContext) {
-    let context = {};
+    let context;
     if (typeof rawContext === "object") {
       // JS null is an object: handle it like a scalar.
       if (rawContext === null) {
@@ -231,12 +235,12 @@ class ServerLogger extends Logger {
   setupConnect(webapp, servePath) {
     this.webapp = webapp;
     if (this.webapp) {
-      console.log("Serving logger on", servePath);
+      this.output.write(`Serving logger on ${servePath}.\n`);
       let app = this.webapp.connectHandlers;
       app.use(this.servePath, this.handleClientLogRequest.bind(this));
     }
     else {
-      console.log("Not serving logger, path", servePath);
+      this.output.write(`Not serving logger, path ${servePath}.\n`);
     }
   }
 }

@@ -1,6 +1,9 @@
+/** global: Package */
+
 /**
  * @fileOverview Meteor user Processor class.
  */
+
 import ProcessorBase from "./ProcessorBase";
 import stack from "callsite";
 
@@ -78,7 +81,7 @@ const MeteorUserProcessor = class extends ProcessorBase {
   v8getUserId() {
     const stackValue = stack();
     let state = "below-logger";
-    let result;
+    let result = "";
     for (const frame of stackValue) {
       // Work around v8 bug 1164933005
       const klass = frame.receiver
@@ -106,6 +109,7 @@ const MeteorUserProcessor = class extends ProcessorBase {
         break;
       }
     }
+
     return result;
   }
 
@@ -124,11 +128,11 @@ const MeteorUserProcessor = class extends ProcessorBase {
     else {
       // In methods, get this.userId from logger caller.
       const id = this.v8getUserId();
-      if (typeof id !== "undefined") {
+      if (id !== "") {
         if (!this.userCache[id]) {
           let user = this.meteor.users.findOne({ _id: id });
           this.userCache[id] = (typeof user === "undefined")
-            ? result = this.getAnonymousAccount(id)
+            ? this.getAnonymousAccount(id)
             : user;
         }
         result = this.userCache[id];

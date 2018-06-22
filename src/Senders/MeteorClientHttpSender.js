@@ -1,3 +1,5 @@
+/** global: HTTP, Meteor */
+
 /**
  * @fileOverview Meteor Client HTTP Sender class.
  */
@@ -20,7 +22,7 @@ const MeteorClientHttpSender = class extends SenderBase {
    */
   constructor(loggerUrl) {
     super();
-    if (!Meteor || !Meteor.isClient) {
+    if (typeof Meteor === "undefined" || !Meteor.isClient) {
       throw new Error("MeteorClientHttpSender is only meant for Meteor client side.");
     }
     if (typeof HTTP === "undefined") {

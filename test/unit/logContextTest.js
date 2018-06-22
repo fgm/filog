@@ -1,6 +1,7 @@
 import LogLevel from "../../src/LogLevel";
 import Logger from "../../src/Logger";
 import ServerLogger from "../../src/ServerLogger";
+import ProcessorBase from "../../src/Processors/ProcessorBase";
 
 function testImmutableContext() {
   const strategy = {
@@ -192,7 +193,7 @@ function testObjectifyContext() {
 
   test("should downgrade boxing classes to underlying primitives", () => {
     const expectations = [
-      // Class name, primitive, boxed.
+      // Primitive, boxed.
       [true, new Boolean(true)],
       [1E15, new Number(1E15)],
       ["😂 hello, α world", new String("😂 hello, α world")],
@@ -256,8 +257,146 @@ function testObjectifyContext() {
   });
 }
 
+function testProcessors() {
+  class Sender {
+    constructor() {
+      this.logs = [];
+    }
+
+    send(level, message, context) {
+      this.logs.push([level, message, context]);
+    }
+  }
+
+  class Adder extends ProcessorBase {
+    process(context) {
+      const result = Object.assign({ added: "value" }, context);
+      return result;
+    }
+  }
+
+  class Modifier extends ProcessorBase {
+    process(context) {
+      context.initial = "cost";
+      return context;
+    }
+  }
+
+  class Remover extends ProcessorBase {
+    process(context) {
+      const { added, initial, ...rest } = context;
+      return rest;
+    }
+  }
+
+  /**
+   * Class Purger attempts to remove all known properties from the context.
+   *
+   * Look at the timestamp test.
+   */
+  class Purger extends ProcessorBase {
+    process(context) {
+      return {};
+    }
+  }
+
+  class TimeWarp extends ProcessorBase {
+    // Let's do the time warp again.
+    process(context) {
+      context.timestamp = { log: +new Date("1978-11-19 05:00:00") };
+      context.hostname = "remote";
+      return context;
+    }
+  }
+
+  beforeEach(() => {
+    this.initialContext = { initial: "initial" };
+    this.sender = new Sender();
+    this.strategy = {
+      customizeLogger: () => [],
+      selectSenders: () => [this.sender],
+    };
+    this.logger = new Logger(this.strategy);
+  });
+
+  test("processors should be able to modify the content of ordinary existing keys", () => {
+    this.logger.processors.push(new Modifier());
+    expect(this.sender.logs.length).toBe(0);
+    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
+    expect(this.sender.logs.length).toBe(1);
+    const [,, context] = this.sender.logs.pop();
+    expect(context).toHaveProperty("initial", "cost");
+  });
+
+  test("processors should be able to add new keys", () => {
+    this.logger.processors.push(new Adder());
+    expect(this.sender.logs.length).toBe(0);
+    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
+    expect(this.sender.logs.length).toBe(1);
+    const [,, context] = this.sender.logs.pop();
+    expect(context).toHaveProperty("added", "value");
+  });
+
+  test("processors should be able to remove existing keys", () => {
+    this.logger.processors.push(new Remover());
+    expect(this.sender.logs.length).toBe(0);
+    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
+    expect(this.sender.logs.length).toBe(1);
+    const [,, context] = this.sender.logs.pop();
+    expect(context.added).toBeUndefined();
+    expect(context.initial).toBeUndefined();
+    // By default, pre-processing content goes to the message_details key.
+    expect(context.message_details).toHaveProperty("initial", "initial");
+  });
+
+  test("processors should be able to remove the message_details", () => {
+    this.logger.processors.push(new Purger());
+    expect(this.sender.logs.length).toBe(0);
+    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
+    expect(this.sender.logs.length).toBe(1);
+    const [,, context] = this.sender.logs.pop();
+    expect(context).not.toHaveProperty("added");
+    expect(context).not.toHaveProperty("initial");
+    expect(context).not.toHaveProperty("message_details");
+  });
+
+  test("processors should not be able to remove the timestamp or hostname key", () => {
+    this.logger.processors.push(new Purger());
+    expect(this.sender.logs.length).toBe(0);
+    this.logger.log(LogLevel.WARNING, "hello, world", { hostname: "local", ...this.initialContext });
+    const ts = +new Date();
+    expect(this.sender.logs.length).toBe(1);
+    const [,, context] = this.sender.logs.pop();
+    expect(context).toHaveProperty("hostname", "local");
+    expect(context).toHaveProperty("timestamp.log");
+    const lag = ts - context.timestamp.log;
+    expect(lag).toBeGreaterThanOrEqual(0);
+    // No sane machine should take more than 100 msec to return from log() with
+    // such a fast sending configuration.
+    expect(lag).toBeLessThan(100);
+  });
+
+  test("processors should not be able to modify the timestamp, but be able to modify the hostname", () => {
+    this.logger.processors.push(new TimeWarp());
+    expect(this.sender.logs.length).toBe(0);
+    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
+    const ts = +new Date();
+    expect(this.sender.logs.length).toBe(1);
+    const [,, context] = this.sender.logs.pop();
+    expect(context).toHaveProperty("hostname", "remote");
+    expect(context).toHaveProperty("timestamp.log");
+    const lag = ts - context.timestamp.log;
+    expect(lag).toBeGreaterThanOrEqual(0);
+    // No sane machine should take more than 100 msec to return from log() with
+    // such a fast sending configuration. The TimeWarp processor attempts to
+    // set the log timestamp to a much more remote value.
+    expect(lag).toBeLessThan(100);
+  });
+}
+
 export {
   testImmutableContext,
   testMessageContext,
   testObjectifyContext,
+  testProcessors,
 };

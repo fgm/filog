@@ -104,31 +104,13 @@ const Logger = class {
    */
   static levelName(level) {
     let numericLevel = Math.round(level);
-    if (numericLevel < LogLevel.EMERGENCY) {
+    if (numericLevel < LogLevel.EMERGENCY || isNaN(numericLevel)) {
       numericLevel = LogLevel.EMERGENCY;
     }
     else if (numericLevel > LogLevel.DEBUG) {
       numericLevel = LogLevel.DEBUG;
     }
     return LogLevel.Names[numericLevel];
-  }
-
-  /**
-   * Reduce callback for processors.
-   *
-   * @see Logger.log()
-   *
-   * @param {Object} accu
-   *   The reduction accumulator.
-   * @param {ProcessorBase} current
-   *   The current process to apply in the reduction.
-   *
-   * @returns {Object}
-   *   The result of the current reduction step.
-   */
-  processorReducer(accu, current) {
-    const result = Object.assign(accu, current.process(accu));
-    return result;
   }
 
   /**
@@ -141,9 +123,9 @@ const Logger = class {
    *   - Otherwise it must be an object with a "message" key.
    *   It may contain placeholders to be substituted with values from the
    *   context object, as in PSR-3.
-   * @param {Object} rawContext
+   * @param {Object} initialContext
    *   (Optional). An object complementing the message.
-   * @param {Boolean} cooked
+   * @param {Boolean} process
    *   (Optional). Apply processors to context before sending. Default == true.
    *
    * @returns {void}
@@ -154,15 +136,27 @@ const Logger = class {
    * @see https://tools.ietf.org/html/rfc5424
    * @see http://www.php-fig.org/psr/psr-3/
    */
-  log(level, message, rawContext = {}, cooked = true) {
-    if (!Number.isInteger(level) || +level < LogLevel.EMERGENCY || +level > LogLevel.DEBUG) {
-      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
-    }
+  log(level, message, initialContext = {}, process = true) {
+    /**
+     * Reduce callback for processors.
+     *
+     * @see Logger.log()
+     *
+     * @param {Object} accu
+     *   The reduction accumulator.
+     * @param {ProcessorBase} current
+     *   The current process to apply in the reduction.
+     *
+     * @returns {Object}
+     *   The result of the current reduction step.
+     */
+    const processorReducer = (accu, current) => {
+      const result = current.process(accu);
+      return result;
+    };
 
-    let context = rawContext;
-
-    if (cooked) {
-      // Context may contain message_details and timsetamps from upstream. Merge them.
+    const applyProcessors = (rawContext) => {
+      // Context may contain message_details and timestamps from upstream. Merge them.
       const DETAILS_KEY = "message_details";
       const TS_KEY = "timestamp";
       const HOST_KEY = "hostname";
@@ -174,24 +168,35 @@ const Logger = class {
         ...contextWithoutDetails
       } = rawContext;
 
-      context = this.processors.reduce(this.processorReducer, { [DETAILS_KEY]: contextWithoutDetails });
+      const processedContext = this.processors.reduce(processorReducer, { [DETAILS_KEY]: contextWithoutDetails });
 
-      // New context keys with the same name override existing ones.
-      context[DETAILS_KEY] = { ...initialDetails, ...context[DETAILS_KEY] };
-      context[TS_KEY] = { ...initialTs, ...context[TS_KEY] };
+      // New context details keys, if any, with the same name override existing ones.
+      const details = { ...initialDetails, ...processedContext[DETAILS_KEY] };
+      if (Object.keys(details).length > 0) {
+        processedContext[DETAILS_KEY] = details;
+      }
+      processedContext[TS_KEY] = { ...initialTs, ...processedContext[TS_KEY] };
 
       // Only add the initial [HOST_KEY] if none has been added and one existed.
-      if (typeof context[HOST_KEY] === "undefined" && typeof initialHost !== "undefined") {
-        context[HOST_KEY] = initialHost;
+      if (typeof processedContext[HOST_KEY] === "undefined" && typeof initialHost !== "undefined") {
+        processedContext[HOST_KEY] = initialHost;
       }
+
+      return processedContext;
+    };
+
+    if (!Number.isInteger(level) || +level < LogLevel.EMERGENCY || +level > LogLevel.DEBUG) {
+      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
     }
 
-    // A timestamp is required, so insert it forcefully.
-    context.timestamp = { log: Date.now() };
+    const finalContext = process ? applyProcessors(initialContext) : initialContext;
 
-    const senders = this.strategy.selectSenders(level, message, context);
+    // A timestamp is required, so insert it forcefully.
+    finalContext.timestamp = { log: Date.now() };
+
+    const senders = this.strategy.selectSenders(level, message, finalContext);
     senders.forEach(sender => {
-      sender.send(level, message, context);
+      sender.send(level, message, finalContext);
     });
   }
 

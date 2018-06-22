@@ -1,13 +1,16 @@
 # FiLog changelog
 ## 0.1 series
 
-### Upcoming
+### 0.1.18
 
+* Logger processors can now delete from the context, not just add/modify keys (#52).
 * ProcessorBase, SenderBase, StrategyBase are now exported to make custom versions easier (#50, #51).
 * BrowserProcessor now provides actual window.performance.memory values (#55).
 * ServerLogger now preserves primitive values of boxed primitives on web-submitted logs (#57).
+* ServerLogger now allows the maximum number of listeners on requests to be configured.
 * BrowserProcessor no longer provides obsolete "product" key (#54).
-* Quality control: Travis CI, CodeClimate, and Scrutinizer integration.
+* Logger.levelName() now returns valid outputs on invalid inputs too.
+* Quality control: Travis CI, CodeClimate, Scrutinizer and Snyk integration.
 
 ### 0.1.17
 
