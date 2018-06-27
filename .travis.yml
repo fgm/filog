@@ -2,7 +2,7 @@ language: node_js
 
 env:
   global:
-    - CC_TEST_REPORTER_ID=787a2f89b15c637323c7340d65ec17e898ac44480706b4b4122ea040c2a88f1d
+    - CC_TEST_REPORTER_ID=c33e0157337760958191e73532ea32aca9e54dee6edd7a941e84f0e33bbe3165
 
 matrix:
   allow_failures:
