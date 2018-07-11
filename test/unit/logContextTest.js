@@ -29,7 +29,7 @@ function testImmutableContext() {
 
 function testMessageContext() {
   let result;
-  const referenceContext = { a: "A" };
+  const referenceContext = () => ({ a: "A" });
   const sender = new class {
     send(level, message, context) {
       result = { level, message, context };
@@ -43,10 +43,15 @@ function testMessageContext() {
 
   const DETAILS_KEY = "message_details";
 
+  /**
+   * log(..., { a: 1 }) should ...
+   *
+   * - log { message_details: { a: 1} }.
+   */
   test(`should add the message argument to ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
-    logger.log(LogLevel.DEBUG, "some message", referenceContext);
+    logger.log(LogLevel.DEBUG, "some message", referenceContext());
 
     const actual = result.context[DETAILS_KEY].a;
     const expected = "A";
@@ -54,10 +59,31 @@ function testMessageContext() {
     expect(actual).toBe(expected);
   });
 
+  /**
+   * log(..., { a: 1 }) should ...
+   *
+   * - NOT log { a: 1 }.
+   */
+  test("should not add the message arguments to context root", () => {
+    const logger = new Logger(strategy);
+    result = null;
+    logger.log(LogLevel.DEBUG, "some message", referenceContext());
+
+    const actual = result.context.hasOwnProperty("a");
+    const expected = false;
+    // Message details is set
+    expect(actual).toBe(expected);
+  });
+
+  /**
+   * log(..., { a: 1, message_details: { b: 2 } }) should...
+   *
+   * - log { message_details: { a: 1, b: 2 }.
+   */
   test(`should merge contents of existing ${DETAILS_KEY} context key`, () => {
     const logger = new Logger(strategy);
     result = null;
-    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
+    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
     const actual = result.context[DETAILS_KEY];
@@ -73,10 +99,15 @@ function testMessageContext() {
     expect(actual.foo).toBe(expectedNested);
   });
 
+  /**
+   * log(..., { a: 1, message_details: { a: 2 } }) should...
+   *
+   * - NOT log { message_details: { a: 1, message_details: { a: 2 } } }.
+   */
   test(`should not merge existing ${DETAILS_KEY} context key itself`, () => {
     const logger = new Logger(strategy);
     result = null;
-    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext);
+    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
     // Message+_details should not contain a nested [DETAILS_KEY].
@@ -84,10 +115,15 @@ function testMessageContext() {
     expect(actual).not.toHaveProperty(DETAILS_KEY);
   });
 
+  /**
+   * log(..., { a: 1, message_details: { a: 2 } }) should ...
+   *
+   * - log { message_details: { a: 1 } }.
+   */
   test(`should keep the latest keys when merging existing ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
-    const originalContext = Object.assign(referenceContext, { [DETAILS_KEY]: { a: "B" } });
+    const originalContext = Object.assign(referenceContext(), { [DETAILS_KEY]: { a: "B" } });
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
     // [DETAILS_KEY] should contain the newly added value for key "a", not the
@@ -97,17 +133,6 @@ function testMessageContext() {
     // Message details is set
     expect(actual).toHaveProperty("a");
     expect(actual.a).toBe(expected);
-  });
-
-  test("should not add the message arguments to context root", () => {
-    const logger = new Logger(strategy);
-    result = null;
-    logger.log(LogLevel.DEBUG, "some message", referenceContext);
-
-    const actual = result.context.hasOwnProperty("a");
-    const expected = false;
-    // Message details is set
-    expect(actual).toBe(expected);
   });
 }
 

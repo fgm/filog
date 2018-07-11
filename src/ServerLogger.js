@@ -121,6 +121,7 @@ class ServerLogger extends Logger {
    */
   log(level, message, rawContext = {}, cooked = true) {
     rawContext.hostname = this.hostname;
+    console.log([level, message, rawContext]);
     super.log(level, message, rawContext, cooked);
   }
 
