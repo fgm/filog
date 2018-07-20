@@ -15,9 +15,10 @@ const SenderBase = class {
    *   Unlike LoggerBase::log(), it is not expected to handler non-string data.
    * @param {object} context
    *   A log event context object.
+   *
    * @returns {void}
    */
-  send() {}
+  send(level, message, context) {}
 };
 
 export default SenderBase;

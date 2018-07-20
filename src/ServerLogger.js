@@ -1,12 +1,14 @@
 /**
  * @fileOverview Server-side Logger.
  */
-import ClientLogger from './ClientLogger';
+import ClientLogger from "./ClientLogger";
 import Logger from "./Logger";
 import * as util from "util";
 import { hostname } from "os";
 import LogLevel from "./LogLevel";
 import process from "process";
+
+const SIDE = "server";
 
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -14,6 +16,8 @@ import process from "process";
  * Its main method is log(level, message, context).
  *
  * @see ServerLogger.log
+ *
+ * @extends Logger
  *
  * @property {string} side
  */
@@ -34,7 +38,7 @@ class ServerLogger extends Logger {
   constructor(strategy, webapp = null, parameters = {}) {
     super(strategy);
     this.output = process.stdout;
-    this.side = ServerLogger.side;
+    this.side = SIDE;
     const defaultParameters = {
       enableMethod: true,
       logRequestHeaders: true,
@@ -147,9 +151,12 @@ class ServerLogger extends Logger {
    *   The upstream sender type.
    *
    * @returns {void}
+   *
+   * @FIXME context is ignored.
    */
   logExtended(level, message, details, context, source) {
     this.validateLevel(level);
+
     const context1 = process
       ? this.applyProcessors(details)
       : details;
@@ -281,6 +288,6 @@ class ServerLogger extends Logger {
   }
 }
 
-ServerLogger.side = 'server';
+ServerLogger.side = SIDE;
 
 export default ServerLogger;

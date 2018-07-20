@@ -7,6 +7,8 @@
   },
 
   "globals": {
+    "console": true,
+
     // Jest.
     "afterAll": false,
     "afterEach": false,

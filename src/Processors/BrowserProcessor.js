@@ -22,9 +22,8 @@ const BrowserProcessor = class extends ProcessorBase {
    */
   constructor(nav, win) {
     super();
-    let actualNav = nav || (typeof navigator === "object" && navigator);
-
-    let actualWin = win || (typeof window === "object" && window);
+    let actualNav = nav || ((typeof navigator === "undefined") ? null : navigator);
+    let actualWin = win || ((typeof window === "undefined") ? null : window);
 
     if (typeof actualNav !== "object" || typeof actualWin !== "object" || !actualNav || !actualWin) {
       throw new ReferenceError("BrowserProcessor is only usable on browser-run code.");

@@ -3,6 +3,7 @@
  */
 import Logger from "../Logger";
 import SenderBase from "./SenderBase";
+import ServerLogger from "../ServerLogger";
 
 /**
  * MongodbSender sends logs to the Meteor standard database.
@@ -46,7 +47,7 @@ const MongodbSender = class extends SenderBase {
     doc.context = defaultedContext;
 
     // doc.context.timestamp.server is known to exist from above.
-    Logger.prototype.stamp.call({ side: 'server' }, doc.context, 'send');
+    Logger.prototype.stamp.call({ side: ServerLogger.side }, doc.context, "send");
     this.store.insert(doc);
   }
 };

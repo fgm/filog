@@ -6,6 +6,7 @@ import * as modernSyslog from "modern-syslog";
 import * as util from "util";
 import Logger from "../Logger";
 import SenderBase from "./SenderBase";
+import ServerLogger from "../ServerLogger";
 
 /**
  * SyslogSender sends messages to a syslog server.
@@ -80,7 +81,7 @@ const SyslogSender = class extends SenderBase {
     }
 
     // doc.context.timestamp.server is known to exist from above.
-    Logger.prototype.stamp.call({ side: 'server' }, doc.context, 'send');
+    Logger.prototype.stamp.call({ side: ServerLogger.side }, doc.context, "send");
     this.syslog.log(level, this.serialize(doc));
   }
 

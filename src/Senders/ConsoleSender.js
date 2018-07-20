@@ -1,6 +1,7 @@
 /**
  * @fileOverview Console Sender class.
  */
+
 import LogLevel from "../LogLevel";
 import SenderBase from "./SenderBase";
 
@@ -12,9 +13,17 @@ import SenderBase from "./SenderBase";
 const ConsoleSender = class extends SenderBase {
   constructor() {
     super();
-    if (!console) {
+    if (typeof console === "undefined" || console === null || typeof console !== "object") {
       throw new Error("Console sender needs a console object.");
     }
+    ["log", "info", "warn", "error"].forEach((method) => {
+      if (typeof console[method] === "undefined") {
+        throw new Error(`Console is missing method ${method}.`);
+      }
+      if (console[method].constructor.name !== "Function") {
+        throw new Error(`Console property method ${method} is not a function.`);
+      }
+    });
   }
 
   /** @inheritDoc */

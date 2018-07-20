@@ -4,6 +4,7 @@ import {
   testObjectifyContext,
   testProcessors,
 } from "./logContextTest";
+import { testConsoleSender } from "./consoleSenderTest";
 import { testLogLevelNames, testLogLevels } from "./logLevelsTest";
 import { testMeteorUserProcessor } from "./meteorUserProcessorTest";
 import { testMongoDbSender } from "./mongodbSenderTest";
@@ -31,7 +32,10 @@ describe("Unit", () => {
     describe("stringifyMessage", testStringifyMessage);
     describe("serializeDeepObject", testSerializeDeepObject);
   });
-  describe("MongoDbSender", testMongoDbSender);
+  describe("Senders", () => {
+    describe("ConsoleSender", testConsoleSender);
+    describe("MongoDbSender", testMongoDbSender);
+  });
   describe("MeteorUserProcessor", testMeteorUserProcessor);
   describe("BrowserProcessor", testBrowserProcessor);
 });

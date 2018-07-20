@@ -7,11 +7,13 @@ import InvalidArgumentException from "./InvalidArgumentException";
 
 // const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
+const SIDE = "unknown";
+
 /**
  * Logger is the base class for loggers.
  *
  * @property {string} side
- *   Which logger is this? Expected values: 'client', 'server', 'cordova'.
+ *   Which logger is this? Expected values: "client", "server", "cordova".
  * @property {string} KEY_DETAILS
  * @property {string} KEY_HOST
  * @property {string} KEY_SOURCE
@@ -28,7 +30,7 @@ const Logger = class {
    */
   constructor(strategy) {
     this.processors = [];
-    this.side = 'unknown';
+    this.side = SIDE;
     this.strategy = strategy;
     this.tk = TraceKit;
 
@@ -36,11 +38,15 @@ const Logger = class {
   }
 
   /**
+   * Apply processors to a context, preserving reserved keys.
+   *
    * @protected
    *
    * @param {Object} rawContext
+   *   The context to process.
    *
    * @returns {Object}
+   *   The processed context.
    */
   applyProcessors(rawContext) {
     const {
@@ -57,28 +63,6 @@ const Logger = class {
     if (typeof processedContext[Logger.KEY_HOST] === "undefined" && typeof initialHost !== "undefined") {
       processedContext[Logger.KEY_HOST] = initialHost;
     }
-
-    // // Set aside reserved keys to allow restoring them after processing.
-    // const {
-    //   [Logger.KEY_DETAILS]: initialDetails,
-    //   [Logger.KEY_TS]: initialTs,
-    //   [Logger.KEY_HOST]: initialHost,
-    //   ...contextWithoutDetails
-    // } = rawContext;
-    //
-    // const processedContext = this.processors.reduce(processorReducer, { [Logger.KEY_DETAILS]: contextWithoutDetails });
-    //
-    // // New context details keys, if any, with the same name override existing ones.
-    // const details = { ...initialDetails, ...processedContext[Logger.KEY_DETAILS] };
-    // if (Object.keys(details).length > 0) {
-    //   processedContext[Logger.KEY_DETAILS] = details;
-    // }
-    // processedContext[Logger.KEY_TS] = { ...initialTs, ...processedContext[Logger.KEY_TS] };
-    //
-    // // Only add the initial [Logger.KEY_HOST] if none has been added and one existed.
-    // if (typeof processedContext[Logger.KEY_HOST] === "undefined" && typeof initialHost !== "undefined") {
-    //   processedContext[Logger.KEY_HOST] = initialHost;
-    // }
 
     return processedContext;
   }
@@ -362,8 +346,9 @@ const Logger = class {
 
 Logger.KEY_DETAILS = "message_details";
 Logger.KEY_HOST = "hostname";
-Logger.KEY_SOURCE = 'source';
-Logger.METHOD = "filog:log";
+Logger.KEY_SOURCE = "source";
 Logger.KEY_TS = "timestamp";
+Logger.METHOD = "filog:log";
+Logger.side = SIDE;
 
 export default Logger;
