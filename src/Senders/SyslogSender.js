@@ -4,6 +4,7 @@
 import * as path from "path";
 import * as modernSyslog from "modern-syslog";
 import * as util from "util";
+import Logger from "../Logger";
 import SenderBase from "./SenderBase";
 
 /**
@@ -68,11 +69,18 @@ const SyslogSender = class extends SenderBase {
       facility: this.syslog.facility[this.facility],
     };
 
-    // It should already contain a timestamp object anyway.
     if (typeof context !== "undefined") {
       doc.context = context;
     }
+    // It should contain a timestamp.{side} object if it comes from any Logger.
+    if (typeof doc.context[Logger.KEY_TS] === "undefined") {
+      doc.context[Logger.KEY_TS] = {
+        server: {},
+      };
+    }
 
+    // doc.context.timestamp.server is known to exist from above.
+    Logger.prototype.stamp.call({ side: 'server' }, doc.context, 'send');
     this.syslog.log(level, this.serialize(doc));
   }
 

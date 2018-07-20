@@ -43,7 +43,7 @@ const StrategyBase = class {
    *
    * @returns {void}
    */
-  customizeLogger() {}
+  customizeLogger(logger) {}
 };
 
 export default StrategyBase;

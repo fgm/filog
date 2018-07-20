@@ -1,6 +1,7 @@
 /**
  * @fileOverview Server-side Logger.
  */
+import ClientLogger from './ClientLogger';
 import Logger from "./Logger";
 import * as util from "util";
 import { hostname } from "os";
@@ -13,6 +14,8 @@ import process from "process";
  * Its main method is log(level, message, context).
  *
  * @see ServerLogger.log
+ *
+ * @property {string} side
  */
 class ServerLogger extends Logger {
   // noinspection JSClassNamingConvention
@@ -31,6 +34,7 @@ class ServerLogger extends Logger {
   constructor(strategy, webapp = null, parameters = {}) {
     super(strategy);
     this.output = process.stdout;
+    this.side = ServerLogger.side;
     const defaultParameters = {
       enableMethod: true,
       logRequestHeaders: true,
@@ -102,7 +106,8 @@ class ServerLogger extends Logger {
           if (this.logRequestHeaders) {
             context.requestHeaders = req.headers;
           }
-          this.log(level, message, context, false);
+          const { [Logger.KEY_DETAILS]: details, ...nonDetails } = context;
+          this.logExtended(level, message, details, nonDetails, ClientLogger.side);
           res.statusCode = 200;
           result = "";
         }
@@ -121,8 +126,38 @@ class ServerLogger extends Logger {
    */
   log(level, message, rawContext = {}, cooked = true) {
     rawContext.hostname = this.hostname;
-    console.log([level, message, rawContext]);
     super.log(level, message, rawContext, cooked);
+  }
+
+  /**
+   * Extended syntax for log() method.
+   *
+   * @private
+   *
+   * @param {number} level
+   *   The event level.
+   * @param {string} message
+   *   The event message.
+   * @param {Object} details
+   *   The details submitted with the message: any additional data added to
+   *   the message by the upstream (client/cordova) log() caller().
+   * @param {Object} context
+   *   The context added to the details by upstream processors.
+   * @param {string} source
+   *   The upstream sender type.
+   *
+   * @returns {void}
+   */
+  logExtended(level, message, details, context, source) {
+    this.validateLevel(level);
+    const context1 = process
+      ? this.applyProcessors(details)
+      : details;
+
+    context1.source = source;
+    this.stamp(context1, "log");
+
+    this.send(this.strategy, level, message, context1);
   }
 
   /**
@@ -138,7 +173,7 @@ class ServerLogger extends Logger {
    * @returns {void}
    */
   logMethod({ level = LogLevel.INFO, message = "", context = {} }) {
-    this.log(level, message, context, true);
+    this.logExtended(level, message, {}, context, ClientLogger.side);
   }
 
   /**
@@ -245,5 +280,7 @@ class ServerLogger extends Logger {
     }
   }
 }
+
+ServerLogger.side = 'server';
 
 export default ServerLogger;

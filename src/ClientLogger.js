@@ -11,7 +11,16 @@ import Logger from "./Logger";
  * extension-specialization point.
  *
  * @extends Logger
+ *
+ * @property {string} side
  */
-const ClientLogger = class extends Logger {};
+const ClientLogger = class extends Logger {
+  constructor(strategy) {
+    super(strategy);
+    this.side = ClientLogger.side;
+  }
+};
+
+ClientLogger.side = 'client';
 
 export default ClientLogger;

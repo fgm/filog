@@ -1,5 +1,6 @@
 const sinon = require("sinon");
 
+import Logger from "../../src/Logger";
 import MongoDbSender from "../../src/Senders/MongodbSender";
 
 function testMongoDbSender() {
@@ -26,7 +27,7 @@ function testMongoDbSender() {
     const collection = 25;
     expect(() => new MongoDbSender(mongo, collection)).toThrowError(Error);
   });
-  test("should add a \"store\" timestamp to empty context", () => {
+  test("should add a \"send\" timestamp to empty context", () => {
     const collection = new mongo.Collection("fake");
     const sender = new MongoDbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
@@ -44,7 +45,7 @@ function testMongoDbSender() {
     // Message is passed.
     expect(callArgs.message).toBe(inboundArgs[1]);
 
-    const timestamp = callArgs.context.timestamp.store;
+    const timestamp = callArgs.context[Logger.KEY_TS].server.send;
     // A numeric store timestamp is passed.
     expect(typeof timestamp).toBe("number");
     // Timestamp is later than 'before'.
@@ -52,7 +53,7 @@ function testMongoDbSender() {
     // Timestamp is earlier than 'after'.
     expect(timestamp <= after).toBe(true);
   });
-  test("should add a \"store\" timestamp to non-empty context", () => {
+  test("should add a \"send\" timestamp to non-empty context", () => {
     const collection = new mongo.Collection("fake");
     const sender = new MongoDbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
@@ -68,7 +69,7 @@ function testMongoDbSender() {
     // Message is passed.
     expect(callArgs.message).toBe(inboundArgs[1]);
 
-    const timestamp = callArgs.context.timestamp.store;
+    const timestamp = callArgs.context[Logger.KEY_TS].server.send;
     // A numeric store timestamp is passed.
     expect(typeof timestamp).toBe("number");
     // Timestamp is later than 'before'.
