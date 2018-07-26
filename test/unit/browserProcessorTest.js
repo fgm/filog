@@ -1,4 +1,5 @@
 import BrowserProcessor from "../../src/Processors/BrowserProcessor";
+import NullFn from "../../src/NullFn";
 
 /* This test hand-builds the MemoryInfo object in window.Performance, because
  * that class is not defined outside Chrome.
@@ -9,10 +10,6 @@ function testBrowserProcessor() {
       for (const key of Object.keys(values)) {
         this[key] = values[key];
       }
-    }
-
-    toJSON() {
-      return { memory: {} };
     }
   }
 
@@ -27,20 +24,23 @@ function testBrowserProcessor() {
   });
 
   test("should fail outside the browser", () => {
+    let processor;
     expect(() => {
-      const processor = new BrowserProcessor(navigator, window);
+      processor = new BrowserProcessor(navigator, window);
       processor.process(initialContext);
     }).not.toThrow(ReferenceError);
 
+    processor = null;
     expect(() => {
-      const processor = new BrowserProcessor();
-      processor.process(initialContext);
+      processor = new BrowserProcessor();
     }).toThrow(ReferenceError);
+    expect(processor).toBeNull();
 
+    processor = null;
     expect(() => {
-      const processor = new BrowserProcessor(null, null);
-      processor.process(initialContext);
+      processor = new BrowserProcessor(null, null);
     }).toThrow(ReferenceError);
+    expect(processor).toBeNull();
   });
 
   test("should at least return defaults", () => {
@@ -52,6 +52,23 @@ function testBrowserProcessor() {
     expect(actual).toHaveProperty("browser.platform");
     expect(actual).toHaveProperty("browser.userAgent");
     expect(actual).not.toHaveProperty("browser.product");
+  });
+
+  test("Should ignore extra defaults on browser", () => {
+    const MAGIC = "xyzzy";
+    const win = Object.assign({}, { performance: new Performance({ memory: {
+      jsHeapSizeLimit: 1,
+      totalJSHeapSize: 2,
+      usedJSHeapSize: 3,
+    } }) });
+
+    const processor = new BrowserProcessor(navigator, win);
+    Object.prototype[MAGIC] = NullFn;
+    const processed = processor.process(initialContext);
+    expect(processed).toHaveProperty('browser');
+    delete Object.prototype[MAGIC];
+    const browser = processed.browser;
+    expect(browser).not.toHaveProperty(MAGIC);
   });
 
   test("should serialize performance.memory correctly", () => {

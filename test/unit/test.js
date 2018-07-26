@@ -11,7 +11,7 @@ import { testMongoDbSender } from "./mongodbSenderTest";
 import { testSerializeDeepObject } from "./serializationTest";
 import { testStrategyConstruction } from "./strategyTest";
 import { testStringifyMessage } from "./stringifyTest";
-import { testConnect, testConstructor } from "./serverLoggerTest";
+import { testBuildContext, testConnect, testConstructor, testLogExtended } from "./serverLoggerTest";
 import { testBrowserProcessor } from "./browserProcessorTest";
 
 describe("Unit", () => {
@@ -26,8 +26,10 @@ describe("Unit", () => {
   });
   describe("ServerLogger", () => {
     describe("constructor", testConstructor);
+    describe("buildContext", testBuildContext);
     describe("messageContext", testMessageContext);
     describe("objectifyContext", testObjectifyContext);
+    describe("logExtended", testLogExtended);
     describe("setUpConnect", testConnect);
     describe("stringifyMessage", testStringifyMessage);
     describe("serializeDeepObject", testSerializeDeepObject);

@@ -81,27 +81,33 @@ const Logger = class {
   /**
    * Build a context object from log() details.
    *
-   * @private
+   * @protected
    *
    * @see Logger.log
    *
    * @param {Object} details
    *   The message details passed to log().
+   * @param {string} source
+   *   The source for the event.
+   * @param {Object} context
+   *   Optional: a pre-existing context.
    *
    * @returns {Object}
    *   The context with details moved to the message_details subkey.
    */
-  buildContext(details) {
-    const context = {
+  buildContext(details, source, context = {}) {
+    const context1 = {
+      ...context,
       [Logger.KEY_DETAILS]: details,
-      [Logger.KEY_SOURCE]: this.side,
+      [Logger.KEY_SOURCE]: source,
     };
 
     if (details[Logger.KEY_HOST]) {
-      context[Logger.KEY_HOST] = details[Logger.KEY_HOST];
-      delete context[Logger.KEY_DETAILS][Logger.KEY_HOST];
+      context1[Logger.KEY_HOST] = details[Logger.KEY_HOST];
+      delete context1[Logger.KEY_DETAILS][Logger.KEY_HOST];
     }
-    return context;
+
+    return context1;
   }
 
   /**
@@ -199,7 +205,7 @@ const Logger = class {
    */
   log(level, message, details = {}, process = true) {
     this.validateLevel(level);
-    const context1 = this.buildContext(details);
+    const context1 = this.buildContext(details, this.side);
 
     const context2 = process
       ? this.applyProcessors(context1)
@@ -311,6 +317,8 @@ const Logger = class {
    *   A possibly invalid severity level.
    *
    * @returns {void}
+   *
+   * @throws InvalidArgumentException
    */
   validateLevel(requestedLevel) {
     if (!Number.isInteger(requestedLevel) || +requestedLevel < LogLevel.EMERGENCY || +requestedLevel > LogLevel.DEBUG) {

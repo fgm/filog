@@ -58,7 +58,7 @@ const BrowserProcessor = class extends ProcessorBase {
     // Overwrite existing browser keys in context, keeping non-overwritten ones.
     for (const key in browserDefaults) {
       if (browserDefaults.hasOwnProperty(key)) {
-        result.browser[key] = this.navigator[key] ? this.navigator[key] : browserDefaults[key];
+        result.browser[key] = this.navigator[key] || browserDefaults[key];
       }
     }
 
