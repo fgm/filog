@@ -91,6 +91,7 @@ class ServerLogger extends Logger {
       [Logger.KEY_DETAILS]: sourceDetails,
       [Logger.KEY_SOURCE]: ignoredSource,
       [Logger.KEY_HOST]: ignoredHostName,
+      [Logger.KEY_TS]: sourceTs,
       ...context1
     } = context;
 
@@ -101,6 +102,7 @@ class ServerLogger extends Logger {
       ...super.buildContext(mergedDetails, source),
       [source]: context1,
       [Logger.KEY_HOST]: this.hostname,
+      [Logger.KEY_TS]: sourceTs,
     };
 
     return context2;

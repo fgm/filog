@@ -33,8 +33,8 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-0": "^6.22.0",
     "codecov": "^3.0.4",
-    "eslint": "^4.19.1",
-    "eslint-plugin-react": "^7.7.0",
+    "eslint": "^5.1.0",
+    "eslint-plugin-react": "^7.10.0",
     "growl": "^1.9.2",
     "ink-docstrap": "^1.3.0",
     "install": "^0.11.0",
@@ -79,10 +79,10 @@
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
     "test-ci": "npm run test-compile && time -p jest --coverage test/unit",
     "test-compile": "time -p babel --presets env,stage-0 -d lib/ src/",
-    "test-integration": "meteor npm run test-compile && time -p jest test/integration",
-    "test-unit": "meteor npm run test-compile && time -p jest test/unit",
-    "test": "meteor npm run test-compile && time -p jest test/*",
-    "cover": "meteor npm run test-compile && time -p jest --coverage test/**/*"
+    "test-integration": "meteor npm run test-compile && time -p meteor npx jest test/integration",
+    "test-unit": "meteor npm run test-compile && time -p meteor npx jest test/unit",
+    "test": "meteor npm run test-compile && time -p meteor npx jest test/*",
+    "cover": "meteor npm run test-compile && time -p meteor npx jest --coverage test/**/*"
   },
   "version": "0.1.18"
 }

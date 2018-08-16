@@ -162,6 +162,26 @@ const testLogExtended = () => {
     expect(actual).toBeLessThanOrEqual(t1);
   });
 
+  test.only("Should factor source timestamp", () => {
+    const logger = new ServerLogger(logStrategy);
+    const t0 = + new Date();
+    const clientTsKey = 'whatever';
+    const sourceContext = {
+      [Logger.KEY_TS]: {
+        [LOG_SOURCE]: {
+          [clientTsKey]: t0,
+        },
+      },
+    };
+    logger.logExtended(LogLevel.INFO, "message", {}, sourceContext, LOG_SOURCE);
+    expect(result).not.toHaveProperty(`context.${LOG_SOURCE}.${Logger.KEY_TS}`);
+    expect(result).toHaveProperty(`context.${Logger.KEY_TS}`);
+    expect(result).toHaveProperty(`context.${Logger.KEY_TS}.${LOG_SOURCE}`);
+    expect(result).toHaveProperty(`context.${Logger.KEY_TS}.${LOG_SOURCE}.${clientTsKey}`);
+    const actual = result.context[Logger.KEY_TS][LOG_SOURCE][clientTsKey];
+    expect(actual).toBe(t0);
+  });
+
   test("Should apply processors", () => {
     const logger = new ServerLogger(logStrategy, null, { foo: "bar" });
     const P1 = class extends ProcessorBase {
@@ -203,7 +223,6 @@ const testLogExtended = () => {
     expect(actual[ServerLogger.side]).toHaveProperty("extra", "p2");
   });
 };
-
 
 export {
   testBuildContext,

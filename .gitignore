@@ -11,4 +11,5 @@ filog*.tgz
 
 # Version lock files
 npm-shrinkwrap.json
+package-lock.json
 yarn.lock

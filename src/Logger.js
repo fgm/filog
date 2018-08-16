@@ -198,7 +198,8 @@ const Logger = class {
    * @returns {void}
    *
    * @throws InvalidArgumentException
-   *   As per PSR-3, if level is not a valid RFC5424 level.
+   *   As per PSR-3, if level is not a valid RFC5424 level. No logging will be
+   *   performed in that case.
    *
    * @see https://tools.ietf.org/html/rfc5424
    * @see http://www.php-fig.org/psr/psr-3/
@@ -313,12 +314,13 @@ const Logger = class {
    *
    * @see Logger.log()
    *
-   * @param {*} requestedLevel
-   *   A possibly invalid severity level.
+   * @param {Number} requestedLevel
+   *   A RFC5424 level.
    *
    * @returns {void}
    *
    * @throws InvalidArgumentException
+   *   As per PSR-3, if level is not a valid RFC5424 level.
    */
   validateLevel(requestedLevel) {
     if (!Number.isInteger(requestedLevel) || +requestedLevel < LogLevel.EMERGENCY || +requestedLevel > LogLevel.DEBUG) {
