@@ -162,7 +162,7 @@ const testLogExtended = () => {
     expect(actual).toBeLessThanOrEqual(t1);
   });
 
-  test.only("Should factor source timestamp", () => {
+  test("Should factor source timestamp", () => {
     const logger = new ServerLogger(logStrategy);
     const t0 = + new Date();
     const clientTsKey = 'whatever';

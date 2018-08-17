@@ -164,7 +164,6 @@ class ServerLogger extends Logger {
         }
         res.end(result);
       },
-      console.log
     ));
   }
 
