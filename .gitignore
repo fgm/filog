@@ -1,6 +1,7 @@
 # Generated files.
 coverage/
 lib/
+libts/
 node_modules/
 npm-debug.log
 out/

@@ -19,6 +19,8 @@
     "email": "support@osinet.fr"
   },
   "dependencies": {
+    "@types/callsite": "^1.0.30",
+    "@types/meteor": "^1.4.19",
     "callsite": "^1.0.0",
     "modern-syslog": "^1.1.4",
     "tracekit": "~0.4.4"
@@ -41,7 +43,9 @@
     "jsdoc": "^3.4.3",
     "npm": "^6.0.0",
     "regenerator-runtime": "^0.11.1",
-    "sinon": "^5.0.3"
+    "sinon": "^5.0.3",
+    "tslint": "^5.11.0",
+    "typescript": "^3"
   },
   "engineStrict": true,
   "engines": {
@@ -74,6 +78,7 @@
   },
   "scripts": {
     "clean": "rm -fr coverage node_modules",
+    "ts-compile": "rm -fr libts src/*.js src/*/*.js; tsc -p tsconfig.json",
     "compile": "rm -fr lib/* ; rm -fr node_modules ; meteor npm i && meteor npm run test-compile",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
     "test-ci": "npm run test-compile && time -p jest --coverage test/unit",
