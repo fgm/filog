@@ -160,10 +160,7 @@ const SyslogSender = class extends SenderBase {
    *   The serialized version of the doc argument under the formatOptions rules.
    */
   public serializeInspect(doc: object): string {
-    console.log('inspecting', doc);
-    const result = util.inspect(doc, this.formatOptions);
-    console.log('result', result);
-    return result;
+    return util.inspect(doc, this.formatOptions);
   }
 };
 
