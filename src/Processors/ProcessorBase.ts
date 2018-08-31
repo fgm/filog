@@ -3,6 +3,7 @@
  */
 
 import {IProcessor} from "./IProcessor";
+import {ISendContext} from "../ISendContext";
 
 /**
  * An "abstract" processor base class.
@@ -11,8 +12,8 @@ import {IProcessor} from "./IProcessor";
  */
 const ProcessorBase = class implements IProcessor {
   /** @inheritDoc */
-  public process(context: object): object {
-    return context;
+  public process(context: object): ISendContext {
+    return context as ISendContext;
   }
 };
 

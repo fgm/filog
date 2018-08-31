@@ -1,11 +1,14 @@
 /**
  * @fileOverview Syslog Sender class.
  */
-import * as modernSyslog from "modern-syslog";
+
 import * as path from "path";
+import modernSyslog = require("modern-syslog");
 import * as util from "util";
-import * as LogLevel from "../LogLevel";
+import Logger from "../Logger";
 import SenderBase from "./SenderBase";
+import {ISendContext, TS_KEY} from "../ISendContext";
+import * as LogLevel from "../LogLevel";
 import ServerLogger from "../ServerLogger";
 
 type Serializer = (doc: object) => string;
@@ -13,8 +16,8 @@ type Serializer = (doc: object) => string;
 interface ISyslogContext {
   message: string;
   level: LogLevel.Levels;
-  facility: modernSyslog.Facility;
-  context?: object;
+  facility?: modernSyslog.facility;
+  context?: ISendContext;
 }
 
 /**
@@ -31,12 +34,11 @@ interface ISyslogContext {
  * @extends SenderBase
  */
 const SyslogSender = class extends SenderBase {
-  public facility: modernSyslog.Facility;
+  public facility: number;
   public formatOptions: object;
   public ident: string;
   public option: number;
   public serialize: Serializer;
-  public syslog: modernSyslog.Syslog;
 
   // noinspection JSClassNamingConvention
   /**
@@ -63,8 +65,8 @@ const SyslogSender = class extends SenderBase {
   constructor(
     ident = null,
     syslogOptions: number = 0,
-    syslogFacility: modernSyslog.Facility | null = null,
-    syslog: modernSyslog.Syslog = null,
+    syslogFacility: number | null = null,
+    public syslog: any, //modernSyslog,
     formatOptions = null,
     serialize = null,
   ) {
@@ -74,7 +76,7 @@ const SyslogSender = class extends SenderBase {
 
     this.syslog = syslog || modernSyslog;
 
-    this.facility = (typeof syslogFacility === null) ? this.syslog.facility.LOG_LOCAL0 : syslogFacility;
+    this.facility = syslogFacility || this.syslog.facility.LOG_LOCAL0;
     this.ident = actualIdent;
     this.option = syslogOptions || (this.syslog.option.LOG_PID);
     this.formatOptions = formatOptions || { depth: 5 };
@@ -86,7 +88,7 @@ const SyslogSender = class extends SenderBase {
   /**
    * @inheritDoc
    */
-  public send(level: number, message: string, context: object): void {
+  public send(level: number, message: string, context: ISendContext): void {
     const doc: ISyslogContext = {
       facility: this.syslog.facility[this.facility],
       level: this.syslog.level[level],
@@ -97,10 +99,10 @@ const SyslogSender = class extends SenderBase {
       doc.context = context;
     }
     // It should contain a timestamp.{side} object if it comes from any Logger.
-    if (typeof doc.context[Logger.KEY_TS] === "undefined") {
-      doc.context[Logger.KEY_TS] = {
-        server: {},
-      };
+    if (typeof doc.context === "undefined") {
+      doc.context = { [TS_KEY]: { server: {}}};
+    } else if (typeof doc.context[TS_KEY] === "undefined") {
+      doc.context[TS_KEY] = {};
     }
 
     // doc.context.timestamp.server is known to exist from above.
@@ -123,7 +125,7 @@ const SyslogSender = class extends SenderBase {
    */
   public serializeDefault(doc: ISyslogContext): string {
     interface IStep1 {
-      facility: modernSyslog.Facility;
+      facility: number;
       level: LogLevel.Levels;
       logger_error: string;
       message?: string|object;
@@ -135,7 +137,7 @@ const SyslogSender = class extends SenderBase {
       result = JSON.stringify(doc);
     } catch (e1) {
       const step1: IStep1 = {
-        facility: doc.facility,
+        facility: doc.facility || this.syslog.facility.LOG_LOCAL0,
         level: doc.level,
         logger_error: `Cannot JSON.stringify logged data: ${e1.message}.`,
         raw: util.inspect(doc, this.formatOptions),
@@ -168,7 +170,8 @@ const SyslogSender = class extends SenderBase {
    *   The serialized version of the doc argument under the formatOptions rules.
    */
   public serializeInspect(doc: object): string {
-    return util.inspect(doc, this.formatOptions);
+    const result = util.inspect(doc, this.formatOptions);
+    return result;
   }
 };
 

@@ -1,3 +1,4 @@
+import * as LogLevel from "../LogLevel";
 interface ISender {
     /**
      * The single method for a sender: send data somewhere.
@@ -9,6 +10,6 @@ interface ISender {
      * @param context
      *   A log event context object.
      */
-    send(level: number, message: string, context: object): void;
+    send(level: LogLevel.Levels, message: string, context: object): void;
 }
 export { ISender, };

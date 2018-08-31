@@ -3,6 +3,7 @@
  */
 
 import Logger from "./Logger";
+import {IStrategy} from "./Strategies/IStrategy";
 
 const SIDE = "client";
 
@@ -17,12 +18,12 @@ const SIDE = "client";
  * @property {string} side
  */
 const ClientLogger = class extends Logger {
-  constructor(strategy) {
+  public static readonly side = SIDE;
+
+  constructor(strategy: IStrategy) {
     super(strategy);
     this.side = SIDE;
   }
 };
-
-ClientLogger.side = SIDE;
 
 export default ClientLogger;

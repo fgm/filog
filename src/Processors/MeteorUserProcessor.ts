@@ -9,6 +9,7 @@ import ProcessorBase from "./ProcessorBase";
 
 import stack from "callsite";
 import User = Meteor.User;
+import {ISendContext, SOURCE_KEY} from "../ISendContext";
 
 interface IPackage {
   "accounts-base": {
@@ -169,7 +170,7 @@ const MeteorUserProcessor = class extends ProcessorBase implements IProcessor {
   }
 
   /** @inheritdoc */
-  public process(context: object): object {
+  public process(context: ISendContext): ISendContext {
     const user = this.getUser();
 
     // Cannot delete property from undefined or null.
@@ -181,7 +182,7 @@ const MeteorUserProcessor = class extends ProcessorBase implements IProcessor {
     // mobile information, a straight server-side log context is not rebuilt by
     // a call to logExtended, so it needs to be set directly in place under a
     // platform key.
-    const userContext = (context[Logger.KEY_SOURCE] === this.platform)
+    const userContext = (context[SOURCE_KEY] === this.platform)
       ? { [this.platform]: { user } }
       : { user };
     let result = Object.assign({}, context, userContext);

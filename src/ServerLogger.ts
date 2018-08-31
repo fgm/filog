@@ -3,7 +3,7 @@
  */
 import {IncomingMessage, ServerResponse} from "http";
 import {WebApp} from "meteor/webapp";
-import ClientLogger from './ClientLogger';
+import ClientLogger from "./ClientLogger";
 import { hostname } from "os";
 import process from "process";
 import * as util from "util";
@@ -12,6 +12,14 @@ import * as LogLevel from "./LogLevel";
 import {IStrategy} from "./Strategies/IStrategy";
 
 import WriteStream = NodeJS.WriteStream;
+import {ILogger} from "./ILogger";
+import {
+  DETAILS_KEY,
+  HOST_KEY,
+  ISendContext,
+  SOURCE_KEY,
+  TS_KEY
+} from "./ISendContext";
 
 type OptionalWebApp = typeof WebApp | null;
 
@@ -20,6 +28,7 @@ interface IServerLoggerConstructorParameters {
   logRequestHeaders?: boolean;
   maxReqListeners?: number;
   servePath?: string;
+  verbose?: boolean;
 }
 
 const SIDE = "server";
@@ -35,7 +44,8 @@ const SIDE = "server";
  *
  * @property {string} side
  */
-class ServerLogger extends Logger {
+class ServerLogger extends Logger implements ILogger {
+
   /**
    * Return a plain object for all types of context values.
    *
@@ -121,6 +131,7 @@ class ServerLogger extends Logger {
   public maxReqListeners: number = 11;
   public output: WriteStream;
   public servePath: string = "/logger";
+  public verbose: boolean = false;
 
   // noinspection JSClassNamingConvention
   /**
@@ -181,23 +192,24 @@ class ServerLogger extends Logger {
    *
    * @see Logger.log
    *
-   * @param {Object} details
+   * @param details
    *   The message details passed to log().
-   * @param {string} source
+   * @param source
    *   The source for the event.
-   * @param {Object} context
+   * @param context
    *   Optional: a pre-existing context.
    *
-   * @returns {Object}
+   * @returns
    *   The context with details moved to the message_details subkey.
    */
-  buildContext(details, source, context = {}) {
+  public buildContext(details: {}, source: string, context: ISendContext = {}): {} {
     // Ignore source and host keys from caller context.
     const {
-      [Logger.KEY_DETAILS]: sourceDetails,
-      [Logger.KEY_SOURCE]: ignoredSource,
-      [Logger.KEY_HOST]: ignoredHostName,
-      [Logger.KEY_TS]: sourceTs,
+      [DETAILS_KEY]: sourceDetails,
+      [SOURCE_KEY]: ignoredSource,
+      [HOST_KEY]: ignoredHostName,
+      [TS_KEY]: sourceTs,
+      // tslint:disable-next-line
       ...context1
     } = context;
 
@@ -207,8 +219,8 @@ class ServerLogger extends Logger {
     const context2 = {
       ...super.buildContext(mergedDetails, source),
       [source]: context1,
-      [Logger.KEY_HOST]: this.hostname,
-      [Logger.KEY_TS]: sourceTs,
+      [HOST_KEY]: this.hostname,
+      [TS_KEY]: sourceTs,
     };
 
     return context2;
@@ -259,7 +271,7 @@ class ServerLogger extends Logger {
           if (this.logRequestHeaders) {
             context.requestHeaders = req.headers;
           }
-          const { [Logger.KEY_DETAILS]: details, ...nonDetails } = context;
+          const { [DETAILS_KEY]: details, ...nonDetails } = context;
           this.logExtended(level, message, details, nonDetails, ClientLogger.side);
           res.statusCode = 200;
           result = "";
@@ -277,7 +289,7 @@ class ServerLogger extends Logger {
   /**
    * @inheritDoc
    */
-  public log(level: LogLevel.Levels, message: string, rawContext: { hostname?: string }, cooked = true): void {
+  public log(level: LogLevel.Levels, message: string, rawContext: ISendContext, cooked = true): void {
     rawContext.hostname = this.hostname;
     super.log(level, message, rawContext, cooked);
   }
@@ -287,41 +299,39 @@ class ServerLogger extends Logger {
    *
    * @private
    *
-   * @param {number} level
+   * @param level
    *   The event level.
-   * @param {string} message
+   * @param message
    *   The event message.
-   * @param {Object} details
+   * @param details
    *   The details submitted with the message: any additional data added to
    *   the message by the upstream (client/cordova) log() caller().
-   * @param {Object} context
+   * @param context
    *   The context added to the details by upstream processors.
-   * @param {string} source
+   * @param source
    *   The upstream sender type.
-   *
-   * @returns {void}
    *
    * @throws InvalidArgumentException
    */
-  logExtended(level, message, details, context, source) {
+  public logExtended(level: LogLevel.Levels, message: string, details: {}, context: ISendContext, source: string): void {
     this.validateLevel(level);
     const context1 = this.buildContext(details, source, context);
     const context2 = this.applyProcessors(context1);
     const {
-      [Logger.KEY_DETAILS]: processedDetails,
-      [Logger.KEY_SOURCE]: processedSource,
+      [DETAILS_KEY]: processedDetails,
+      [SOURCE_KEY]: processedSource,
       [source]: processedSourceContext,
-      [Logger.KEY_HOST]: processedHost,
-      [Logger.KEY_TS]: processedTs,
+      [HOST_KEY]: processedHost,
+      [TS_KEY]: processedTs,
       ...serverContext
     } = context2;
 
-    const context3 = {
-      [Logger.KEY_DETAILS]: processedDetails,
-      [Logger.KEY_SOURCE]: processedSource,
+    const context3: ISendContext = {
+      [DETAILS_KEY]: processedDetails,
+      [SOURCE_KEY]: processedSource,
       [source]: processedSourceContext,
-      [Logger.KEY_HOST]: processedHost,
-      [Logger.KEY_TS]: processedTs,
+      [HOST_KEY]: processedHost,
+      [TS_KEY]: processedTs,
       [ServerLogger.side]: serverContext,
     };
     this.stamp(context3, "log");
@@ -369,7 +379,5 @@ class ServerLogger extends Logger {
     }
   }
 }
-
-ServerLogger.side = SIDE;
 
 export default ServerLogger;

@@ -17,14 +17,14 @@ import SenderBase from "./SenderBase";
 const ConsoleSender = class extends SenderBase {
   constructor() {
     super();
-    if (typeof console === "undefined" || console === null || typeof console !== "object") {
+    if (!(console instanceof Console)) {
       throw new Error("Console sender needs a console object.");
     }
     ["log", "info", "warn", "error"].forEach((method) => {
-      if (typeof console[method] === "undefined") {
+      if (typeof console[method as keyof Console] === "undefined") {
         throw new Error(`Console is missing method ${method}.`);
       }
-      if (console[method].constructor.name !== "Function") {
+      if (console[method as keyof Console].constructor.name !== "Function") {
         throw new Error(`Console property method ${method} is not a function.`);
       }
     });

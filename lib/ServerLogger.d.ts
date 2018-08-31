@@ -8,12 +8,15 @@ import Logger from "./Logger";
 import * as LogLevel from "./LogLevel";
 import { IStrategy } from "./Strategies/IStrategy";
 import WriteStream = NodeJS.WriteStream;
+import { ILogger } from "./ILogger";
+import { ISendContext } from "./ISendContext";
 declare type OptionalWebApp = typeof WebApp | null;
 interface IServerLoggerConstructorParameters {
     enableMethod?: boolean;
     logRequestHeaders?: boolean;
     maxReqListeners?: number;
     servePath?: string;
+    verbose?: boolean;
 }
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -21,8 +24,12 @@ interface IServerLoggerConstructorParameters {
  * Its main method is log(level, message, context).
  *
  * @see ServerLogger.log
+ *
+ * @extends Logger
+ *
+ * @property {string} side
  */
-declare class ServerLogger extends Logger {
+declare class ServerLogger extends Logger implements ILogger {
     webapp: OptionalWebApp;
     /**
      * Return a plain object for all types of context values.
@@ -54,6 +61,7 @@ declare class ServerLogger extends Logger {
     maxReqListeners: number;
     output: WriteStream;
     servePath: string;
+    verbose: boolean;
     /**
      * @constructor
      *
@@ -68,6 +76,24 @@ declare class ServerLogger extends Logger {
      * - servePath: the path on which to expose the logger endpoint. Defaults to "/logger".
      */
     constructor(strategy: IStrategy, webapp?: OptionalWebApp, parameters?: IServerLoggerConstructorParameters);
+    /**
+     * Build a context object from log() details.
+     *
+     * @protected
+     *
+     * @see Logger.log
+     *
+     * @param details
+     *   The message details passed to log().
+     * @param source
+     *   The source for the event.
+     * @param context
+     *   Optional: a pre-existing context.
+     *
+     * @returns
+     *   The context with details moved to the message_details subkey.
+     */
+    buildContext(details: {}, source: string, context?: ISendContext): {};
     /**
      * Handle a log message from the client.
      *
@@ -84,9 +110,27 @@ declare class ServerLogger extends Logger {
     /**
      * @inheritDoc
      */
-    log(level: LogLevel.Levels, message: string, rawContext: {
-        hostname?: string;
-    }, cooked?: boolean): void;
+    log(level: LogLevel.Levels, message: string, rawContext: ISendContext, cooked?: boolean): void;
+    /**
+     * Extended syntax for log() method.
+     *
+     * @private
+     *
+     * @param level
+     *   The event level.
+     * @param message
+     *   The event message.
+     * @param details
+     *   The details submitted with the message: any additional data added to
+     *   the message by the upstream (client/cordova) log() caller().
+     * @param context
+     *   The context added to the details by upstream processors.
+     * @param source
+     *   The upstream sender type.
+     *
+     * @throws InvalidArgumentException
+     */
+    logExtended(level: LogLevel.Levels, message: string, details: {}, context: ISendContext, source: string): void;
     /**
      * The Meteor server method registered a ${Logger.METHOD}.
      *
@@ -111,8 +155,6 @@ declare class ServerLogger extends Logger {
      *   The Meteor webapp service (Connect wrapper).
      * @param servePath
      *   The path on which to expose the server logger. Must NOT start by a "/".
-     *
-     * @returns {void}
      */
     setupConnect(webapp: OptionalWebApp, servePath: string): void;
 }

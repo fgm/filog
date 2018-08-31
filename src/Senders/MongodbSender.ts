@@ -2,8 +2,10 @@
  * @fileOverview MongoDB Sender class.
  */
 import {Mongo} from "meteor/mongo";
-import SenderBase from "./SenderBase";
+import {ISendContext, TS_KEY} from "../ISendContext";
+import Logger from "../Logger";
 import ServerLogger from "../ServerLogger";
+import SenderBase from "./SenderBase";
 
 /**
  * MongodbSender sends logs to the Meteor standard database.
@@ -36,15 +38,12 @@ const MongodbSender = class extends SenderBase {
 
   /** @inheritDoc */
   public send(level: number, message: string, context: object): void {
-    interface ISendingContext {
-      timestamp: { store?: number };
-    }
-    const defaultedContext: ISendingContext = { ...context, timestamp: {} };
-    const doc = { level, message, context: {} as ISendingContext };
+    const defaultedContext: ISendContext = { ...context, timestamp: {} };
+    const doc = { level, message, context: {} as ISendContext };
 
     // It should contain a timestamp.{side} object if it comes from any Logger.
-    if (typeof defaultedContext[Logger.KEY_TS] === "undefined") {
-      defaultedContext[Logger.KEY_TS] = {
+    if (typeof defaultedContext[TS_KEY] === "undefined") {
+      defaultedContext[TS_KEY] = {
         server: {},
       };
     }

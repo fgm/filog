@@ -2,6 +2,12 @@ import * as LogLevel from "../../src/LogLevel";
 import Logger from "../../src/Logger";
 import ServerLogger from "../../src/ServerLogger";
 import ProcessorBase from "../../src/Processors/ProcessorBase";
+import {
+  DETAILS_KEY,
+  ISendContext,
+  SOURCE_KEY,
+  TS_KEY
+} from "../../src/ISendContext";
 
 function testImmutableContext() {
   const strategy = {
@@ -47,12 +53,12 @@ function testMessageContext() {
    *
    * - log { message_details: { a: 1} }.
    */
-  test(`should add the message argument to ${Logger.KEY_DETAILS}`, () => {
+  test(`should add the message argument to ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
     logger.log(LogLevel.DEBUG, "some message", referenceContext());
 
-    const actual = result.context[Logger.KEY_DETAILS].a;
+    const actual = result.context[DETAILS_KEY].a;
     const expected = "A";
     // Message details is set
     expect(actual).toBe(expected);
@@ -80,27 +86,27 @@ function testMessageContext() {
    * - log { message_details: { a: "A", message_details: { foo: "bar" } } },
    *   unlike the message_details merging it did until 0.1.18 included.
    */
-  test(`should not merge contents of existing ${Logger.KEY_DETAILS} context key`, () => {
+  test(`should not merge contents of existing ${DETAILS_KEY} context key`, () => {
     const logger = new Logger(strategy);
     result = null;
-    const originalContext = Object.assign({ [Logger.KEY_DETAILS]: { foo: "bar" } }, referenceContext());
+    const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
     const actual = result.context;
     expect(actual).not.toHaveProperty("a");
     expect(actual).not.toHaveProperty("foo");
-    expect(actual).toHaveProperty(Logger.KEY_DETAILS);
+    expect(actual).toHaveProperty(DETAILS_KEY);
 
     // Original top-level keys should still be in top [KEY_DETAILS].
-    const actualDetails = actual[Logger.KEY_DETAILS];
+    const actualDetails = actual[DETAILS_KEY];
     expect(actualDetails).toHaveProperty("a", "A");
-    expect(actualDetails).toHaveProperty(Logger.KEY_DETAILS);
+    expect(actualDetails).toHaveProperty(DETAILS_KEY);
     expect(actualDetails).not.toHaveProperty("foo");
 
     // Key nested in original message_detail should remain in place.
-    const actualNested = actualDetails[Logger.KEY_DETAILS];
+    const actualNested = actualDetails[DETAILS_KEY];
     expect(actualNested).not.toHaveProperty("a", "A");
-    expect(actualNested).not.toHaveProperty(Logger.KEY_DETAILS);
+    expect(actualNested).not.toHaveProperty(DETAILS_KEY);
     expect(actualNested).toHaveProperty("foo", 'bar');
   });
 
@@ -110,27 +116,27 @@ function testMessageContext() {
    * - log { message_details: { a: "A", message_details: { a: "A" } } },
    *   unlike the message_details merging it did until 0.1.18 included.
    */
-  test(`should not merge existing ${Logger.KEY_DETAILS} context key itself`, () => {
+  test(`should not merge existing ${DETAILS_KEY} context key itself`, () => {
     const logger = new Logger(strategy);
     result = null;
-    const originalContext = Object.assign({ [Logger.KEY_DETAILS]: { a: "A" } }, referenceContext());
+    const originalContext = Object.assign({ [DETAILS_KEY]: { a: "A" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
-    // Message_details should only contain a nested [KEY_DETAILS].
+    // Message_details should only contain a nested [DETAILS_KEY].
     const actual = result.context;
     const keys = Object.keys(actual).sort();
     expect(keys.length).toBe(3);
-    expect(keys).toEqual([Logger.KEY_DETAILS, Logger.KEY_SOURCE, Logger.KEY_TS]);
-    expect(actual).toHaveProperty(Logger.KEY_DETAILS);
+    expect(keys).toEqual([DETAILS_KEY, SOURCE_KEY, TS_KEY]);
+    expect(actual).toHaveProperty(DETAILS_KEY);
 
     // Original top-level keys should still be in top [KEY_DETAILS].
-    const actualDetails = actual[Logger.KEY_DETAILS];
+    const actualDetails = actual[DETAILS_KEY];
     expect(Object.keys(actualDetails).length).toBe(2);
     expect(actualDetails).toHaveProperty("a", "A");
-    expect(actualDetails).toHaveProperty(Logger.KEY_DETAILS);
+    expect(actualDetails).toHaveProperty(DETAILS_KEY);
 
     // Key nested in original message_detail should remain in place.
-    const actualNested = actualDetails[Logger.KEY_DETAILS];
+    const actualNested = actualDetails[DETAILS_KEY];
     expect(Object.keys(actualNested).length).toBe(1);
     expect(actualNested).toHaveProperty("a", "A");
   });
@@ -140,15 +146,15 @@ function testMessageContext() {
    *
    * - log { message_details: { a: "A", message_details: { a: "B" } } }.
    */
-  test(`should not merge keys within ${Logger.KEY_DETAILS}`, () => {
+  test(`should not merge keys within ${DETAILS_KEY}`, () => {
     const logger = new Logger(strategy);
     result = null;
-    const originalContext = Object.assign({ [Logger.KEY_DETAILS]: { a: "B" } }, referenceContext());
+    const originalContext = Object.assign({ [DETAILS_KEY]: { a: "B" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
     // [KEY_DETAILS] should contain the newly added value for key "a", not the
-    // one present in the initial [KEY_DETAILS].
-    const actual = result.context[Logger.KEY_DETAILS];
+    // one present in the initial [DETAILS_KEY].
+    const actual = result.context[DETAILS_KEY];
     const expected = "A";
     // Message details is set.
     expect(actual).toHaveProperty("a");
@@ -347,8 +353,8 @@ function testProcessors() {
 
   class TimeWarp extends ProcessorBase {
     // Let's do the time warp again.
-    process(context) {
-      context[Logger.KEY_TS] = {
+    public process(context: ISendContext): ISendContext {
+      context[TS_KEY] = {
         test: { log: +new Date("1978-11-19 05:00:00") },
       };
       context.hostname = "remote";
@@ -416,8 +422,8 @@ function testProcessors() {
     expect(this.sender.logs.length).toBe(1);
     const [,, context] = this.sender.logs.pop();
     expect(context).toHaveProperty("hostname", "local");
-    expect(context).toHaveProperty(`${Logger.KEY_TS}.${this.logger.side}.log`);
-    const lag = ts - context[Logger.KEY_TS][this.logger.side].log;
+    expect(context).toHaveProperty(`${TS_KEY}.${this.logger.side}.log`);
+    const lag = ts - context[TS_KEY][this.logger.side].log;
     expect(lag).toBeGreaterThanOrEqual(0);
     // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration.
@@ -432,8 +438,8 @@ function testProcessors() {
     expect(this.sender.logs.length).toBe(1);
     const [,, context] = this.sender.logs.pop();
     expect(context).toHaveProperty("hostname", "remote");
-    expect(context).toHaveProperty(`${Logger.KEY_TS}.${this.logger.side}.log`);
-    const lag = ts - context[Logger.KEY_TS][this.logger.side].log;
+    expect(context).toHaveProperty(`${TS_KEY}.${this.logger.side}.log`);
+    const lag = ts - context[TS_KEY][this.logger.side].log;
     expect(lag).toBeGreaterThanOrEqual(0);
     // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration. The TimeWarp processor attempts to

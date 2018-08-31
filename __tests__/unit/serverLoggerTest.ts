@@ -2,10 +2,10 @@
 
 const sinon = require("sinon");
 
-import NullFn from "../../src/NullFn";
-
+import {DETAILS_KEY, SOURCE_KEY, TS_KEY} from "../../src/ISendContext";
 import Logger from "../../src/Logger";
-import LogLevel from "../../src/LogLevel";
+import * as LogLevel from "../../src/LogLevel";
+import NullFn from "../../src/NullFn";
 import ProcessorBase from "../../src/Processors/ProcessorBase";
 import ServerLogger from "../../src/ServerLogger";
 
@@ -107,18 +107,18 @@ const testConnect = () => {
 const testBuildContext = () => {
   test("Should apply argument source over context", () => {
     const logger = new ServerLogger(emptyStrategy());
-    const actual = logger.buildContext({}, LOG_SOURCE, { [Logger.KEY_SOURCE]: "other" });
-    expect(actual).toHaveProperty(Logger.KEY_SOURCE, LOG_SOURCE);
+    const actual = logger.buildContext({}, LOG_SOURCE, { [SOURCE_KEY]: "other" });
+    expect(actual).toHaveProperty(SOURCE_KEY, LOG_SOURCE);
   });
 
   test("Should merge details, applying argument over context", () => {
     const logger = new ServerLogger(emptyStrategy());
     const argumentDetails = { a: "A", d: "D1" };
-    const initialContext = { [Logger.KEY_DETAILS]: { b: "B", d: "D2" } };
+    const initialContext = { [DETAILS_KEY]: { b: "B", d: "D2" } };
     const actual = logger.buildContext(argumentDetails, LOG_SOURCE, initialContext);
     const expected = {
       // Argument detail overwrites context detail.
-      [Logger.KEY_DETAILS]: { a: "A", b: "B", d: "D1" },
+      [DETAILS_KEY]: { a: "A", b: "B", d: "D1" },
     };
     expect(actual).toMatchObject(expected);
   });
@@ -167,18 +167,18 @@ const testLogExtended = () => {
     const t0 = + new Date();
     const clientTsKey = 'whatever';
     const sourceContext = {
-      [Logger.KEY_TS]: {
+      [TS_KEY]: {
         [LOG_SOURCE]: {
           [clientTsKey]: t0,
         },
       },
     };
     logger.logExtended(LogLevel.INFO, "message", {}, sourceContext, LOG_SOURCE);
-    expect(result).not.toHaveProperty(`context.${LOG_SOURCE}.${Logger.KEY_TS}`);
-    expect(result).toHaveProperty(`context.${Logger.KEY_TS}`);
-    expect(result).toHaveProperty(`context.${Logger.KEY_TS}.${LOG_SOURCE}`);
-    expect(result).toHaveProperty(`context.${Logger.KEY_TS}.${LOG_SOURCE}.${clientTsKey}`);
-    const actual = result.context[Logger.KEY_TS][LOG_SOURCE][clientTsKey];
+    expect(result).not.toHaveProperty(`context.${LOG_SOURCE}.${TS_KEY}`);
+    expect(result).toHaveProperty(`context.${TS_KEY}`);
+    expect(result).toHaveProperty(`context.${TS_KEY}.${LOG_SOURCE}`);
+    expect(result).toHaveProperty(`context.${TS_KEY}.${LOG_SOURCE}.${clientTsKey}`);
+    const actual = result.context[TS_KEY][LOG_SOURCE][clientTsKey];
     expect(actual).toBe(t0);
   });
 

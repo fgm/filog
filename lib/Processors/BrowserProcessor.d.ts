@@ -1,3 +1,4 @@
+import { ISendContext } from "../ISendContext";
 interface IMemoryInfo {
     jsHeapSizeLimit: number;
     totalJSHeapSize: number;
@@ -28,7 +29,7 @@ declare const BrowserProcessor: {
         navigator: INavigator;
         window: IWindow;
         /** @inheritDoc */
-        process(context: object): object;
+        process(context: object): ISendContext;
     };
 };
 export default BrowserProcessor;

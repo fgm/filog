@@ -3,6 +3,7 @@
  */
 import {IProcessor} from "./IProcessor";
 import ProcessorBase from "./ProcessorBase";
+import {ISendContext} from "../ISendContext";
 
 interface IMemoryInfo {
   jsHeapSizeLimit: number;
@@ -66,7 +67,7 @@ const BrowserProcessor = class extends ProcessorBase implements IProcessor {
   }
 
   /** @inheritDoc */
-  public process(context: object): object {
+  public process(context: object): ISendContext {
     const unknown = "unknown";
     const browserDefaults: IBrowserInfo = {
       platform: unknown,

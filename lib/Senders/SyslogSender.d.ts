@@ -1,14 +1,15 @@
 /**
  * @fileOverview Syslog Sender class.
  */
-import * as modernSyslog from "modern-syslog";
+import modernSyslog = require("modern-syslog");
+import { ISendContext } from "../ISendContext";
 import * as LogLevel from "../LogLevel";
 declare type Serializer = (doc: object) => string;
 interface ISyslogContext {
     message: string;
     level: LogLevel.Levels;
-    facility: modernSyslog.Facility;
-    context?: object;
+    facility?: modernSyslog.facility;
+    context?: ISendContext;
 }
 /**
  * SyslogSender sends messages to a syslog server.
@@ -24,8 +25,8 @@ interface ISyslogContext {
  * @extends SenderBase
  */
 declare const SyslogSender: {
-    new (ident?: null, syslogOptions?: number, syslogFacility?: modernSyslog.Facility | null, syslog?: any, formatOptions?: null, serialize?: null): {
-        facility: modernSyslog.Facility;
+    new (ident: null | undefined, syslogOptions: number | undefined, syslogFacility: number | null | undefined, syslog: any, formatOptions?: null, serialize?: null): {
+        facility: number;
         formatOptions: object;
         ident: string;
         option: number;
@@ -34,7 +35,7 @@ declare const SyslogSender: {
         /**
          * @inheritDoc
          */
-        send(level: number, message: string, context: object): void;
+        send(level: number, message: string, context: ISendContext): void;
         /**
          * Serialize a message to JSON. Handles circular documents with a fallback.
          *

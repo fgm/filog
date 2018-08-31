@@ -1,3 +1,4 @@
+import { IDetails, ISendContext } from "./ISendContext";
 import * as LogLevel from "./LogLevel";
 import { IProcessor } from "./Processors/IProcessor";
 import { IStrategy } from "./Strategies/IStrategy";
@@ -7,26 +8,46 @@ import { IStrategy } from "./Strategies/IStrategy";
 declare const Logger: {
     new (strategy: IStrategy): {
         processors: IProcessor[];
+        side: string;
         tk: any;
         strategy: IStrategy;
-        applyProcessors(rawContext: any): any;
-        doProcess(apply: any, contextToProcess: any): any;
+        /**
+         * Apply processors to a context, preserving reserved keys.
+         *
+         * @protected
+         *
+         * @param rawContext
+         *   The context to process.
+         *
+         * @returns
+         *   The processed context.
+         */
+        applyProcessors(rawContext: ISendContext): ISendContext;
+        /**
+         * Arm the report subscriber.
+         *
+         * @returns {void}
+         *
+         * @see Logger#reportSubscriber
+         */
+        arm(): void;
+        doProcess(apply: boolean, contextToProcess: ISendContext): ISendContext;
         /**
          * Reduce callback for processors.
          *
          * @private
          * @see Logger.log()
          *
-         * @param {Object} accu
+         * @param accu
          *   The reduction accumulator.
-         * @param {ProcessorBase} current
+         * @param current
          *   The current process to apply in the reduction.
          *
-         * @returns {Object}
+         * @returns
          *   The result of the current reduction step.
          *
          */
-        processorReducer(accu: any, current: any): any;
+        processorReducer(accu: {}, current: IProcessor): ISendContext;
         /**
          * The callback invoked by TraceKit
          *
@@ -47,40 +68,48 @@ declare const Logger: {
          * Actually send a message with a processed context using a strategy.
          *
          * @see Logger.log()
-         * @private
+         * @protected
          *
-         * @param {StrategyBase} strategy
+         * @param strategy
          *   The sending strategy.
-         * @param {number} level
+         * @param level
          *   An RFC5424 level.
-         * @param {string} message
+         * @param message
          *   The message template.
-         * @param {object} sentContext
+         * @param sentContext
          *   A message context, possibly including a message_details key to separate
          *   data passed to the log() call from data added by processors.
          *
          * @returns {void}
          */
-        send(strategy: any, level: any, message: any, sentContext: any): void;
+        send(strategy: IStrategy, level: LogLevel.Levels, message: string, sentContext: {}): void;
         /**
-         * Ensure a log level is in the allowed value set.
+         * Add a timestamp to a context object on the active side.
          *
-         * @see Logger.log()
-         *
-         * @param {*} requestedLevel
-         *   A possibly invalid severity level.
-         *
-         * @returns {void}
+         * @param context
+         *   Mutated. The context to stamp.
+         * @param op
+         *   The operation for which to add a timestamp.
          */
-        validateLevel(requestedLevel: any): void;
+        stamp(context: ISendContext, op: string): void;
         /**
-         * Arm the report subscriber.
+         * Build a context object from log() details.
          *
-         * @returns {void}
+         * @protected
          *
-         * @see Logger#reportSubscriber
+         * @see Logger.log
+         *
+         * @param details
+         *   The message details passed to log().
+         * @param source
+         *   The source for the event.
+         * @param context
+         *   Optional: a pre-existing context.
+         *
+         * @returns
+         *   The context with details moved to the message_details subkey.
          */
-        arm(): void;
+        buildContext(details: IDetails, source: string, context?: ISendContext): ISendContext;
         /**
          * Disarm the subscriber.
          *
@@ -93,6 +122,31 @@ declare const Logger: {
          * @returns {void}
          */
         disarm(delay?: number): void;
+        /** @inheritDoc */
+        error(message: string | object, context?: ISendContext): void;
+        /** @inheritDoc */
+        log(level: LogLevel.Levels, message: string | object, initialContext?: ISendContext, process?: boolean): void;
+        /** @inheritDoc */
+        debug(message: string | object, context?: ISendContext): void;
+        /** @inheritDoc */
+        info(message: string | object, context?: ISendContext): void;
+        /**
+         * Ensure a log level is in the allowed value set.
+         *
+         * While this is useless for TS code, JS code using the compiled version of
+         * the module still needs that check.
+         *
+         * @see Logger.log()
+         *
+         * @param {Number} requestedLevel
+         *   A RFC5424 level.
+         *
+         * @throws InvalidArgumentException
+         *   As per PSR-3, if level is not a valid RFC5424 level.
+         */
+        validateLevel(requestedLevel: LogLevel.Levels): void;
+        /** @inheritDoc */
+        warn(message: string | object, context?: ISendContext): void;
         /**
          * Implements the standard Meteor logger methods.
          *
@@ -101,23 +155,12 @@ declare const Logger: {
          * @param {String} level
          *   debug, info, warn, or error
          *
-         * @returns {void}
-         *
          * @todo (or not ?) merge in the funky Meteor logic from the logging package.
          */
         _meteorLog(): void;
-        /** @inheritDoc */
-        log(level: LogLevel.Levels, message: string | object, initialContext?: object, process?: boolean): void;
-        /** @inheritDoc */
-        debug(message: string | object, context?: object): void;
-        /** @inheritDoc */
-        info(message: string | object, context?: object): void;
-        /** @inheritDoc */
-        warn(message: string | object, context?: object): void;
-        /** @inheritDoc */
-        error(message: string | object, context?: object): void;
     };
     readonly METHOD: "filog:log";
+    readonly side: string;
     /**
      * Map a syslog level to its standard name.
      *

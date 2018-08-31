@@ -1,3 +1,5 @@
+import {TS_KEY} from "../../src/ISendContext";
+
 const sinon = require("sinon");
 
 import Logger from "../../src/Logger";
@@ -45,7 +47,7 @@ function testMongoDbSender() {
     // Message is passed.
     expect(callArgs.message).toBe(inboundArgs[1]);
 
-    const timestamp = callArgs.context[Logger.KEY_TS].server.send;
+    const timestamp = callArgs.context[TS_KEY].server.send;
     // A numeric store timestamp is passed.
     expect(typeof timestamp).toBe("number");
     // Timestamp is later than 'before'.
@@ -69,7 +71,7 @@ function testMongoDbSender() {
     // Message is passed.
     expect(callArgs.message).toBe(inboundArgs[1]);
 
-    const timestamp = callArgs.context[Logger.KEY_TS].server.send;
+    const timestamp = callArgs.context[TS_KEY].server.send;
     // A numeric store timestamp is passed.
     expect(typeof timestamp).toBe("number");
     // Timestamp is later than 'before'.
