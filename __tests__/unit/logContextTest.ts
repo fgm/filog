@@ -1,4 +1,4 @@
-import LogLevel from "../../src/LogLevel";
+import * as LogLevel from "../../src/LogLevel";
 import Logger from "../../src/Logger";
 import ServerLogger from "../../src/ServerLogger";
 import ProcessorBase from "../../src/Processors/ProcessorBase";

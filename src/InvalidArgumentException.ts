@@ -1,13 +1,12 @@
-const InvalidArgumentException = class extends Error {
-  // The optional stack as a string. May be undefined on some browsers.
-  public stack?: string;
+interface InvalidArgumentException extends Error {}
 
-  constructor(message: string) {
-    super();
-    this.message = message;
-    this.name = "InvalidArgumentException";
-    this.stack = (new Error()).stack;
-  }
-};
+const InvalidArgumentException = function (this: Error, message: string): void {
+  this.name = "InvalidArgumentException";
+  this.message = message;
+  this.stack = (new Error()).stack;
+} as any as { new (message: string): InvalidArgumentException };
+
+InvalidArgumentException.prototype = Object.create(Error.prototype);
+InvalidArgumentException.prototype.constructor = InvalidArgumentException;
 
 export default InvalidArgumentException;

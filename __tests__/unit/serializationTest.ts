@@ -48,7 +48,7 @@ function testSerializeDeepObject() {
 
     // Notice the non-quoted format used by util.inspect for keys, and single
     // quotes around strings: JSON would have double quotes around both.
-    expect(spy.calledWithMatch(logLevelWarn, /\{ message: 'hello'/)).toBe(true);
+    expect(spy.calledWithMatch(logLevelWarn, /message: 'hello'/)).toBe(true);
 
     expect(spy.calledWithMatch(logLevelWarn, /\[Object\]/)).toBe(false);
   });

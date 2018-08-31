@@ -8,13 +8,11 @@ function testStrategyConstruction() {
     const nullSender = new NullSender();
     const leveled = new LeveledStrategy(nullSender, nullSender, nullSender);
 
-    let actual = leveled.constructor.name;
-    let expected = "LeveledStrategy";
     // Constructor returns a LeveledStrategyInstance
-    expect(actual).toBe(expected);
+    expect(leveled).toBeInstanceOf(LeveledStrategy);
 
-    actual = leveled.constructor.prototype;
-    expected = LeveledStrategy.prototype;
+    const actual = leveled.constructor.prototype;
+    const expected = LeveledStrategy.prototype;
     // Constructor returns a LeveledStrategyInstance with the proper prototype
     expect(actual).toBe(expected);
   });

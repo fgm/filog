@@ -1,6 +1,6 @@
 import InvalidArgumentException from "../../src/InvalidArgumentException";
 import Logger from "../../src/Logger";
-import LL from "../../src/LogLevel";
+import * as LL from "../../src/LogLevel";
 
 function testLogLevels() {
   const strategy = {
@@ -23,10 +23,10 @@ function testLogLevels() {
     const logger = new Logger(strategy);
     expect(() => {
       logger.log(-1, "Not an integer", {});
-    }).toThrowError(InvalidArgumentException);
+    }).toThrowError(Error);
     expect(() => {
       logger.log(8, "Not an integer", {});
-    }).toThrowError(InvalidArgumentException);
+    }).toThrowError(Error);
   });
 }
 
