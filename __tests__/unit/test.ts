@@ -1,18 +1,18 @@
+import { testBrowserProcessor } from "./browserProcessorTest";
+import { testConsoleSender } from "./consoleSenderTest";
 import {
   testImmutableContext,
   testMessageContext,
   testObjectifyContext,
   testProcessors,
 } from "./logContextTest";
-import { testConsoleSender } from "./consoleSenderTest";
 import { testLogLevelNames, testLogLevels } from "./logLevelsTest";
 import { testMeteorUserProcessor } from "./meteorUserProcessorTest";
 import { testMongoDbSender } from "./mongodbSenderTest";
 import { testSerializeDeepObject } from "./serializationTest";
+import { testBuildContext, testConnect, testConstructor, testLogExtended } from "./serverLoggerTest";
 import { testStrategyConstruction } from "./strategyTest";
 import { testStringifyMessage } from "./stringifyTest";
-import { testBuildContext, testConnect, testConstructor, testLogExtended } from "./serverLoggerTest";
-import { testBrowserProcessor } from "./browserProcessorTest";
 
 describe("Unit", () => {
   describe("LeveledStrategy", () => {

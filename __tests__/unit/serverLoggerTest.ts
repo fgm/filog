@@ -1,6 +1,6 @@
 /** global: jest */
 
-const sinon = require("sinon");
+import sinon = require("sinon");
 
 import {DETAILS_KEY, SOURCE_KEY, TS_KEY} from "../../src/ISendContext";
 import Logger from "../../src/Logger";
@@ -19,7 +19,7 @@ const MAGIC = "xyzzy";
 
 let result;
 const TestSender = new class {
-  send(level, message, context) {
+  public send(level, message, context): void {
     result = { level, message, context };
   }
 }();
