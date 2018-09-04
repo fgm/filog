@@ -1,6 +1,7 @@
 /**
  * @fileOverview Routing Processor class.
  */
+import {IContext} from "../IContext";
 import {IProcessor} from "./IProcessor";
 import ProcessorBase from "./ProcessorBase";
 
@@ -29,7 +30,7 @@ const RoutingProcessor = class extends ProcessorBase implements IProcessor {
    * @returns {object}
    *   The processed context object.
    */
-  public process(context: object) {
+  public process(context: IContext): IContext {
     const result = Object.assign({}, context, { routing: { location: window.location } });
     return result;
   }

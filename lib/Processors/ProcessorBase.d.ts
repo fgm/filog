@@ -1,7 +1,7 @@
 /**
  * @fileOverview Base Processor class.
  */
-import { ISendContext } from "../ISendContext";
+import { IContext } from "../IContext";
 /**
  * An "abstract" processor base class.
  *
@@ -10,7 +10,7 @@ import { ISendContext } from "../ISendContext";
 declare const ProcessorBase: {
     new (): {
         /** @inheritDoc */
-        process(context: object): ISendContext;
+        process(context: IContext): IContext;
     };
 };
 export default ProcessorBase;

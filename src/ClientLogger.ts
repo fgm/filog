@@ -17,13 +17,13 @@ const SIDE = "client";
  *
  * @property {string} side
  */
-const ClientLogger = class extends Logger {
+class ClientLogger extends Logger {
   public static readonly side = SIDE;
 
   constructor(strategy: IStrategy) {
     super(strategy);
     this.side = SIDE;
   }
-};
+}
 
 export default ClientLogger;

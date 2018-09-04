@@ -1,25 +1,31 @@
 /**
  * @fileOverview Server-side Logger.
  */
+
+// Meteor imports.
 import {IncomingMessage, ServerResponse} from "http";
 import {WebApp} from "meteor/webapp";
-import ClientLogger from "./ClientLogger";
+
+// Node.JS packages: this is server-side code.
 import { hostname } from "os";
 import process from "process";
 import * as util from "util";
+
+// Package imports.
+import ClientLogger from "./ClientLogger";
 import Logger from "./Logger";
 import * as LogLevel from "./LogLevel";
 import {IStrategy} from "./Strategies/IStrategy";
 
 import WriteStream = NodeJS.WriteStream;
-import {ILogger} from "./ILogger";
 import {
   DETAILS_KEY,
   HOST_KEY,
-  ISendContext,
+  IContext,
   SOURCE_KEY,
-  TS_KEY
-} from "./ISendContext";
+  TS_KEY,
+} from "./IContext";
+import {ILogger} from "./ILogger";
 
 type OptionalWebApp = typeof WebApp | null;
 
@@ -39,10 +45,6 @@ const SIDE = "server";
  * Its main method is log(level, message, context).
  *
  * @see ServerLogger.log
- *
- * @extends Logger
- *
- * @property {string} side
  */
 class ServerLogger extends Logger implements ILogger {
 
@@ -131,6 +133,7 @@ class ServerLogger extends Logger implements ILogger {
   public maxReqListeners: number = 11;
   public output: WriteStream;
   public servePath: string = "/logger";
+  public readonly side = "server";
   public verbose: boolean = false;
 
   // noinspection JSClassNamingConvention
@@ -183,47 +186,6 @@ class ServerLogger extends Logger implements ILogger {
     }
 
     this.setupConnect(webapp, this.servePath);
-  }
-
-  /**
-   * Build a context object from log() details.
-   *
-   * @protected
-   *
-   * @see Logger.log
-   *
-   * @param details
-   *   The message details passed to log().
-   * @param source
-   *   The source for the event.
-   * @param context
-   *   Optional: a pre-existing context.
-   *
-   * @returns
-   *   The context with details moved to the message_details subkey.
-   */
-  public buildContext(details: {}, source: string, context: ISendContext = {}): {} {
-    // Ignore source and host keys from caller context.
-    const {
-      [DETAILS_KEY]: sourceDetails,
-      [SOURCE_KEY]: ignoredSource,
-      [HOST_KEY]: ignoredHostName,
-      [TS_KEY]: sourceTs,
-      // tslint:disable-next-line
-      ...context1
-    } = context;
-
-    // In case of conflict, argument details overwrites caller details.
-    const mergedDetails = { ...sourceDetails, ...details };
-
-    const context2 = {
-      ...super.buildContext(mergedDetails, source),
-      [source]: context1,
-      [HOST_KEY]: this.hostname,
-      [TS_KEY]: sourceTs,
-    };
-
-    return context2;
   }
 
   /**
@@ -289,7 +251,7 @@ class ServerLogger extends Logger implements ILogger {
   /**
    * @inheritDoc
    */
-  public log(level: LogLevel.Levels, message: string, rawContext: ISendContext, cooked = true): void {
+  public log(level: LogLevel.Levels, message: string, rawContext: IContext, cooked = true): void {
     rawContext.hostname = this.hostname;
     super.log(level, message, rawContext, cooked);
   }
@@ -313,29 +275,8 @@ class ServerLogger extends Logger implements ILogger {
    *
    * @throws InvalidArgumentException
    */
-  public logExtended(level: LogLevel.Levels, message: string, details: {}, context: ISendContext, source: string): void {
+  public logExtended(level: LogLevel.Levels, message: string, details: {}, context: IContext, source: string): void {
     this.validateLevel(level);
-    const context1 = this.buildContext(details, source, context);
-    const context2 = this.applyProcessors(context1);
-    const {
-      [DETAILS_KEY]: processedDetails,
-      [SOURCE_KEY]: processedSource,
-      [source]: processedSourceContext,
-      [HOST_KEY]: processedHost,
-      [TS_KEY]: processedTs,
-      ...serverContext
-    } = context2;
-
-    const context3: ISendContext = {
-      [DETAILS_KEY]: processedDetails,
-      [SOURCE_KEY]: processedSource,
-      [source]: processedSourceContext,
-      [HOST_KEY]: processedHost,
-      [TS_KEY]: processedTs,
-      [ServerLogger.side]: serverContext,
-    };
-    this.stamp(context3, "log");
-
     this.send(this.strategy, level, message, context3);
   }
 

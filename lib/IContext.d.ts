@@ -5,20 +5,17 @@ declare const TS_KEY = "timestamp";
 interface IDetails {
     [HOST_KEY]?: string;
 }
-interface ITimes {
-    [key: string]: number;
+interface ITimestamps {
+    [op: string]: number;
 }
-interface ITsHash {
-    client?: ITimes;
-    server?: ITimes;
-    cordova?: ITimes;
-    [key: string]: ITimes | undefined;
+interface ITimestampsHash {
+    [key: string]: ITimestamps;
 }
-interface ISendContext {
+interface IContext {
     [DETAILS_KEY]?: object;
     [HOST_KEY]?: string;
     [SOURCE_KEY]?: string;
-    [TS_KEY]?: ITsHash;
+    [TS_KEY]?: ITimestampsHash;
     [key: string]: {} | undefined;
 }
-export { DETAILS_KEY, HOST_KEY, SOURCE_KEY, TS_KEY, IDetails, ISendContext, ITsHash, };
+export { DETAILS_KEY, HOST_KEY, SOURCE_KEY, TS_KEY, IDetails, IContext, ITimestampsHash, };

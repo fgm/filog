@@ -9,7 +9,7 @@ import ProcessorBase from "./ProcessorBase";
 
 import stack from "callsite";
 import User = Meteor.User;
-import {ISendContext, SOURCE_KEY} from "../ISendContext";
+import {IContext, SOURCE_KEY} from "../IContext";
 
 interface IPackage {
   "accounts-base": {
@@ -170,7 +170,7 @@ const MeteorUserProcessor = class extends ProcessorBase implements IProcessor {
   }
 
   /** @inheritdoc */
-  public process(context: ISendContext): ISendContext {
+  public process(context: IContext): IContext {
     const user = this.getUser();
 
     // Cannot delete property from undefined or null.

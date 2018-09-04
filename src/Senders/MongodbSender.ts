@@ -2,7 +2,7 @@
  * @fileOverview MongoDB Sender class.
  */
 import {Mongo} from "meteor/mongo";
-import {ISendContext, TS_KEY} from "../ISendContext";
+import {IContext, TS_KEY} from "../IContext";
 import Logger from "../Logger";
 import ServerLogger from "../ServerLogger";
 import SenderBase from "./SenderBase";
@@ -38,8 +38,8 @@ const MongodbSender = class extends SenderBase {
 
   /** @inheritDoc */
   public send(level: number, message: string, context: object): void {
-    const defaultedContext: ISendContext = { ...context, timestamp: {} };
-    const doc = { level, message, context: {} as ISendContext };
+    const defaultedContext: IContext = { ...context, timestamp: {} };
+    const doc = { level, message, context: {} as IContext };
 
     // It should contain a timestamp.{side} object if it comes from any Logger.
     if (typeof defaultedContext[TS_KEY] === "undefined") {

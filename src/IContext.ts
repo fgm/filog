@@ -7,22 +7,20 @@ interface IDetails {
   [HOST_KEY]?: string;
 }
 
-interface ITimes {
-  [key: string]: number;
+interface ITimestamps {
+  // Values are times in milliseconds since the Epoch, e.g. +new Date().
+  [op: string]: number;
 }
 
-interface ITsHash {
-  client?: ITimes;
-  server?: ITimes;
-  cordova?: ITimes;
-  [key: string]: ITimes | undefined;
+interface ITimestampsHash {
+  [key: string]: ITimestamps;
 }
 
-interface ISendContext {
+interface IContext {
   [DETAILS_KEY]?: object;
   [HOST_KEY]?: string;
   [SOURCE_KEY]?: string;
-  [TS_KEY]?: ITsHash;
+  [TS_KEY]?: ITimestampsHash;
   [key: string]: {} | undefined;
 }
 
@@ -32,6 +30,6 @@ export {
   SOURCE_KEY,
   TS_KEY,
   IDetails,
-  ISendContext,
-  ITsHash,
+  IContext,
+  ITimestampsHash,
 };

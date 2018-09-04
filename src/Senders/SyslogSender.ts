@@ -2,14 +2,14 @@
  * @fileOverview Syslog Sender class.
  */
 
-import * as path from "path";
 import modernSyslog = require("modern-syslog");
+import * as path from "path";
 import * as util from "util";
+import {IContext, TS_KEY} from "../IContext";
 import Logger from "../Logger";
-import SenderBase from "./SenderBase";
-import {ISendContext, TS_KEY} from "../ISendContext";
 import * as LogLevel from "../LogLevel";
 import ServerLogger from "../ServerLogger";
+import SenderBase from "./SenderBase";
 
 type Serializer = (doc: object) => string;
 
@@ -17,7 +17,7 @@ interface ISyslogContext {
   message: string;
   level: LogLevel.Levels;
   facility?: modernSyslog.facility;
-  context?: ISendContext;
+  context?: IContext;
 }
 
 /**
@@ -88,7 +88,7 @@ const SyslogSender = class extends SenderBase {
   /**
    * @inheritDoc
    */
-  public send(level: number, message: string, context: ISendContext): void {
+  public send(level: number, message: string, context: IContext): void {
     const doc: ISyslogContext = {
       facility: this.syslog.facility[this.facility],
       level: this.syslog.level[level],

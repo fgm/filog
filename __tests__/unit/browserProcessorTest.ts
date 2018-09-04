@@ -1,12 +1,17 @@
-import BrowserProcessor from "../../src/Processors/BrowserProcessor";
 import NullFn from "../../src/NullFn";
+import {BrowserProcessor, IMemoryInfo, IPerformance, IWindow} from "../../src/Processors/BrowserProcessor";
 
 /* This test hand-builds the MemoryInfo object in window.Performance, because
  * that class is not defined outside Chrome.
  */
 function testBrowserProcessor() {
-  class Performance {
+  class Performance implements IPerformance {
+    public memory: IMemoryInfo;
+
     constructor(values = {}) {
+      // Avoid an "unused field" warning.
+      this.memory = undefined;
+
       for (const key of Object.keys(values)) {
         this[key] = values[key];
       }
@@ -15,7 +20,7 @@ function testBrowserProcessor() {
 
   let initialContext;
   let navigator = {};
-  let window = {};
+  let window: IWindow;
 
   beforeEach(() => {
     initialContext = { anything: "goes" };
@@ -32,7 +37,7 @@ function testBrowserProcessor() {
 
     processor = null;
     expect(() => {
-      processor = new BrowserProcessor();
+      processor = new BrowserProcessor(undefined, undefined);
     }).toThrow(ReferenceError);
     expect(processor).toBeNull();
 
@@ -56,16 +61,19 @@ function testBrowserProcessor() {
 
   test("Should ignore extra defaults on browser", () => {
     const MAGIC = "xyzzy";
-    const win = Object.assign({}, { performance: new Performance({ memory: {
-      jsHeapSizeLimit: 1,
-      totalJSHeapSize: 2,
-      usedJSHeapSize: 3,
-    } }) });
+    const win = { performance: new Performance({
+        memory: {
+          jsHeapSizeLimit: 1,
+          totalJSHeapSize: 2,
+          usedJSHeapSize: 3,
+        },
+      }),
+    };
 
     const processor = new BrowserProcessor(navigator, win);
     Object.prototype[MAGIC] = NullFn;
     const processed = processor.process(initialContext);
-    expect(processed).toHaveProperty('browser');
+    expect(processed).toHaveProperty("browser");
     delete Object.prototype[MAGIC];
     const browser = processed.browser;
     expect(browser).not.toHaveProperty(MAGIC);
@@ -77,11 +85,15 @@ function testBrowserProcessor() {
       "totalJSHeapSize",
       "usedJSHeapSize",
     ];
-    const win = Object.assign({}, { performance: new Performance({ memory: {
-      jsHeapSizeLimit: 1,
-      totalJSHeapSize: 2,
-      usedJSHeapSize: 3,
-    } }) });
+    const win: IWindow = {
+      performance: new Performance({
+        memory: {
+          jsHeapSizeLimit: 1,
+          totalJSHeapSize: 2,
+          usedJSHeapSize: 3,
+        },
+      }),
+    };
     const processor = new BrowserProcessor(navigator, win);
     expect(processor).toBeInstanceOf(BrowserProcessor);
 
@@ -95,8 +107,8 @@ function testBrowserProcessor() {
     }
 
     // Ensure they are available after serialization by parsing the serialized result.
-    const string = JSON.stringify(processed);
-    const actual = JSON.parse(string);
+    const stringified = JSON.stringify(processed);
+    const actual = JSON.parse(stringified);
     expect(actual).toHaveProperty("browser");
     expect(actual).toHaveProperty("browser.performance");
     expect(actual).toHaveProperty("browser.performance.memory");

@@ -1,4 +1,4 @@
-import {TS_KEY} from "../../src/ISendContext";
+import {TS_KEY} from "../../src/IContext";
 
 const sinon = require("sinon");
 

@@ -1,13 +1,13 @@
-import * as LogLevel from "../../src/LogLevel";
-import Logger from "../../src/Logger";
-import ServerLogger from "../../src/ServerLogger";
-import ProcessorBase from "../../src/Processors/ProcessorBase";
 import {
   DETAILS_KEY,
-  ISendContext,
+  IContext,
   SOURCE_KEY,
-  TS_KEY
-} from "../../src/ISendContext";
+  TS_KEY,
+} from "../../src/IContext";
+import Logger from "../../src/Logger";
+import * as LogLevel from "../../src/LogLevel";
+import ProcessorBase from "../../src/Processors/ProcessorBase";
+import ServerLogger from "../../src/ServerLogger";
 
 function testImmutableContext() {
   const strategy = {
@@ -16,7 +16,7 @@ function testImmutableContext() {
   };
   test("should not modify context in log() calls", () => {
     const logger = new Logger(strategy );
-    logger.side = 'test';
+    logger.side = "test";
     const originalContext = {};
     const context = { ...originalContext };
 
@@ -353,7 +353,7 @@ function testProcessors() {
 
   class TimeWarp extends ProcessorBase {
     // Let's do the time warp again.
-    public process(context: ISendContext): ISendContext {
+    public process(context: IContext): IContext {
       context[TS_KEY] = {
         test: { log: +new Date("1978-11-19 05:00:00") },
       };

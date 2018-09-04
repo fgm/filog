@@ -1,4 +1,4 @@
-import { ISendContext } from "./ISendContext";
+import { IContext } from "./IContext";
 import * as LogLevel from "./LogLevel";
 interface ILogger {
     /**
@@ -22,7 +22,7 @@ interface ILogger {
      * @see https://tools.ietf.org/html/rfc5424
      * @see http://www.php-fig.org/psr/psr-3/
      */
-    log(level: LogLevel.Levels, message: string, context: ISendContext): void;
+    log(level: LogLevel.Levels, message: string, context: IContext): void;
     /**
      * Implementation compatibility to replace Meteor.debug.
      *
@@ -30,24 +30,24 @@ interface ILogger {
      *
      * @see Meteor.debug
      */
-    debug(message: string, context: ISendContext): void;
+    debug(message: string, context: IContext): void;
     /**
      * Implementation compatibility to replace Meteor.info.
      *
      * @see Meteor.info
      */
-    info(message: string, context: ISendContext): void;
+    info(message: string, context: IContext): void;
     /**
      * Implementation compatibility to replace Meteor.warn.
      *
      * @see Meteor.warn
      */
-    warn(message: string, context: ISendContext): void;
+    warn(message: string, context: IContext): void;
     /**
      * Implementation compatibility to replace Meteor.error.
      *
      * @see Meteor.error
      */
-    error(message: string, context: ISendContext): void;
+    error(message: string, context: IContext): void;
 }
 export { ILogger, };

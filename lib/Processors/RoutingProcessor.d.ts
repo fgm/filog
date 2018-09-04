@@ -1,4 +1,8 @@
 /**
+ * @fileOverview Routing Processor class.
+ */
+import { IContext } from "../IContext";
+/**
  * RoutingProcessor adds route information to logs.
  *
  * @extends ProcessorBase
@@ -14,11 +18,7 @@ declare const RoutingProcessor: {
          * @returns {object}
          *   The processed context object.
          */
-        process(context: object): object & {
-            routing: {
-                location: Location;
-            };
-        };
+        process(context: IContext): IContext;
     };
 };
 export default RoutingProcessor;

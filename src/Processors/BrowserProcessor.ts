@@ -1,9 +1,9 @@
 /**
  * @fileOverview Browser Processor class.
  */
+import {IContext} from "../IContext";
 import {IProcessor} from "./IProcessor";
 import ProcessorBase from "./ProcessorBase";
-import {ISendContext} from "../ISendContext";
 
 interface IMemoryInfo {
   jsHeapSizeLimit: number;
@@ -17,7 +17,7 @@ interface IPerformance {
 }
 
 interface IWindow {
-  navigator: INavigator;
+  navigator?: INavigator;
   performance: IPerformance;
 }
 
@@ -67,7 +67,7 @@ const BrowserProcessor = class extends ProcessorBase implements IProcessor {
   }
 
   /** @inheritDoc */
-  public process(context: object): ISendContext {
+  public process(context: object): IContext {
     const unknown = "unknown";
     const browserDefaults: IBrowserInfo = {
       platform: unknown,
@@ -86,22 +86,31 @@ const BrowserProcessor = class extends ProcessorBase implements IProcessor {
     // Overwrite existing browser keys in context, keeping non-overwritten ones.
     for (const key in browserDefaults) {
       if (browserDefaults.hasOwnProperty(key)) {
-        result.browser[key as keyof IBrowserInfo] = this.navigator[key] ? this.navigator[key] : browserDefaults[key as keyof IBrowserInfo];
+        result.browser[key as keyof IBrowserInfo] = this.navigator[key]
+          ? this.navigator[key]
+          : browserDefaults[key as keyof IBrowserInfo];
       }
     }
 
-    result.browser.performance = (this.window.performance && this.window.performance.memory) ?
-      {
-        memory: {
-          jsHeapSizeLimit: this.window.performance.memory.jsHeapSizeLimit,
-          totalJSHeapSize: this.window.performance.memory.totalJSHeapSize,
-          usedJSHeapSize: this.window.performance.memory.usedJSHeapSize,
-        },
-      } :
-      {};
+    result.browser.performance = (this.window.performance && this.window.performance.memory)
+      ? {
+          memory: {
+            jsHeapSizeLimit: this.window.performance.memory.jsHeapSizeLimit,
+            totalJSHeapSize: this.window.performance.memory.totalJSHeapSize,
+            usedJSHeapSize: this.window.performance.memory.usedJSHeapSize,
+          },
+        }
+      : {};
 
     return result;
   }
 };
 
-export default BrowserProcessor;
+export {
+  BrowserProcessor,
+  IBrowserInfo,
+  IMemoryInfo,
+  INavigator,
+  IPerformance,
+  IWindow,
+};

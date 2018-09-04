@@ -1,6 +1,6 @@
 /** global: Package */
 import User = Meteor.User;
-import { ISendContext } from "../ISendContext";
+import { IContext } from "../IContext";
 /**
  * MeteorUserProcessor adds Meteor account information to log events.
  *
@@ -52,7 +52,7 @@ declare const MeteorUserProcessor: {
          */
         getUser(): User;
         /** @inheritdoc */
-        process(context: ISendContext): ISendContext;
+        process(context: IContext): IContext;
     };
 };
 export default MeteorUserProcessor;

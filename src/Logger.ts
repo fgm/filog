@@ -2,17 +2,13 @@
  * @fileOverview Base Logger class.
  */
 import TraceKit from "tracekit";
+import {
+  IContext,
+  ITimestampsHash,
+  TS_KEY,
+} from "./IContext";
 import {ILogger} from "./ILogger";
 import InvalidArgumentException from "./InvalidArgumentException";
-import {
-  DETAILS_KEY,
-  HOST_KEY,
-  IDetails,
-  ISendContext,
-  ITsHash,
-  SOURCE_KEY,
-  TS_KEY,
-} from "./ISendContext";
 import * as LogLevel from "./LogLevel";
 import {IProcessor} from "./Processors/IProcessor";
 import {IStrategy} from "./Strategies/IStrategy";
@@ -24,7 +20,7 @@ const SIDE = "unknown";
 /**
  * Logger is the base class for loggers.
  */
-const Logger = class implements ILogger {
+class Logger implements ILogger {
   public static readonly METHOD = "filog:log";
   public static readonly side: string = SIDE;
 
@@ -67,37 +63,6 @@ const Logger = class implements ILogger {
   }
 
   /**
-   * Apply processors to a context, preserving reserved keys.
-   *
-   * @protected
-   *
-   * @param rawContext
-   *   The context to process.
-   *
-   * @returns
-   *   The processed context.
-   */
-  public applyProcessors(rawContext: ISendContext): ISendContext {
-    const {
-      [TS_KEY]: initialTs,
-      [HOST_KEY]: initialHost,
-    } = rawContext;
-
-    const processedContext: ISendContext = this.processors.reduce(this.processorReducer, rawContext);
-
-    // Timestamp is protected against modifications, for traceability.
-    processedContext[TS_KEY] = { ...initialTs, ...processedContext[TS_KEY] };
-
-    // Only add the initial [HOST_KEY] if none has been added and one existed.
-    if ((typeof processedContext[HOST_KEY] === "undefined") && typeof initialHost === "string") {
-      // The "as" is not needed for the compiler but for TSLint.
-      processedContext[HOST_KEY] = initialHost as string;
-    }
-
-    return processedContext;
-  }
-
-  /**
    * Arm the report subscriber.
    *
    * @returns {void}
@@ -106,34 +71,6 @@ const Logger = class implements ILogger {
    */
   public arm() {
     this.tk.report.subscribe(this.reportSubscriber.bind(this));
-  }
-
-  public doProcess(apply: boolean, contextToProcess: ISendContext): ISendContext {
-    const finalContext = apply ? this.applyProcessors(contextToProcess) : contextToProcess;
-
-    // A timestamp is required, so insert it forcefully.
-    finalContext.timestamp = { [this.side]: { log: +Date.now() } };
-    return finalContext;
-  }
-
-  /**
-   * Reduce callback for processors.
-   *
-   * @private
-   * @see Logger.log()
-   *
-   * @param accu
-   *   The reduction accumulator.
-   * @param current
-   *   The current process to apply in the reduction.
-   *
-   * @returns
-   *   The result of the current reduction step.
-   *
-   */
-  public processorReducer(accu: {}, current: IProcessor): ISendContext {
-    const result = current.process(accu);
-    return result;
   }
 
   /**
@@ -191,46 +128,19 @@ const Logger = class implements ILogger {
    * @param op
    *   The operation for which to add a timestamp.
    */
-  public stamp(context: ISendContext, op: string): void {
+  public stamp(context: IContext, op: string): void {
     const now = + new Date();
     if (!context[TS_KEY]) {
       context[TS_KEY] = {};
     }
-    const contextTs: ITsHash = context[TS_KEY]!;
-    const side = contextTs[this.side as keyof ITsHash] || {};
+    const contextTs: ITimestampsHash = context[TS_KEY]!;
+    const side = contextTs[this.side as keyof ITimestampsHash] || {};
     side[op] = now;
   }
 
-  /**
-   * Build a context object from log() details.
-   *
-   * @protected
-   *
-   * @see Logger.log
-   *
-   * @param details
-   *   The message details passed to log().
-   * @param source
-   *   The source for the event.
-   * @param context
-   *   Optional: a pre-existing context.
-   *
-   * @returns
-   *   The context with details moved to the message_details subkey.
-   */
-  public buildContext(details: IDetails, source: string, context: ISendContext = {}): ISendContext {
-    const context1 = {
-      ...context,
-      [DETAILS_KEY]: details,
-      [SOURCE_KEY]: source,
-    };
-
-    if (details[HOST_KEY]) {
-      context1[HOST_KEY] = details[HOST_KEY];
-      delete context1[DETAILS_KEY][HOST_KEY];
-    }
-
-    return context1;
+  /** @inheritDoc */
+  public debug(message: object|string, context: IContext = {}): void {
+    this.log(LogLevel.DEBUG, message, context);
   }
 
   /**
@@ -251,39 +161,24 @@ const Logger = class implements ILogger {
   }
 
   /** @inheritDoc */
-  public error(message: object|string, context: ISendContext = {}): void {
+  public error(message: object|string, context: IContext = {}): void {
     // FIXME: message may not be a string.
     this.log(LogLevel.ERROR, message as string, context);
+  }
+
+  /** @inheritDoc */
+  public info(message: object|string, context: IContext = {}): void {
+    this.log(LogLevel.INFORMATIONAL, message, context);
   }
 
   /** @inheritDoc */
   public log(
     level: LogLevel.Levels,
     message: object|string,
-    initialContext: ISendContext = {},
+    initialContext: IContext = {},
     process: boolean = true,
   ): void {
-    this.validateLevel(level);
-    const context1 = this.buildContext(initialContext, this.side);
-
-    const context2 = process
-      ? this.applyProcessors(context1)
-      : context1;
-
-    this.stamp(context2, "log");
-
-    // @FIXME this cast is not really correct to handle non-string messages.
-    this.send(this.strategy, level, message as string, context2);
-  }
-
-  /** @inheritDoc */
-  public debug(message: object|string, context: ISendContext = {}): void {
-    this.log(LogLevel.DEBUG, message, context);
-  }
-
-  /** @inheritDoc */
-  public info(message: object|string, context: ISendContext = {}): void {
-    this.log(LogLevel.INFORMATIONAL, message, context);
+    this.send(this.strategy, level, String(message), initialContext);
   }
 
   /**
@@ -309,7 +204,7 @@ const Logger = class implements ILogger {
   }
 
   /** @inheritDoc */
-  public warn(message: object|string, context: ISendContext = {}): void {
+  public warn(message: object|string, context: IContext = {}): void {
     this.log(LogLevel.WARNING, message, context);
   }
 
@@ -324,6 +219,6 @@ const Logger = class implements ILogger {
    * @todo (or not ?) merge in the funky Meteor logic from the logging package.
    */
   public _meteorLog(): void { return; }
-};
+}
 
 export default Logger;

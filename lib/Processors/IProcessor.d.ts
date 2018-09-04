@@ -1,4 +1,4 @@
-import { ISendContext } from "../ISendContext";
+import { IContext } from "../IContext";
 interface IProcessor {
     /**
      * The only required method for processor implementations.
@@ -12,6 +12,6 @@ interface IProcessor {
      * @returns
      *   The processed context object.
      */
-    process(context: object): ISendContext;
+    process(context: IContext): IContext;
 }
 export { IProcessor, };

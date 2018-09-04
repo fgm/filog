@@ -2,7 +2,7 @@
 
 import sinon = require("sinon");
 
-import {DETAILS_KEY, SOURCE_KEY, TS_KEY} from "../../src/ISendContext";
+import {DETAILS_KEY, SOURCE_KEY, TS_KEY} from "../../src/IContext";
 import Logger from "../../src/Logger";
 import * as LogLevel from "../../src/LogLevel";
 import NullFn from "../../src/NullFn";

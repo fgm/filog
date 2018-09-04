@@ -1,4 +1,4 @@
-import {ISendContext} from "../ISendContext";
+import {IContext} from "../IContext";
 
 interface IProcessor {
   /**
@@ -13,7 +13,7 @@ interface IProcessor {
    * @returns
    *   The processed context object.
    */
-  process(context: object): ISendContext;
+  process(context: IContext): IContext;
 }
 
 export {

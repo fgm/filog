@@ -5,7 +5,7 @@ import ClientLogger from "./ClientLogger";
 import Logger from "./Logger";
 import ServerLogger from "./ServerLogger";
 
-import BrowserProcessor from "./Processors/BrowserProcessor";
+import { BrowserProcessor } from "./Processors/BrowserProcessor";
 import MeteorUserProcessor from "./Processors/MeteorUserProcessor";
 import ProcessorBase from "./Processors/ProcessorBase";
 import RoutingProcessor from "./Processors/RoutingProcessor";

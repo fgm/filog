@@ -2,8 +2,8 @@
  * @fileOverview Base Processor class.
  */
 
+import {IContext} from "../IContext";
 import {IProcessor} from "./IProcessor";
-import {ISendContext} from "../ISendContext";
 
 /**
  * An "abstract" processor base class.
@@ -12,8 +12,8 @@ import {ISendContext} from "../ISendContext";
  */
 const ProcessorBase = class implements IProcessor {
   /** @inheritDoc */
-  public process(context: object): ISendContext {
-    return context as ISendContext;
+  public process(context: IContext): IContext {
+    return context as IContext;
   }
 };
 

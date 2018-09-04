@@ -1,15 +1,15 @@
-/// <reference types="node" />
 /**
  * @fileOverview Server-side Logger.
  */
+/// <reference types="node" />
 import { IncomingMessage, ServerResponse } from "http";
 import { WebApp } from "meteor/webapp";
 import Logger from "./Logger";
 import * as LogLevel from "./LogLevel";
 import { IStrategy } from "./Strategies/IStrategy";
 import WriteStream = NodeJS.WriteStream;
+import { IContext } from "./IContext";
 import { ILogger } from "./ILogger";
-import { ISendContext } from "./ISendContext";
 declare type OptionalWebApp = typeof WebApp | null;
 interface IServerLoggerConstructorParameters {
     enableMethod?: boolean;
@@ -24,10 +24,6 @@ interface IServerLoggerConstructorParameters {
  * Its main method is log(level, message, context).
  *
  * @see ServerLogger.log
- *
- * @extends Logger
- *
- * @property {string} side
  */
 declare class ServerLogger extends Logger implements ILogger {
     webapp: OptionalWebApp;
@@ -61,6 +57,7 @@ declare class ServerLogger extends Logger implements ILogger {
     maxReqListeners: number;
     output: WriteStream;
     servePath: string;
+    readonly side: string;
     verbose: boolean;
     /**
      * @constructor
@@ -77,24 +74,6 @@ declare class ServerLogger extends Logger implements ILogger {
      */
     constructor(strategy: IStrategy, webapp?: OptionalWebApp, parameters?: IServerLoggerConstructorParameters);
     /**
-     * Build a context object from log() details.
-     *
-     * @protected
-     *
-     * @see Logger.log
-     *
-     * @param details
-     *   The message details passed to log().
-     * @param source
-     *   The source for the event.
-     * @param context
-     *   Optional: a pre-existing context.
-     *
-     * @returns
-     *   The context with details moved to the message_details subkey.
-     */
-    buildContext(details: {}, source: string, context?: ISendContext): {};
-    /**
      * Handle a log message from the client.
      *
      * @param req
@@ -110,7 +89,7 @@ declare class ServerLogger extends Logger implements ILogger {
     /**
      * @inheritDoc
      */
-    log(level: LogLevel.Levels, message: string, rawContext: ISendContext, cooked?: boolean): void;
+    log(level: LogLevel.Levels, message: string, rawContext: IContext, cooked?: boolean): void;
     /**
      * Extended syntax for log() method.
      *
@@ -130,7 +109,7 @@ declare class ServerLogger extends Logger implements ILogger {
      *
      * @throws InvalidArgumentException
      */
-    logExtended(level: LogLevel.Levels, message: string, details: {}, context: ISendContext, source: string): void;
+    logExtended(level: LogLevel.Levels, message: string, details: {}, context: IContext, source: string): void;
     /**
      * The Meteor server method registered a ${Logger.METHOD}.
      *

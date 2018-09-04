@@ -1,5 +1,6 @@
 import { testBrowserProcessor } from "./browserProcessorTest";
 import { testConsoleSender } from "./consoleSenderTest";
+import { testContextSourcing } from "./contextSourcingTest";
 import {
   testImmutableContext,
   testMessageContext,
@@ -17,6 +18,9 @@ import { testStringifyMessage } from "./stringifyTest";
 describe("Unit", () => {
   describe("LeveledStrategy", () => {
     describe("reject non-senders in constructor", testStrategyConstruction);
+  });
+  describe.only("Multiple loggers", () => {
+    describe("test context sourcing", testContextSourcing);
   });
   describe("Logger", () => {
     describe("validate log levels", testLogLevels);

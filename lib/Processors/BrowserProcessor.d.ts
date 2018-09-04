@@ -1,4 +1,7 @@
-import { ISendContext } from "../ISendContext";
+/**
+ * @fileOverview Browser Processor class.
+ */
+import { IContext } from "../IContext";
 interface IMemoryInfo {
     jsHeapSizeLimit: number;
     totalJSHeapSize: number;
@@ -8,8 +11,13 @@ interface IPerformance {
     memory: IMemoryInfo;
 }
 interface IWindow {
-    navigator: INavigator;
+    navigator?: INavigator;
     performance: IPerformance;
+}
+interface IBrowserInfo {
+    performance?: IPerformance | {};
+    platform: string;
+    userAgent: string;
 }
 interface INavigator {
     platform?: string;
@@ -29,7 +37,7 @@ declare const BrowserProcessor: {
         navigator: INavigator;
         window: IWindow;
         /** @inheritDoc */
-        process(context: object): ISendContext;
+        process(context: object): IContext;
     };
 };
-export default BrowserProcessor;
+export { BrowserProcessor, IBrowserInfo, IMemoryInfo, INavigator, IPerformance, IWindow, };
