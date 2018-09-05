@@ -2,7 +2,7 @@
  * @fileOverview Base Strategy.
  */
 
-import {ILogger} from "../ILogger";
+import {ILogger} from "../Loggers/ILogger";
 import * as LogLevel from "../LogLevel";
 import {ISender} from "../Senders/ISender";
 import NullSender from "../Senders/NullSender";

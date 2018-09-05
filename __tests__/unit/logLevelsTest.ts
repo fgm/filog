@@ -1,26 +1,29 @@
 import InvalidArgumentException from "../../src/InvalidArgumentException";
-import Logger from "../../src/Logger";
+import { Logger } from "../../src/Loggers/Logger";
 import * as LL from "../../src/LogLevel";
+import {newEmptyStrategy} from "./types";
 
 function testLogLevels() {
   const strategy = {
     customizeLogger: () => [],
   };
   test("log() should throw on non-integer levels", () => {
-    const logger = new Logger(strategy);
+    const logger = new Logger(newEmptyStrategy());
     expect(() => {
       logger.log(4.2, "Not an integer", {});
     }).toThrowError(InvalidArgumentException);
     expect(() => {
-      logger.log("5", "Not an integer", {});
+      // Force type to accept invalid data.
+      logger.log("5" as any, "Not an integer", {});
     }).toThrowError(InvalidArgumentException);
     expect(() => {
-      logger.log({}, "Not an integer", {});
+      // Force type to accept invalid data.
+      logger.log({} as any, "Not an integer", {});
     }).toThrowError(InvalidArgumentException);
   });
 
   test("log() should throw on integer levels out of range", () => {
-    const logger = new Logger(strategy);
+    const logger = new Logger(newEmptyStrategy());
     expect(() => {
       logger.log(-1, "Not an integer", {});
     }).toThrowError(Error);

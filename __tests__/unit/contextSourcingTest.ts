@@ -1,52 +1,36 @@
-import ClientLogger from "../../src/ClientLogger";
 import {
-  DETAILS_KEY, HOST_KEY,
-  IContext, ITimestamps, ITimestampsHash, SOURCE_KEY, TS_KEY,
+  DETAILS_KEY,
+  HOST_KEY,
+  IContext,
+  ITimestamps,
+  ITimestampsHash,
+  SOURCE_KEY,
+  TS_KEY,
 } from "../../src/IContext";
-import {ILogger} from "../../src/ILogger";
-import { Levels } from "../../src/LogLevel";
-import ServerLogger from "../../src/ServerLogger";
+import { ClientLogger } from "../../src/Loggers/ClientLogger";
+import {ILogger} from "../../src/Loggers/ILogger";
+import {ServerLogger} from "../../src/Loggers/ServerLogger";
+import {Levels} from "../../src/LogLevel";
+import {ISender} from "../../src/Senders/ISender";
+import { newLogStrategy, TestSender } from "./types";
 
 // Unit tests run on NodeJS, so we have access to its packages.
-import { hostname } from "os";
-import {ISender} from "../../src/Senders/ISender";
-import {IStrategy} from "../../src/Strategies/IStrategy";
-
-type StrategyFactory = (sender?: ISender) => IStrategy;
-
-const newEmptyStrategy: StrategyFactory = () => ({
-  customizeLogger: () => [],
-  selectSenders: () => [],
-});
-
-class TestSender {
-  public result: IContext = {};
-
-  public send(level, message, context): void {
-    this.result = { level, message, context };
-  }
-}
-
-const newLogStrategy: StrategyFactory = (sender: TestSender) => ({
-  ...newEmptyStrategy(),
-  selectSenders: () => [sender],
-});
+import {hostname} from "os";
 
 function testContextSourcing(): void {
   function newClientLogger(sender: ISender): ILogger {
-    const cl: ILogger = new ClientLogger(newLogStrategy(sender));
-    return cl;
+    return new ClientLogger(newLogStrategy(sender));
   }
 
   function newServerLogger(sender: ISender): ServerLogger {
-    const sl: ServerLogger = new ServerLogger(newLogStrategy(sender));
-    return sl;
+    return new ServerLogger(newLogStrategy(sender));
   }
 
   test("Client logging, pure, no processor", () => {
     const sender: TestSender = new TestSender();
     const cl = newClientLogger(sender);
-    // Constant strings are immutable.
+    // Constant scalars are immutable.
+    const level = Levels.WARNING;
     const message = "some message";
     const side = "client";
 
@@ -55,17 +39,17 @@ function testContextSourcing(): void {
     const expectedDetails = { ...details };
 
     const t1: number = +new Date();
-    cl.log(Levels.WARNING, message, details);
+    cl.log(level, message, details);
     const t2: number = +new Date();
 
     const expected = {
       context: {
-        [DETAILS_KEY]: details,
+        [DETAILS_KEY]: expectedDetails,
         // HOST_KEY: not on client contexts.
         [SOURCE_KEY]: side,
         // TS_KEY: Cannot test content just with toMatchObject.
       },
-      level: Levels.WARNING,
+      level,
       message,
     };
     expect(t2).toBeGreaterThanOrEqual(t1);
@@ -92,6 +76,7 @@ function testContextSourcing(): void {
     const sl = newServerLogger(sender);
 
     // Constant strings are immutable.
+    const level = Levels.WARNING;
     const message = "some message";
     const host = hostname();
     const side = "server";
@@ -101,7 +86,7 @@ function testContextSourcing(): void {
     const expectedDetails = { ...details };
 
     const t1: number = +new Date();
-    sl.log(Levels.WARNING, message, details);
+    sl.log(level, message, details);
     const t2: number = +new Date();
 
     const expected = {
@@ -111,7 +96,7 @@ function testContextSourcing(): void {
         [SOURCE_KEY]: side,
         // TS_KEY: Cannot test content just with toMatchObject.
       },
-      level: Levels.WARNING,
+      level,
       message,
     };
     expect(t2).toBeGreaterThanOrEqual(t1);
@@ -133,7 +118,8 @@ function testContextSourcing(): void {
     const sender: TestSender = new TestSender();
     const sl = newServerLogger(sender);
 
-    // Constant strings are immutable.
+    // Constant scalars are immutable.
+    const level = Levels.WARNING;
     const message = "some message";
     const host = hostname();
 
@@ -166,7 +152,7 @@ function testContextSourcing(): void {
       [side]: clientContext,
     };
 
-    sl.logExtended(Levels.WARNING, message, initialContext, "client");
+    sl.logExtended(level, message, initialContext, side);
     const t2: number = +new Date();
 
     const expected = {
@@ -178,7 +164,7 @@ function testContextSourcing(): void {
         [side]: expectedClientContext,
         // No "server" content without a server processor.
       },
-      level: Levels.WARNING,
+      level,
       message,
     };
 
@@ -194,7 +180,7 @@ function testContextSourcing(): void {
 
     expect(actualContext).toHaveProperty(TS_KEY);
     const ts: ITimestampsHash = actualContext[TS_KEY];
-    expect(typeof result[TS_KEY]).toBe("object");
+    expect(typeof actualContext[TS_KEY]).toBe("object");
     expect(typeof ts).toBe("object");
     expect(ts).toHaveProperty(side);
     expect(ts).toHaveProperty("server");

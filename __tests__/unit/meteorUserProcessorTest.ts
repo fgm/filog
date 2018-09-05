@@ -1,20 +1,32 @@
+import {IContext} from "../../src/IContext";
+import {ServerSide} from "../../src/Loggers/ServerLogger";
+import {IProcessor} from "../../src/Processors/IProcessor";
 import MeteorUserProcessor from "../../src/Processors/MeteorUserProcessor";
-import ServerLogger from "../../src/ServerLogger";
+
+interface IUserSubContext {
+  user: {
+    services: {},
+  };
+}
+
+interface IMeteorAccountContext extends IContext {
+  client?: IUserSubContext;
+  cordova?: IUserSubContext;
+  server?: IUserSubContext;
+}
 
 function testMeteorUserProcessor() {
   const mockMeteor = { isServer: true };
   const mockAccountsPackage = { "accounts-base": { AccountsServer: true } };
-  const SIDE = ServerLogger.side;
-
-  const postProcessorDelete = data => {
-    let result = Object.assign({}, data);
+  const postProcessorDelete = (data) => {
+    const result = Object.assign({}, data);
     delete result.server.user.services;
     return result;
   };
 
   const forcedUserId = 42;
-  const postProcessorUpdate = data => {
-    let result = Object.assign({}, data);
+  const postProcessorUpdate = (data) => {
+    const result = Object.assign({}, data);
     result.server.user = forcedUserId;
     return result;
   };
@@ -24,26 +36,26 @@ function testMeteorUserProcessor() {
       anything: "goes",
       // Actual contexts always have a "source" top-level key, added by
       // Logger.log() before invoking buildContext().
-      "source": SIDE,
+      source: ServerSide,
     };
-    global.Package = mockAccountsPackage;
-    const processorRaw = new MeteorUserProcessor(mockMeteor);
-    const processorDeletor = new MeteorUserProcessor(mockMeteor, postProcessorDelete);
-    const processorUpdater = new MeteorUserProcessor(mockMeteor, postProcessorUpdate);
-    delete global.PACKAGE;
+    (global as any).Package = mockAccountsPackage;
+    const processorRaw: IProcessor = new MeteorUserProcessor(mockMeteor as typeof Meteor);
+    const processorDeletor = new MeteorUserProcessor(mockMeteor as typeof Meteor, postProcessorDelete);
+    const processorUpdater = new MeteorUserProcessor(mockMeteor as typeof Meteor, postProcessorUpdate);
+    delete (global as any).Package;
 
     expect(processorRaw).toBeInstanceOf(MeteorUserProcessor);
-    const resultRaw = processorRaw.process(data);
-    expect(resultRaw).toHaveProperty(SIDE);
-    expect(resultRaw[SIDE].user.services).toBeDefined();
+    const resultRaw: IMeteorAccountContext = processorRaw.process(data);
+    expect(resultRaw).toHaveProperty(ServerSide);
+    expect(resultRaw[ServerSide].user.services).toBeDefined();
 
     expect(processorDeletor).toBeInstanceOf(MeteorUserProcessor);
-    const resultDeleted = processorDeletor.process(data);
-    expect(resultDeleted[SIDE].user.services).toBeUndefined();
+    const resultDeleted: IMeteorAccountContext = processorDeletor.process(data);
+    expect(resultDeleted[ServerSide].user.services).toBeUndefined();
 
     expect(processorUpdater).toBeInstanceOf(MeteorUserProcessor);
-    const resultUpdated = processorUpdater.process(data);
-    expect(resultUpdated[SIDE].user).toBe(forcedUserId);
+    const resultUpdated: IMeteorAccountContext = processorUpdater.process(data);
+    expect(resultUpdated[ServerSide].user).toBe(forcedUserId);
   });
 }
 

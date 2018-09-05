@@ -4,8 +4,8 @@
  * @fileOverview Meteor Client Method Sender class.
  */
 
-import Logger from "../Logger";
-import SenderBase from "./SenderBase";
+import { Logger } from "../Loggers/Logger";
+import { SenderBase } from "./SenderBase";
 
 /**
  * MeteorClientMethodSender send data from the client to the server over DDP.

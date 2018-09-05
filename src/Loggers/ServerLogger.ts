@@ -3,31 +3,26 @@
  */
 
 // Meteor imports.
+import * as connect from "connect";
 import {IncomingMessage, ServerResponse} from "http";
 import {WebApp} from "meteor/webapp";
-
 // Node.JS packages: this is server-side code.
-import { hostname } from "os";
+import * as os from "os";
 import process from "process";
 import * as util from "util";
-
 // Package imports.
-import ClientLogger from "./ClientLogger";
-import Logger from "./Logger";
-import * as LogLevel from "./LogLevel";
-import {IStrategy} from "./Strategies/IStrategy";
-
-import WriteStream = NodeJS.WriteStream;
-import {
-  DETAILS_KEY,
-  HOST_KEY,
-  IContext,
-  SOURCE_KEY,
-  TS_KEY,
-} from "./IContext";
+import {DETAILS_KEY, HOST_KEY, IContext, SOURCE_KEY } from "../IContext";
+import * as LogLevel from "../LogLevel";
+import {IStrategy} from "../Strategies/IStrategy";
+import {ClientLogger} from "./ClientLogger";
 import {ILogger} from "./ILogger";
+import {Logger} from "./Logger";
+import WriteStream = NodeJS.WriteStream;
 
-type OptionalWebApp = typeof WebApp | null;
+interface IWebApp {
+  connectHandlers: connect.Server;
+}
+type OptionalWebApp = typeof WebApp | IWebApp | null;
 
 interface IServerLoggerConstructorParameters {
   enableMethod?: boolean;
@@ -123,8 +118,7 @@ class ServerLogger extends Logger implements ILogger {
       }
     }
 
-    const message = util.inspect(doc);
-    return message;
+    return util.inspect(doc);
   }
 
   public enableMethod: boolean = true;
@@ -133,7 +127,8 @@ class ServerLogger extends Logger implements ILogger {
   public maxReqListeners: number = 11;
   public output: WriteStream;
   public servePath: string = "/logger";
-  public readonly side = "server";
+  // Should usually not be modified.
+  public side = "server";
   public verbose: boolean = false;
 
   // noinspection JSClassNamingConvention
@@ -179,13 +174,38 @@ class ServerLogger extends Logger implements ILogger {
       }
     }
 
-    this.hostname = hostname();
+    this.hostname = os.hostname();
 
     if (this.enableMethod) {
       Meteor.methods({ [Logger.METHOD]: this.logMethod.bind(this) });
     }
 
     this.setupConnect(webapp, this.servePath);
+  }
+
+  /**
+   * Add defaults to the initial context.
+   *
+   * @param initialContext
+   *   The context passed to logExtended().
+   * @param source
+   *   The source whence the event originated.
+   *
+   * @see logExtended()
+   *
+   * This method is only made public for the benefit of tests: it is not meant
+   * to be used outside the class and its tests.
+   *
+   * @protected
+   */
+  public defaultContext(initialContext: IContext, source: string): IContext {
+    const cx1 = {
+      [HOST_KEY]: this._getHostname(),
+      [SOURCE_KEY]: source,
+      ...initialContext,
+    };
+    Logger.stamp(cx1, "log", this.side);
+    return cx1;
   }
 
   /**
@@ -233,8 +253,12 @@ class ServerLogger extends Logger implements ILogger {
           if (this.logRequestHeaders) {
             context.requestHeaders = req.headers;
           }
-          const { [DETAILS_KEY]: details, ...nonDetails } = context;
-          this.logExtended(level, message, details, nonDetails, ClientLogger.side);
+          const {
+            [DETAILS_KEY]: details,
+            // tslint:disable-next-line
+            ...nonDetails
+          } = context;
+          this.logExtended(level, message, nonDetails, ClientLogger.side);
           res.statusCode = 200;
           result = "";
         } catch (err) {
@@ -251,9 +275,9 @@ class ServerLogger extends Logger implements ILogger {
   /**
    * @inheritDoc
    */
-  public log(level: LogLevel.Levels, message: string, rawContext: IContext, cooked = true): void {
+  public log(level: LogLevel.Levels, message: string, rawContext: IContext): void {
     rawContext.hostname = this.hostname;
-    super.log(level, message, rawContext, cooked);
+    super.log(level, message, rawContext);
   }
 
   /**
@@ -274,7 +298,8 @@ class ServerLogger extends Logger implements ILogger {
    */
   public logExtended(level: LogLevel.Levels, message: string, context: IContext, source: string): void {
     this.validateLevel(level);
-    this.send(this.strategy, level, message, context);
+    const cx1 = this.defaultContext(context, source);
+    this.send(this.strategy, level, message, cx1);
   }
 
   /**
@@ -307,15 +332,29 @@ class ServerLogger extends Logger implements ILogger {
       if (this.verbose) {
         this.output.write(`Serving logger on ${servePath}.\n`);
       }
-      let app = this.webapp.connectHandlers;
+      const app = this.webapp.connectHandlers;
       app.use(this.servePath, this.handleClientLogRequest.bind(this));
-    }
-    else {
+    } else {
       if (this.verbose) {
         this.output.write(`Not serving logger, path ${servePath}.\n`);
       }
     }
   }
+
+  /**
+   * @inheritDoc
+   */
+  protected _getHostname(): string | undefined {
+    if (!this.hostname) {
+      this.hostname = os.hostname();
+    }
+
+    return this.hostname;
+  }
 }
 
-export default ServerLogger;
+export {
+  IServerLoggerConstructorParameters,
+  ServerLogger,
+  SIDE as ServerSide,
+};

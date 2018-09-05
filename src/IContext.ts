@@ -17,7 +17,7 @@ interface ITimestampsHash {
 }
 
 interface IContext {
-  [DETAILS_KEY]?: object;
+  [DETAILS_KEY]?: {};
   [HOST_KEY]?: string;
   [SOURCE_KEY]?: string;
   [TS_KEY]?: ITimestampsHash;

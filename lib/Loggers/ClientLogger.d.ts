@@ -1,8 +1,8 @@
 /**
  * @fileOverview Client-side Logger implementation.
  */
-import Logger from "./Logger";
-import { IStrategy } from "./Strategies/IStrategy";
+import { IStrategy } from "../Strategies/IStrategy";
+import { Logger } from "./Logger";
 /**
  * ClientLogger is the client-side implementation of Logger.
  *
@@ -16,5 +16,9 @@ import { IStrategy } from "./Strategies/IStrategy";
 declare class ClientLogger extends Logger {
     static readonly side: string;
     constructor(strategy: IStrategy);
+    /**
+     * @inheritDoc
+     */
+    protected getHostname(): string | undefined;
 }
-export default ClientLogger;
+export { ClientLogger, };

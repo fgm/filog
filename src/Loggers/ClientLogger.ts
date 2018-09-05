@@ -2,8 +2,8 @@
  * @fileOverview Client-side Logger implementation.
  */
 
-import Logger from "./Logger";
-import {IStrategy} from "./Strategies/IStrategy";
+import {IStrategy} from "../Strategies/IStrategy";
+import { Logger } from "./Logger";
 
 const SIDE = "client";
 
@@ -24,6 +24,15 @@ class ClientLogger extends Logger {
     super(strategy);
     this.side = SIDE;
   }
+
+  /**
+   * @inheritDoc
+   */
+  protected getHostname(): string | undefined {
+    return undefined;
+  }
 }
 
-export default ClientLogger;
+export {
+  ClientLogger,
+};

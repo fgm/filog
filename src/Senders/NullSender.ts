@@ -2,7 +2,7 @@
  * @fileOverview NulllSender class.
  */
 
-import SenderBase from "./SenderBase";
+import { SenderBase } from "./SenderBase";
 
 /**
  * NullSender defines an explicit null sender.

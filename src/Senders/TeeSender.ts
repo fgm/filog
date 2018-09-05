@@ -3,7 +3,7 @@
  */
 
 import {ISender} from "./ISender";
-import SenderBase from "./SenderBase";
+import { SenderBase } from "./SenderBase";
 
 /**
  * Like a UNIX tee(1), the TeeSender sends its input to multiple outputs.

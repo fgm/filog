@@ -1,5 +1,5 @@
-import { IContext } from "./IContext";
-import * as LogLevel from "./LogLevel";
+import { IContext } from "../IContext";
+import * as LogLevel from "../LogLevel";
 interface ILogger {
     /**
      * Log an event. This is the *MAIN* method in the whole package.

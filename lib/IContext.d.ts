@@ -9,13 +9,13 @@ interface ITimestamps {
     [op: string]: number;
 }
 interface ITimestampsHash {
-    [key: string]: ITimestamps;
+    [side: string]: ITimestamps;
 }
 interface IContext {
-    [DETAILS_KEY]?: object;
+    [DETAILS_KEY]?: {};
     [HOST_KEY]?: string;
     [SOURCE_KEY]?: string;
     [TS_KEY]?: ITimestampsHash;
     [key: string]: {} | undefined;
 }
-export { DETAILS_KEY, HOST_KEY, SOURCE_KEY, TS_KEY, IDetails, IContext, ITimestampsHash, };
+export { DETAILS_KEY, HOST_KEY, SOURCE_KEY, TS_KEY, IDetails, IContext, ITimestamps, ITimestampsHash, };

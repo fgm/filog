@@ -13,7 +13,7 @@ declare const TrivialStrategy: {
     new (sender: ISender): {
         senders: ISender[];
         selectSenders(_1: Levels, _2: string, _3: object): ISender[];
-        customizeLogger(_: import("../ILogger").ILogger): void;
+        customizeLogger(_: import("../Loggers/ILogger").ILogger): void;
     };
 };
 export default TrivialStrategy;

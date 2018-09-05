@@ -3,9 +3,9 @@
  */
 import {Mongo} from "meteor/mongo";
 import {IContext, TS_KEY} from "../IContext";
-import Logger from "../Logger";
-import ServerLogger from "../ServerLogger";
-import SenderBase from "./SenderBase";
+import { Logger } from "../Loggers/Logger";
+import { ServerSide } from "../Loggers/ServerLogger";
+import { SenderBase } from "./SenderBase";
 
 /**
  * MongodbSender sends logs to the Meteor standard database.
@@ -24,10 +24,10 @@ const MongodbSender = class extends SenderBase {
    * @param {(String|Collection)} collection
    *   The collection or the name of the collection in which to log.
    */
-  constructor(mongo: typeof Mongo, collection: string|Mongo.Collection<object> = "logger") {
+  constructor(mongo: any, collection: string|Mongo.Collection<object> = "logger") {
     super();
     if (collection instanceof mongo.Collection) {
-      this.store = collection;
+      this.store = collection as Mongo.Collection<object>;
     } else if (typeof collection === "string") {
       const collectionName = collection;
       this.store = new mongo.Collection(collectionName);
@@ -50,7 +50,7 @@ const MongodbSender = class extends SenderBase {
     doc.context = defaultedContext;
 
     // doc.context.timestamp.server is known to exist from above.
-    Logger.prototype.stamp.call({ side: ServerLogger.side }, doc.context, "send");
+    Logger.stamp(doc.context, "send", ServerSide);
     this.store.insert(doc);
   }
 };

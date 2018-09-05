@@ -5,7 +5,7 @@
  */
 
 import NullFn from "../NullFn";
-import SenderBase from "./SenderBase";
+import { SenderBase } from "./SenderBase";
 
 /**
  * MeteorClientHttpSender send data from the client to the server over HTTP.

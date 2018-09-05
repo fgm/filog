@@ -2,12 +2,12 @@
  * @fileOverview Level-based Strategy.
  */
 
-import {ILogger} from "../ILogger";
+import {ILogger} from "../Loggers/ILogger";
 import * as LogLevel from "../LogLevel";
 import NullFn from "../NullFn";
 import {ISender} from "../Senders/ISender";
 import NullSender from "../Senders/NullSender";
-import SenderBase from "../Senders/SenderBase";
+import { SenderBase } from "../Senders/SenderBase";
 import StrategyBase from "./StrategyBase";
 
 /**

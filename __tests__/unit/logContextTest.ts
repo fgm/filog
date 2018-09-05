@@ -1,21 +1,14 @@
-import {
-  DETAILS_KEY,
-  IContext,
-  SOURCE_KEY,
-  TS_KEY,
-} from "../../src/IContext";
-import Logger from "../../src/Logger";
+import {DETAILS_KEY, IContext, SOURCE_KEY, TS_KEY } from "../../src/IContext";
+import {Logger} from "../../src/Loggers/Logger";
+import {ServerLogger} from "../../src/Loggers/ServerLogger";
 import * as LogLevel from "../../src/LogLevel";
+import {IProcessor} from "../../src/Processors/IProcessor";
 import ProcessorBase from "../../src/Processors/ProcessorBase";
-import ServerLogger from "../../src/ServerLogger";
+import {newEmptyStrategy, newLogStrategy, TestSender} from "./types";
 
 function testImmutableContext() {
-  const strategy = {
-    customizeLogger: () => [],
-    selectSenders: () => [],
-  };
   test("should not modify context in log() calls", () => {
-    const logger = new Logger(strategy );
+    const logger = new Logger(newEmptyStrategy());
     logger.side = "test";
     const originalContext = {};
     const context = { ...originalContext };
@@ -35,18 +28,7 @@ function testImmutableContext() {
 }
 
 function testMessageContext() {
-  let result;
   const referenceContext = () => ({ a: "A" });
-  const sender = new class {
-    send(level, message, context) {
-      result = { level, message, context };
-    }
-  }();
-
-  const strategy = {
-    customizeLogger: () => [],
-    selectSenders: () => [sender],
-  };
 
   /**
    * log(..., { a: 1 }) should ...
@@ -54,14 +36,14 @@ function testMessageContext() {
    * - log { message_details: { a: 1} }.
    */
   test(`should add the message argument to ${DETAILS_KEY}`, () => {
-    const logger = new Logger(strategy);
-    result = null;
+    const testSender: TestSender = new TestSender();
+    const logger = new Logger(newLogStrategy(testSender));
     logger.log(LogLevel.DEBUG, "some message", referenceContext());
 
-    const actual = result.context[DETAILS_KEY].a;
+    const actualDetails = testSender.result.context[DETAILS_KEY];
     const expected = "A";
     // Message details is set
-    expect(actual).toBe(expected);
+    expect(actualDetails).toHaveProperty("a", expected);
   });
 
   /**
@@ -70,11 +52,11 @@ function testMessageContext() {
    * - NOT log { a: 1 }.
    */
   test("should not add the message arguments to context root", () => {
-    const logger = new Logger(strategy);
-    result = null;
+    const sender = new TestSender();
+    const logger = new Logger(newLogStrategy(sender));
     logger.log(LogLevel.DEBUG, "some message", referenceContext());
 
-    const actual = result.context.hasOwnProperty("a");
+    const actual = sender.result.context.hasOwnProperty("a");
     const expected = false;
     // Message details is set
     expect(actual).toBe(expected);
@@ -87,12 +69,12 @@ function testMessageContext() {
    *   unlike the message_details merging it did until 0.1.18 included.
    */
   test(`should not merge contents of existing ${DETAILS_KEY} context key`, () => {
-    const logger = new Logger(strategy);
-    result = null;
+    const sender = new TestSender();
+    const logger = new Logger(newLogStrategy(sender));
     const originalContext = Object.assign({ [DETAILS_KEY]: { foo: "bar" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
-    const actual = result.context;
+    const actual = sender.result.context;
     expect(actual).not.toHaveProperty("a");
     expect(actual).not.toHaveProperty("foo");
     expect(actual).toHaveProperty(DETAILS_KEY);
@@ -107,7 +89,7 @@ function testMessageContext() {
     const actualNested = actualDetails[DETAILS_KEY];
     expect(actualNested).not.toHaveProperty("a", "A");
     expect(actualNested).not.toHaveProperty(DETAILS_KEY);
-    expect(actualNested).toHaveProperty("foo", 'bar');
+    expect(actualNested).toHaveProperty("foo", "bar");
   });
 
   /**
@@ -117,13 +99,14 @@ function testMessageContext() {
    *   unlike the message_details merging it did until 0.1.18 included.
    */
   test(`should not merge existing ${DETAILS_KEY} context key itself`, () => {
-    const logger = new Logger(strategy);
-    result = null;
+    const sender = new TestSender();
+    const logger = new Logger(newLogStrategy(sender));
+
     const originalContext = Object.assign({ [DETAILS_KEY]: { a: "A" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
     // Message_details should only contain a nested [DETAILS_KEY].
-    const actual = result.context;
+    const actual = sender.result.context;
     const keys = Object.keys(actual).sort();
     expect(keys.length).toBe(3);
     expect(keys).toEqual([DETAILS_KEY, SOURCE_KEY, TS_KEY]);
@@ -147,18 +130,17 @@ function testMessageContext() {
    * - log { message_details: { a: "A", message_details: { a: "B" } } }.
    */
   test(`should not merge keys within ${DETAILS_KEY}`, () => {
-    const logger = new Logger(strategy);
-    result = null;
+    const sender = new TestSender();
+    const logger = new Logger(newLogStrategy(sender));
     const originalContext = Object.assign({ [DETAILS_KEY]: { a: "B" } }, referenceContext());
     logger.log(LogLevel.DEBUG, "some message", originalContext);
 
     // [KEY_DETAILS] should contain the newly added value for key "a", not the
     // one present in the initial [DETAILS_KEY].
-    const actual = result.context[DETAILS_KEY];
+    const actualDetails: { a?: any } = sender.result.context[DETAILS_KEY];
     const expected = "A";
-    // Message details is set.
-    expect(actual).toHaveProperty("a");
-    expect(actual.a).toBe(expected);
+    // Message details are set.
+    expect(actualDetails).toHaveProperty("a", expected);
   });
 }
 
@@ -188,12 +170,12 @@ function testObjectifyContext() {
       undefined,
     ];
 
-    scalars.forEach(v => {
+    scalars.forEach((v) => {
       const objectified = objectifyContext(v);
       // const printable = JSON.stringify(objectified);
 
-      let actual = typeof objectified;
-      let expected = "object";
+      let actual: string | number | boolean | null | undefined = typeof objectified;
+      let expected: string | number | boolean | null | undefined = "object";
       // `Result type is "object" for ${printable}.`);
       expect(actual).toBe(expected);
 
@@ -223,8 +205,8 @@ function testObjectifyContext() {
   test("should not modify existing POJOs", () => {
     const raw = { a: "b" };
     const actual = objectifyContext(raw);
-    const expected = raw;
-    expect(actual).toBe(expected);
+    const expected = { ...raw };
+    expect(actual).toEqual(expected);
   });
 
   test("should convert date objects to ISO date strings", () => {
@@ -242,13 +224,16 @@ function testObjectifyContext() {
     expect(actual).toBe(expected);
   });
 
+  // This test checks boxing/unboxing, so disable TSlint about it.
   test("should downgrade boxing classes to underlying primitives", () => {
+    // tslint:disable no-construct
     const expectations = [
       // Primitive, boxed.
       [true, new Boolean(true)],
       [1E15, new Number(1E15)],
       ["😂 hello, α world", new String("😂 hello, α world")],
     ];
+    // tslint:enable no-construct
 
     for (const [primitive, boxed] of expectations) {
       expect(typeof boxed).toBe("object");
@@ -260,14 +245,15 @@ function testObjectifyContext() {
   test("should downgrade miscellaneous classed objects to POJOs", () => {
     const value = "foo";
     class Foo {
+      public k;
       constructor(v) {
         this.k = v;
       }
     }
     const initial = new Foo(value);
 
-    let actual = typeof initial;
-    let expected = "object";
+    let actual: string = typeof initial;
+    let expected: string | Foo = "object";
     expect(actual).toBe(expected);
 
     actual = initial.constructor.name;
@@ -309,49 +295,51 @@ function testObjectifyContext() {
 }
 
 function testProcessors() {
-  class Sender {
+  const Sender = class extends ProcessorBase implements IProcessor {
+    public logs: any[][];
+
     constructor() {
+      super();
       this.logs = [];
     }
 
-    send(level, message, context) {
+    public send(level, message, context) {
       this.logs.push([level, message, context]);
     }
-  }
+  };
 
-  class Adder extends ProcessorBase {
-    process(context) {
-      const result = Object.assign({ added: "value" }, context);
-      return result;
+  const Adder = class extends ProcessorBase implements IProcessor {
+    public process(context) {
+      return Object.assign({ added: "value" }, context);
     }
-  }
+  };
 
-  class Modifier extends ProcessorBase {
-    process(context) {
+  const Modifier = class extends ProcessorBase implements IProcessor {
+    public process(context) {
       context.initial = "cost";
       return context;
     }
-  }
+  };
 
-  class Remover extends ProcessorBase {
-    process(context) {
+  const Remover = class extends ProcessorBase implements IProcessor {
+    public process(context) {
       const { added, initial, ...rest } = context;
       return rest;
     }
-  }
+  };
 
   /**
    * Class Purger attempts to remove all known properties from the context.
    *
    * Look at the timestamp test.
    */
-  class Purger extends ProcessorBase {
-    process(context) {
+  const Purger = class extends ProcessorBase implements IProcessor {
+    public process(context) {
       return {};
     }
-  }
+  };
 
-  class TimeWarp extends ProcessorBase {
+  const TimeWarp = class extends ProcessorBase {
     // Let's do the time warp again.
     public process(context: IContext): IContext {
       context[TS_KEY] = {
@@ -360,7 +348,7 @@ function testProcessors() {
       context.hostname = "remote";
       return context;
     }
-  }
+  };
 
   beforeEach(() => {
     this.initialContext = { initial: "initial" };
@@ -370,7 +358,7 @@ function testProcessors() {
       selectSenders: () => [this.sender],
     };
     this.logger = new Logger(this.strategy);
-    this.logger.side = 'test';
+    this.logger.side = "test";
   });
 
   test("processors should be able to modify the content of ordinary existing keys", () => {
@@ -378,7 +366,7 @@ function testProcessors() {
     expect(this.sender.logs.length).toBe(0);
     this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
     expect(this.sender.logs.length).toBe(1);
-    const [,, context] = this.sender.logs.pop();
+    const [, , context] = this.sender.logs.pop();
     expect(context).toHaveProperty("initial", "cost");
   });
 
@@ -387,7 +375,7 @@ function testProcessors() {
     expect(this.sender.logs.length).toBe(0);
     this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
     expect(this.sender.logs.length).toBe(1);
-    const [,, context] = this.sender.logs.pop();
+    const [, , context] = this.sender.logs.pop();
     expect(context).toHaveProperty("added", "value");
   });
 
@@ -396,7 +384,7 @@ function testProcessors() {
     expect(this.sender.logs.length).toBe(0);
     this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
     expect(this.sender.logs.length).toBe(1);
-    const [,, context] = this.sender.logs.pop();
+    const [, , context] = this.sender.logs.pop();
     expect(context.added).toBeUndefined();
     expect(context.initial).toBeUndefined();
     // By default, pre-processing content goes to the message_details key.
@@ -408,7 +396,7 @@ function testProcessors() {
     expect(this.sender.logs.length).toBe(0);
     this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
     expect(this.sender.logs.length).toBe(1);
-    const [,, context] = this.sender.logs.pop();
+    const [, , context] = this.sender.logs.pop();
     expect(context).not.toHaveProperty("added");
     expect(context).not.toHaveProperty("initial");
     expect(context).not.toHaveProperty("message_details");
@@ -420,7 +408,7 @@ function testProcessors() {
     this.logger.log(LogLevel.WARNING, "hello, world", { hostname: "local", ...this.initialContext });
     const ts = +new Date();
     expect(this.sender.logs.length).toBe(1);
-    const [,, context] = this.sender.logs.pop();
+    const [, , context] = this.sender.logs.pop();
     expect(context).toHaveProperty("hostname", "local");
     expect(context).toHaveProperty(`${TS_KEY}.${this.logger.side}.log`);
     const lag = ts - context[TS_KEY][this.logger.side].log;
@@ -436,7 +424,7 @@ function testProcessors() {
     this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
     const ts = +new Date();
     expect(this.sender.logs.length).toBe(1);
-    const [,, context] = this.sender.logs.pop();
+    const [, , context] = this.sender.logs.pop();
     expect(context).toHaveProperty("hostname", "remote");
     expect(context).toHaveProperty(`${TS_KEY}.${this.logger.side}.log`);
     const lag = ts - context[TS_KEY][this.logger.side].log;

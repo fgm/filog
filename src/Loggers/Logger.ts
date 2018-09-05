@@ -1,17 +1,20 @@
 /**
  * @fileOverview Base Logger class.
  */
+
 import TraceKit from "tracekit";
+
 import {
+  DETAILS_KEY, HOST_KEY,
   IContext,
-  ITimestampsHash,
+  ITimestampsHash, SOURCE_KEY,
   TS_KEY,
-} from "./IContext";
+} from "../IContext";
+import InvalidArgumentException from "../InvalidArgumentException";
+import * as LogLevel from "../LogLevel";
+import {IProcessor} from "../Processors/IProcessor";
+import {IStrategy} from "../Strategies/IStrategy";
 import {ILogger} from "./ILogger";
-import InvalidArgumentException from "./InvalidArgumentException";
-import * as LogLevel from "./LogLevel";
-import {IProcessor} from "./Processors/IProcessor";
-import {IStrategy} from "./Strategies/IStrategy";
 
 // const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
@@ -43,6 +46,34 @@ class Logger implements ILogger {
     return LogLevel.Names[numericLevel];
   }
 
+  /**
+   * Add a timestamp to a context object on the active side.
+   *
+   * Ensure a TS_KEY will be present, and existing timestamps are not being
+   * overwritten, except possibly for any value already present at [TS_KEY][op].
+   *
+   * @param context
+   *   Mutated. The context to stamp.
+   * @param op
+   *   The operation for which to add a timestamp.
+   *
+   * @protected
+   */
+  public static stamp(context: IContext, op: string, side: keyof ITimestampsHash): void {
+    const now = + new Date();
+    // Ensure context actually contains a TS_KEY.
+    if (typeof context[TS_KEY] === "undefined") {
+      context[TS_KEY] = {} as ITimestampsHash;
+    }
+
+    // We know context[TS_KEY] is defined because we just ensured it was.
+    const contextTs: ITimestampsHash = context[TS_KEY]!;
+
+    const sideTs = contextTs[side] || {};
+    sideTs[op] = now;
+    contextTs[side] = sideTs;
+  }
+
   public processors: IProcessor[] = [];
   public side: string = SIDE;
   // FIXME Cannot use TraceKit as a type as it's a namespace.
@@ -71,6 +102,76 @@ class Logger implements ILogger {
    */
   public arm() {
     this.tk.report.subscribe(this.reportSubscriber.bind(this));
+  }
+
+  /** @inheritDoc */
+  public debug(message: object|string, context: IContext = {}): void {
+    this.log(LogLevel.DEBUG, message, context);
+  }
+
+  /**
+   * Disarm the subscriber.
+   *
+   * In most cases, we do not want to disarm immediately: a stack trace being
+   * build may take several hundred milliseconds, and we would lose it.
+   *
+   * @param {Number} delay
+   *   The delay before actually disarming, in milliseconds.
+   *
+   * @returns {void}
+   */
+  public disarm(delay = 2000) {
+    setTimeout(() => {
+      this.tk.report.unsubscribe(this.reportSubscriber);
+    }, delay);
+  }
+
+  /** @inheritDoc */
+  public error(message: object|string, context: IContext = {}): void {
+    // FIXME: message may not be a string.
+    this.log(LogLevel.ERROR, message as string, context);
+  }
+
+  /**
+   * Provide the default context bits specific to the logger instance + details.
+   *
+   * @param details
+   *   The message details.
+   *
+   * This method is only made public for the benefit of tests: it is not meant
+   * to be used outside the class and its tests.
+   *
+   * @protected
+   */
+  public getInitialContext(details = {}): IContext {
+    const cx: IContext = {
+      [DETAILS_KEY]: details,
+      [SOURCE_KEY]: this.side,
+    };
+
+    const hostName = this._getHostname();
+    if (typeof hostName === "string") {
+      cx[HOST_KEY] = hostName;
+    }
+
+    Logger.stamp(cx, "log", this.side);
+    return cx;
+  }
+
+  /** @inheritDoc */
+  public info(message: object|string, context: IContext = {}): void {
+    this.log(LogLevel.INFORMATIONAL, message, context);
+  }
+
+  /** @inheritDoc */
+  public log(
+    level: LogLevel.Levels,
+    message: object|string,
+    details: {} = {},
+  ): void {
+    this.validateLevel(level);
+    const c1 = this.getInitialContext(details);
+    this.send(this.strategy, level, String(message), c1);
   }
 
   /**
@@ -121,67 +222,6 @@ class Logger implements ILogger {
   }
 
   /**
-   * Add a timestamp to a context object on the active side.
-   *
-   * @param context
-   *   Mutated. The context to stamp.
-   * @param op
-   *   The operation for which to add a timestamp.
-   */
-  public stamp(context: IContext, op: string): void {
-    const now = + new Date();
-    if (!context[TS_KEY]) {
-      context[TS_KEY] = {};
-    }
-    const contextTs: ITimestampsHash = context[TS_KEY]!;
-    const side = contextTs[this.side as keyof ITimestampsHash] || {};
-    side[op] = now;
-  }
-
-  /** @inheritDoc */
-  public debug(message: object|string, context: IContext = {}): void {
-    this.log(LogLevel.DEBUG, message, context);
-  }
-
-  /**
-   * Disarm the subscriber.
-   *
-   * In most cases, we do not want to disarm immediately: a stack trace being
-   * build may take several hundred milliseconds, and we would lose it.
-   *
-   * @param {Number} delay
-   *   The delay before actually disarming, in milliseconds.
-   *
-   * @returns {void}
-   */
-  public disarm(delay = 2000) {
-    setTimeout(() => {
-      this.tk.report.unsubscribe(this.reportSubscriber);
-    }, delay);
-  }
-
-  /** @inheritDoc */
-  public error(message: object|string, context: IContext = {}): void {
-    // FIXME: message may not be a string.
-    this.log(LogLevel.ERROR, message as string, context);
-  }
-
-  /** @inheritDoc */
-  public info(message: object|string, context: IContext = {}): void {
-    this.log(LogLevel.INFORMATIONAL, message, context);
-  }
-
-  /** @inheritDoc */
-  public log(
-    level: LogLevel.Levels,
-    message: object|string,
-    initialContext: IContext = {},
-    process: boolean = true,
-  ): void {
-    this.send(this.strategy, level, String(message), initialContext);
-  }
-
-  /**
    * Ensure a log level is in the allowed value set.
    *
    * While this is useless for TS code, JS code using the compiled version of
@@ -219,6 +259,17 @@ class Logger implements ILogger {
    * @todo (or not ?) merge in the funky Meteor logic from the logging package.
    */
   public _meteorLog(): void { return; }
+
+  /**
+   * Child classes are expected to re-implement this.
+   *
+   * @protected
+   */
+  protected _getHostname(): string | undefined {
+    return undefined;
+  }
 }
 
-export default Logger;
+export {
+  Logger,
+};

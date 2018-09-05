@@ -6,10 +6,10 @@ import modernSyslog = require("modern-syslog");
 import * as path from "path";
 import * as util from "util";
 import {IContext, TS_KEY} from "../IContext";
-import Logger from "../Logger";
+import { Logger } from "../Loggers/Logger";
 import * as LogLevel from "../LogLevel";
-import ServerLogger from "../ServerLogger";
-import SenderBase from "./SenderBase";
+import { ServerLogger } from "../Loggers/ServerLogger";
+import { SenderBase } from "./SenderBase";
 
 type Serializer = (doc: object) => string;
 
@@ -106,7 +106,7 @@ const SyslogSender = class extends SenderBase {
     }
 
     // doc.context.timestamp.server is known to exist from above.
-    Logger.prototype.stamp.call({ side: ServerLogger.side }, doc.context, "send");
+    Logger.stamp(doc.context, "send", ServerLogger.side);
     this.syslog.log(level, this.serialize(doc));
   }
 

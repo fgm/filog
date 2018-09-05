@@ -1,4 +1,4 @@
-import ServerLogger from "../../src/ServerLogger";
+import { ServerLogger } from "../../src/Loggers/ServerLogger";
 
 function testStringifyMessage() {
   const stringify = ServerLogger.stringifyMessage;

@@ -1,8 +1,11 @@
-import { IContext } from "./IContext";
+/**
+ * @fileOverview Base Logger class.
+ */
+import { IContext, ITimestampsHash } from "../IContext";
+import * as LogLevel from "../LogLevel";
+import { IProcessor } from "../Processors/IProcessor";
+import { IStrategy } from "../Strategies/IStrategy";
 import { ILogger } from "./ILogger";
-import * as LogLevel from "./LogLevel";
-import { IProcessor } from "./Processors/IProcessor";
-import { IStrategy } from "./Strategies/IStrategy";
 /**
  * Logger is the base class for loggers.
  */
@@ -20,6 +23,20 @@ declare class Logger implements ILogger {
      *   The english name for the level.
      */
     static levelName(level: number): string;
+    /**
+     * Add a timestamp to a context object on the active side.
+     *
+     * Ensure a TS_KEY will be present, and existing timestamps are not being
+     * overwritten, except possibly for any value already present at [TS_KEY][op].
+     *
+     * @param context
+     *   Mutated. The context to stamp.
+     * @param op
+     *   The operation for which to add a timestamp.
+     *
+     * @protected
+     */
+    static stamp(context: IContext, op: string, side: keyof ITimestampsHash): void;
     processors: IProcessor[];
     side: string;
     tk: any;
@@ -39,6 +56,38 @@ declare class Logger implements ILogger {
      * @see Logger#reportSubscriber
      */
     arm(): void;
+    /** @inheritDoc */
+    debug(message: object | string, context?: IContext): void;
+    /**
+     * Disarm the subscriber.
+     *
+     * In most cases, we do not want to disarm immediately: a stack trace being
+     * build may take several hundred milliseconds, and we would lose it.
+     *
+     * @param {Number} delay
+     *   The delay before actually disarming, in milliseconds.
+     *
+     * @returns {void}
+     */
+    disarm(delay?: number): void;
+    /** @inheritDoc */
+    error(message: object | string, context?: IContext): void;
+    /**
+     * Provide the default context bits specific to the logger instance + details.
+     *
+     * @param details
+     *   The message details.
+     *
+     * This method is only made public for the benefit of tests: it is not meant
+     * to be used outside the class and its tests.
+     *
+     * @protected
+     */
+    getInitialContext(details?: {}): IContext;
+    /** @inheritDoc */
+    info(message: object | string, context?: IContext): void;
+    /** @inheritDoc */
+    log(level: LogLevel.Levels, message: object | string, details?: {}): void;
     /**
      * The callback invoked by TraceKit
      *
@@ -75,35 +124,6 @@ declare class Logger implements ILogger {
      */
     send(strategy: IStrategy, level: LogLevel.Levels, message: string, sentContext: {}): void;
     /**
-     * Add a timestamp to a context object on the active side.
-     *
-     * @param context
-     *   Mutated. The context to stamp.
-     * @param op
-     *   The operation for which to add a timestamp.
-     */
-    stamp(context: IContext, op: string): void;
-    /** @inheritDoc */
-    debug(message: object | string, context?: IContext): void;
-    /**
-     * Disarm the subscriber.
-     *
-     * In most cases, we do not want to disarm immediately: a stack trace being
-     * build may take several hundred milliseconds, and we would lose it.
-     *
-     * @param {Number} delay
-     *   The delay before actually disarming, in milliseconds.
-     *
-     * @returns {void}
-     */
-    disarm(delay?: number): void;
-    /** @inheritDoc */
-    error(message: object | string, context?: IContext): void;
-    /** @inheritDoc */
-    info(message: object | string, context?: IContext): void;
-    /** @inheritDoc */
-    log(level: LogLevel.Levels, message: object | string, initialContext?: IContext, process?: boolean): void;
-    /**
      * Ensure a log level is in the allowed value set.
      *
      * While this is useless for TS code, JS code using the compiled version of
@@ -131,5 +151,11 @@ declare class Logger implements ILogger {
      * @todo (or not ?) merge in the funky Meteor logic from the logging package.
      */
     _meteorLog(): void;
+    /**
+     * Child classes are expected to re-implement this.
+     *
+     * @protected
+     */
+    protected _getHostname(): string | undefined;
 }
-export default Logger;
+export { Logger, };

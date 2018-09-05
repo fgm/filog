@@ -2,15 +2,19 @@
  * @fileOverview Server-side Logger.
  */
 /// <reference types="node" />
+import * as connect from "connect";
 import { IncomingMessage, ServerResponse } from "http";
 import { WebApp } from "meteor/webapp";
-import Logger from "./Logger";
-import * as LogLevel from "./LogLevel";
-import { IStrategy } from "./Strategies/IStrategy";
-import WriteStream = NodeJS.WriteStream;
-import { IContext } from "./IContext";
+import { IContext } from "../IContext";
+import * as LogLevel from "../LogLevel";
+import { IStrategy } from "../Strategies/IStrategy";
 import { ILogger } from "./ILogger";
-declare type OptionalWebApp = typeof WebApp | null;
+import { Logger } from "./Logger";
+import WriteStream = NodeJS.WriteStream;
+interface IWebApp {
+    connectHandlers: connect.Server;
+}
+declare type OptionalWebApp = typeof WebApp | IWebApp | null;
 interface IServerLoggerConstructorParameters {
     enableMethod?: boolean;
     logRequestHeaders?: boolean;
@@ -18,6 +22,7 @@ interface IServerLoggerConstructorParameters {
     servePath?: string;
     verbose?: boolean;
 }
+declare const SIDE = "server";
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
  *
@@ -57,7 +62,7 @@ declare class ServerLogger extends Logger implements ILogger {
     maxReqListeners: number;
     output: WriteStream;
     servePath: string;
-    readonly side: string;
+    side: string;
     verbose: boolean;
     /**
      * @constructor
@@ -74,6 +79,22 @@ declare class ServerLogger extends Logger implements ILogger {
      */
     constructor(strategy: IStrategy, webapp?: OptionalWebApp, parameters?: IServerLoggerConstructorParameters);
     /**
+     * Add defaults to the initial context.
+     *
+     * @param initialContext
+     *   The context passed to logExtended().
+     * @param source
+     *   The source whence the event originated.
+     *
+     * @see logExtended()
+     *
+     * This method is only made public for the benefit of tests: it is not meant
+     * to be used outside the class and its tests.
+     *
+     * @protected
+     */
+    defaultContext(initialContext: IContext, source: string): IContext;
+    /**
      * Handle a log message from the client.
      *
      * @param req
@@ -89,7 +110,7 @@ declare class ServerLogger extends Logger implements ILogger {
     /**
      * @inheritDoc
      */
-    log(level: LogLevel.Levels, message: string, rawContext: IContext, cooked?: boolean): void;
+    log(level: LogLevel.Levels, message: string, rawContext: IContext): void;
     /**
      * Extended syntax for log() method.
      *
@@ -99,9 +120,6 @@ declare class ServerLogger extends Logger implements ILogger {
      *   The event level.
      * @param message
      *   The event message.
-     * @param details
-     *   The details submitted with the message: any additional data added to
-     *   the message by the upstream (client/cordova) log() caller().
      * @param context
      *   The context added to the details by upstream processors.
      * @param source
@@ -109,7 +127,7 @@ declare class ServerLogger extends Logger implements ILogger {
      *
      * @throws InvalidArgumentException
      */
-    logExtended(level: LogLevel.Levels, message: string, details: {}, context: IContext, source: string): void;
+    logExtended(level: LogLevel.Levels, message: string, context: IContext, source: string): void;
     /**
      * The Meteor server method registered a ${Logger.METHOD}.
      *
@@ -136,5 +154,9 @@ declare class ServerLogger extends Logger implements ILogger {
      *   The path on which to expose the server logger. Must NOT start by a "/".
      */
     setupConnect(webapp: OptionalWebApp, servePath: string): void;
+    /**
+     * @inheritDoc
+     */
+    protected _getHostname(): string | undefined;
 }
-export default ServerLogger;
+export { IServerLoggerConstructorParameters, ServerLogger, SIDE as ServerSide, };

@@ -8,7 +8,7 @@ import { Mongo } from "meteor/mongo";
  * @extends SenderBase
  */
 declare const MongodbSender: {
-    new (mongo: typeof Mongo, collection?: string | Mongo.Collection<object>): {
+    new (mongo: any, collection?: string | Mongo.Collection<object>): {
         store: Mongo.Collection<object>;
         /** @inheritDoc */
         send(level: number, message: string, context: object): void;

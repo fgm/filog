@@ -1,60 +1,48 @@
-/** global: jest */
-
 import sinon = require("sinon");
 
-import {DETAILS_KEY, SOURCE_KEY, TS_KEY} from "../../src/IContext";
-import Logger from "../../src/Logger";
+import {DETAILS_KEY, IContext, SOURCE_KEY, TS_KEY} from "../../src/IContext";
+import {ILogger} from "../../src/Loggers/ILogger";
+import { IServerLoggerConstructorParameters, ServerLogger } from "../../src/Loggers/ServerLogger";
 import * as LogLevel from "../../src/LogLevel";
 import NullFn from "../../src/NullFn";
+import {IProcessor} from "../../src/Processors/IProcessor";
 import ProcessorBase from "../../src/Processors/ProcessorBase";
-import ServerLogger from "../../src/ServerLogger";
-
-const emptyStrategy = () => ({
-  customizeLogger: () => [],
-  selectSenders: () => [],
-});
+import {IResult, newEmptyStrategy, newLogStrategy, TestSender} from "./types";
 
 const LOG_SOURCE = "test";
 const MAGIC = "xyzzy";
 
-let result;
-const TestSender = new class {
-  public send(level, message, context): void {
-    result = { level, message, context };
-  }
-}();
-const logStrategy = { ...emptyStrategy(), selectSenders: () => [TestSender] };
-
 const testConstructor = () => {
-  global.Meteor = { methods: NullFn };
+  (global as any).Meteor = { methods: NullFn };
 
   test("Should provide default parameters", () => {
-    const logger = new ServerLogger(emptyStrategy());
+    const logger = new ServerLogger(newEmptyStrategy());
     expect(logger.enableMethod).toBe(true);
     expect(logger.logRequestHeaders).toBe(true);
     expect(logger.maxReqListeners).toBe(11);
     expect(logger.servePath).toBe("/logger");
   });
 
+  // These tests are only relevant to non-TS code: TS would reject the calls.
   test("Should not add unknown parameters", () => {
     // Extra property on values prototype and on object itself.
     Object.prototype[MAGIC] = NullFn;
     const values = { foo: "bar" };
 
-    const logger = new ServerLogger(emptyStrategy(), null, values);
+    const logger = new ServerLogger(newEmptyStrategy(), null, values as IServerLoggerConstructorParameters);
     delete Object.prototype[MAGIC];
     // Unknown argument from object and prototype are not set on instance.
-    expect(typeof logger.foo).toBe("undefined");
+    expect(typeof logger["foo" as keyof ILogger]).toBe("undefined");
     expect(typeof logger[MAGIC]).toBe("undefined");
   });
 
   test("Should not overwrite passed parameters", () => {
-    const options = {
-      logRequestHeaders: "foo",
-      servePath: 42,
+    const options: IServerLoggerConstructorParameters = {
+      logRequestHeaders: false,
       maxReqListeners: 30,
+      servePath: "nowhere",
     };
-    const logger = new ServerLogger(emptyStrategy(), null, options);
+    const logger = new ServerLogger(newEmptyStrategy(), null, options);
 
     for (const k of Object.keys(options)) {
       expect(logger[k]).toBe(options[k]);
@@ -79,25 +67,25 @@ const testConnect = () => {
   });
 
   test("Should only register with connect when WebApp is passed", () => {
-    const loggerHappy = new ServerLogger(emptyStrategy(), mockWebApp, {});
+    const loggerHappy = new ServerLogger(newEmptyStrategy(), mockWebApp as any, {});
     expect(loggerHappy.constructor.name).toBe("ServerLogger");
     expect(connectSpy.calledOnce).toBe(true);
 
     connectSpy.resetHistory();
-    const loggerSad = new ServerLogger(emptyStrategy(), null, {});
+    const loggerSad = new ServerLogger(newEmptyStrategy(), null, {});
     expect(loggerSad.constructor.name).toBe("ServerLogger");
     expect(connectSpy.calledOnce).toBe(true);
   });
 
   test("Should register with connect with default path", () => {
-    const logger = new ServerLogger(emptyStrategy(), mockWebApp, {});
+    const logger = new ServerLogger(newEmptyStrategy(), mockWebApp as any, {});
     expect(logger.constructor.name).toBe("ServerLogger");
     expect(connectSpy.alwaysCalledWith(mockWebApp, "/logger")).toBe(true);
   });
 
   test("Should register with connect with chosen path", () => {
     const servePath = "/eightfold";
-    const logger = new ServerLogger(emptyStrategy(), mockWebApp, { servePath });
+    const logger = new ServerLogger(newEmptyStrategy(), mockWebApp as any, { servePath });
     expect(logger.constructor.name).toBe("ServerLogger");
     expect(connectSpy.calledOnce).toBe(true);
     expect(connectSpy.alwaysCalledWith(mockWebApp, servePath)).toBe(true);
@@ -105,67 +93,69 @@ const testConnect = () => {
 };
 
 const testBuildContext = () => {
-  test("Should apply argument source over context", () => {
-    const logger = new ServerLogger(emptyStrategy());
-    const actual = logger.buildContext({}, LOG_SOURCE, { [SOURCE_KEY]: "other" });
+  test("Should apply logger source over context", () => {
+    const logger: ServerLogger = new ServerLogger(newEmptyStrategy());
+    logger.side = LOG_SOURCE;
+    const details: {} = {
+      [SOURCE_KEY]: "other",
+    };
+    const actual = logger.getInitialContext(details);
     expect(actual).toHaveProperty(SOURCE_KEY, LOG_SOURCE);
   });
 
-  test("Should merge details, applying argument over context", () => {
-    const logger = new ServerLogger(emptyStrategy());
+  test("Should import details as details key", () => {
+    const logger = new ServerLogger(newEmptyStrategy());
     const argumentDetails = { a: "A", d: "D1" };
-    const initialContext = { [DETAILS_KEY]: { b: "B", d: "D2" } };
-    const actual = logger.buildContext(argumentDetails, LOG_SOURCE, initialContext);
+    const actual = logger.getInitialContext(argumentDetails);
     const expected = {
       // Argument detail overwrites context detail.
-      [DETAILS_KEY]: { a: "A", b: "B", d: "D1" },
+      [DETAILS_KEY]: argumentDetails,
     };
     expect(actual).toMatchObject(expected);
-  });
-
-  test("Should merge context", () => {
-    const logger = new ServerLogger(emptyStrategy());
-    const initialContext = { foo: "bar" };
-    const actual = logger.buildContext({}, LOG_SOURCE, initialContext);
-    expect(actual).toMatchObject({ [LOG_SOURCE]: initialContext });
   });
 };
 
 const testLogExtended = () => {
   let buildContextSpy;
+  let defaultContextSpy;
 
   beforeAll(() => {
-    buildContextSpy = sinon.spy(ServerLogger.prototype, "buildContext");
+    buildContextSpy = sinon.spy(ServerLogger.prototype, "getInitialContext");
+    defaultContextSpy = sinon.spy(ServerLogger.prototype, "defaultContext");
   });
 
   test("Should reject invalid log levels", () => {
-    const logger = new ServerLogger(emptyStrategy());
+    const logger = new ServerLogger(newEmptyStrategy());
     expect(() => {
-      logger.logExtended(-1, "message", {}, {}, LOG_SOURCE);
+      logger.logExtended(-1, "message", {}, LOG_SOURCE);
     }).toThrow();
   });
 
-  test("Should build context", () => {
-    const logger = new ServerLogger(emptyStrategy());
-    logger.logExtended(LogLevel.INFO, "message", {}, {}, LOG_SOURCE);
-    expect(buildContextSpy.calledOnce).toBe(true);
+  test("Should default context", () => {
+    const logger = new ServerLogger(newEmptyStrategy());
+    logger.logExtended(LogLevel.INFO, "message", {}, LOG_SOURCE);
+    expect(defaultContextSpy.calledOnce).toBe(true);
   });
 
   test("Should timestamp context", () => {
-    const logger = new ServerLogger(logStrategy);
+    const sender = new TestSender();
+    const logger = new ServerLogger(newLogStrategy(sender));
+
     const t0 = + new Date();
-    logger.logExtended(LogLevel.INFO, "message", {}, {}, LOG_SOURCE);
+    logger.logExtended(LogLevel.INFO, "message", {}, LOG_SOURCE);
     const t1 = + new Date();
-    expect(result).toHaveProperty('context.timestamp.server.log');
+    const result: IResult = sender.result;
+    expect(result).toHaveProperty("context.timestamp.server.log");
     const actual = result.context.timestamp.server.log;
     expect(actual).toBeGreaterThanOrEqual(t0);
     expect(actual).toBeLessThanOrEqual(t1);
   });
 
   test("Should factor source timestamp", () => {
-    const logger = new ServerLogger(logStrategy);
+    const sender = new TestSender();
+    const logger = new ServerLogger(newLogStrategy(sender));
     const t0 = + new Date();
-    const clientTsKey = 'whatever';
+    const clientTsKey = "whatever";
     const sourceContext = {
       [TS_KEY]: {
         [LOG_SOURCE]: {
@@ -173,7 +163,8 @@ const testLogExtended = () => {
         },
       },
     };
-    logger.logExtended(LogLevel.INFO, "message", {}, sourceContext, LOG_SOURCE);
+    logger.logExtended(LogLevel.INFO, "message", sourceContext, LOG_SOURCE);
+    const result: IResult = sender.result;
     expect(result).not.toHaveProperty(`context.${LOG_SOURCE}.${TS_KEY}`);
     expect(result).toHaveProperty(`context.${TS_KEY}`);
     expect(result).toHaveProperty(`context.${TS_KEY}.${LOG_SOURCE}`);
@@ -182,15 +173,20 @@ const testLogExtended = () => {
     expect(actual).toBe(t0);
   });
 
-  test("Should apply processors", () => {
-    const logger = new ServerLogger(logStrategy, null, { foo: "bar" });
-    const P1 = class extends ProcessorBase {
-      process(context) {
+  // TODO: processors are not yet implemented in this branch.
+  test.skip("Should apply processors", () => {
+    const sender = new TestSender();
+    const logger = new ServerLogger(newLogStrategy(sender), null, { foo: "bar" } as IServerLoggerConstructorParameters);
+
+    const P1 = class extends ProcessorBase implements IProcessor {
+      /** @inheritDoc */
+      public process(context: IContext): IContext {
         return { ...context, extra: "p1", p1: "p1" };
       }
     };
-    const P2 = class extends ProcessorBase {
-      process(context) {
+    const P2 = class extends ProcessorBase implements IProcessor {
+      /** @inheritDoc */
+      public process(context: IContext): IContext {
         return { ...context, extra: "p2", p2: "p2" };
       }
     };
@@ -202,7 +198,7 @@ const testLogExtended = () => {
       // Should be overwritten twice.
       extra: "initial",
     };
-    logger.logExtended(LogLevel.INFO, "message", { "some": "detail" }, initialContext, LOG_SOURCE);
+    logger.logExtended(LogLevel.INFO, "message", initialContext, LOG_SOURCE);
     // Expected: {
     //   message_details: (..not tested here..),
     //   source: "test",
@@ -210,7 +206,8 @@ const testLogExtended = () => {
     //   server: { p1: "p1", p2: "p2", extra: "p2" }
     //   timestamp: (..not tested here..)
     // }
-    expect(result).toHaveProperty('context');
+    const result: IResult = sender.result;
+    expect(result).toHaveProperty("context");
     const actual = result.context;
     expect(actual).not.toHaveProperty("c");
     expect(actual).not.toHaveProperty("p1");
