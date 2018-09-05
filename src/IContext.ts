@@ -13,7 +13,7 @@ interface ITimestamps {
 }
 
 interface ITimestampsHash {
-  [key: string]: ITimestamps;
+  [side: string]: ITimestamps;
 }
 
 interface IContext {
@@ -31,5 +31,6 @@ export {
   TS_KEY,
   IDetails,
   IContext,
+  ITimestamps,
   ITimestampsHash,
 };

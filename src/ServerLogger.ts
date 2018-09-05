@@ -265,9 +265,6 @@ class ServerLogger extends Logger implements ILogger {
    *   The event level.
    * @param message
    *   The event message.
-   * @param details
-   *   The details submitted with the message: any additional data added to
-   *   the message by the upstream (client/cordova) log() caller().
    * @param context
    *   The context added to the details by upstream processors.
    * @param source
@@ -275,9 +272,9 @@ class ServerLogger extends Logger implements ILogger {
    *
    * @throws InvalidArgumentException
    */
-  public logExtended(level: LogLevel.Levels, message: string, details: {}, context: IContext, source: string): void {
+  public logExtended(level: LogLevel.Levels, message: string, context: IContext, source: string): void {
     this.validateLevel(level);
-    this.send(this.strategy, level, message, context3);
+    this.send(this.strategy, level, message, context);
   }
 
   /**
@@ -293,7 +290,7 @@ class ServerLogger extends Logger implements ILogger {
    * @returns {void}
    */
   public logMethod({ level = LogLevel.INFO, message = "", context = {} }) {
-    this.logExtended(level, message, {}, context, ClientLogger.side);
+    this.logExtended(level, message, context, ClientLogger.side);
   }
 
   /**
