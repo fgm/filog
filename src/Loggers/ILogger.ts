@@ -1,4 +1,4 @@
-import {IContext} from "../IContext";
+import {IContext, IDetails} from "../IContext";
 import * as LogLevel from "../LogLevel";
 
 interface ILogger {
@@ -24,7 +24,7 @@ interface ILogger {
    * @see https://tools.ietf.org/html/rfc5424
    * @see http://www.php-fig.org/psr/psr-3/
    */
-  log(level: LogLevel.Levels, message: string, context: IContext): void;
+  log(level: LogLevel.Levels, message: string, context: IDetails): void;
 
   /**
    * Implementation compatibility to replace Meteor.debug.

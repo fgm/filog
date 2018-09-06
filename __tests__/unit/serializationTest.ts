@@ -1,6 +1,6 @@
 const sinon = require("sinon");
 
-import SyslogSender from "../../src/Senders/SyslogSender";
+import { SyslogSender } from "../../src/Senders/SyslogSender";
 
 function testSerializeDeepObject() {
   const LOCAL0 = 16;

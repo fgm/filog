@@ -5,11 +5,11 @@
 import modernSyslog = require("modern-syslog");
 import * as path from "path";
 import * as util from "util";
-import {IContext, TS_KEY} from "../IContext";
-import { Logger } from "../Loggers/Logger";
+import {IContext, KEY_TS} from "../IContext";
+import {Logger} from "../Loggers/Logger";
+import {ServerLogger} from "../Loggers/ServerLogger";
 import * as LogLevel from "../LogLevel";
-import { ServerLogger } from "../Loggers/ServerLogger";
-import { SenderBase } from "./SenderBase";
+import {ISender} from "./ISender";
 
 type Serializer = (doc: object) => string;
 
@@ -30,10 +30,8 @@ interface ISyslogContext {
  * @see https://tools.ietf.org/html/rfc3164#section-4.1
  * @see https://tools.ietf.org/html/rfc5424#section-6.1
  * @see https://tools.ietf.org/html/rfc6587#section-3.4.1
- *
- * @extends SenderBase
  */
-const SyslogSender = class extends SenderBase {
+class SyslogSender implements ISender {
   public facility: number;
   public formatOptions: object;
   public ident: string;
@@ -66,11 +64,10 @@ const SyslogSender = class extends SenderBase {
     ident = null,
     syslogOptions: number = 0,
     syslogFacility: number | null = null,
-    public syslog: any, //modernSyslog,
+    public syslog: any, // modernSyslog,
     formatOptions = null,
     serialize = null,
   ) {
-    super();
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;
 
@@ -100,9 +97,9 @@ const SyslogSender = class extends SenderBase {
     }
     // It should contain a timestamp.{side} object if it comes from any Logger.
     if (typeof doc.context === "undefined") {
-      doc.context = { [TS_KEY]: { server: {}}};
-    } else if (typeof doc.context[TS_KEY] === "undefined") {
-      doc.context[TS_KEY] = {};
+      doc.context = { [KEY_TS]: { server: {}}};
+    } else if (typeof doc.context[KEY_TS] === "undefined") {
+      doc.context[KEY_TS] = {};
     }
 
     // doc.context.timestamp.server is known to exist from above.
@@ -143,9 +140,8 @@ const SyslogSender = class extends SenderBase {
         raw: util.inspect(doc, this.formatOptions),
       };
 
-      if (typeof doc.message === "string") {
-        step1.message = doc.message;
-      }
+      // Since doc is a SyslogContext, doc.message is a string, no need to test.
+      step1.message = doc.message;
 
       try {
         result = JSON.stringify(step1);
@@ -170,9 +166,10 @@ const SyslogSender = class extends SenderBase {
    *   The serialized version of the doc argument under the formatOptions rules.
    */
   public serializeInspect(doc: object): string {
-    const result = util.inspect(doc, this.formatOptions);
-    return result;
+    return util.inspect(doc, this.formatOptions);
   }
-};
+}
 
-export default SyslogSender;
+export {
+  SyslogSender,
+};

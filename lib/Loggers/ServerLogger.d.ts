@@ -5,7 +5,7 @@
 import * as connect from "connect";
 import { IncomingMessage, ServerResponse } from "http";
 import { WebApp } from "meteor/webapp";
-import { IContext } from "../IContext";
+import { IContext, IDetails } from "../IContext";
 import * as LogLevel from "../LogLevel";
 import { IStrategy } from "../Strategies/IStrategy";
 import { ILogger } from "./ILogger";
@@ -110,7 +110,7 @@ declare class ServerLogger extends Logger implements ILogger {
     /**
      * @inheritDoc
      */
-    log(level: LogLevel.Levels, message: string, rawContext: IContext): void;
+    log(level: LogLevel.Levels, message: string, rawContext: IDetails): void;
     /**
      * Extended syntax for log() method.
      *

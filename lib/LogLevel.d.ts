@@ -1,5 +1,6 @@
 /**
- * @fileOverview Package exported constants.
+ * @fileOverview
+ * Package exported constants.
  */
 declare const Names: string[];
 declare const EMERGENCY = 0;

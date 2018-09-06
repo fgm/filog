@@ -59,7 +59,7 @@
 
 ### 0.1.10 / 0.1.9
 
-* MongoDbSender can now take an existing collection instead of just a name
+* MongodbSender can now take an existing collection instead of just a name
 * Allow logging client request headers
 * New TrivialStrategy for simple configurations
 * New documentation site on [https://fgm.github.io/filog](https://fgm.github.io/filog)
@@ -97,7 +97,7 @@
 
 * New Syslog sender using modern-syslog
 * Fixed server-side double escaping in message strings
-* Improved collection handling in MongoDbSender
+* Improved collection handling in MongodbSender
 
 ### 0.1.1
 

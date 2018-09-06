@@ -11,10 +11,16 @@ import * as os from "os";
 import process from "process";
 import * as util from "util";
 // Package imports.
-import {DETAILS_KEY, HOST_KEY, IContext, SOURCE_KEY } from "../IContext";
+import {
+  KEY_DETAILS,
+  KEY_HOST,
+  IContext,
+  IDetails,
+  KEY_SOURCE
+} from "../IContext";
 import * as LogLevel from "../LogLevel";
 import {IStrategy} from "../Strategies/IStrategy";
-import {ClientLogger} from "./ClientLogger";
+import {ClientSide} from "./ClientLogger";
 import {ILogger} from "./ILogger";
 import {Logger} from "./Logger";
 import WriteStream = NodeJS.WriteStream;
@@ -200,8 +206,8 @@ class ServerLogger extends Logger implements ILogger {
    */
   public defaultContext(initialContext: IContext, source: string): IContext {
     const cx1 = {
-      [HOST_KEY]: this._getHostname(),
-      [SOURCE_KEY]: source,
+      [KEY_HOST]: this._getHostname(),
+      [KEY_SOURCE]: source,
       ...initialContext,
     };
     Logger.stamp(cx1, "log", this.side);
@@ -254,11 +260,11 @@ class ServerLogger extends Logger implements ILogger {
             context.requestHeaders = req.headers;
           }
           const {
-            [DETAILS_KEY]: details,
+            [KEY_DETAILS]: details,
             // tslint:disable-next-line
             ...nonDetails
           } = context;
-          this.logExtended(level, message, nonDetails, ClientLogger.side);
+          this.logExtended(level, message, nonDetails, ClientSide);
           res.statusCode = 200;
           result = "";
         } catch (err) {
@@ -275,7 +281,7 @@ class ServerLogger extends Logger implements ILogger {
   /**
    * @inheritDoc
    */
-  public log(level: LogLevel.Levels, message: string, rawContext: IContext): void {
+  public log(level: LogLevel.Levels, message: string, rawContext: IDetails): void {
     rawContext.hostname = this.hostname;
     super.log(level, message, rawContext);
   }
@@ -315,7 +321,7 @@ class ServerLogger extends Logger implements ILogger {
    * @returns {void}
    */
   public logMethod({ level = LogLevel.INFO, message = "", context = {} }) {
-    this.logExtended(level, message, context, ClientLogger.side);
+    this.logExtended(level, message, context, ClientSide);
   }
 
   /**

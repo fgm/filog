@@ -1,7 +1,7 @@
 /**
  * @fileOverview Base Logger class.
  */
-import { IContext, ITimestampsHash } from "../IContext";
+import { IContext, ITimestamps } from "../IContext";
 import * as LogLevel from "../LogLevel";
 import { IProcessor } from "../Processors/IProcessor";
 import { IStrategy } from "../Strategies/IStrategy";
@@ -26,17 +26,19 @@ declare class Logger implements ILogger {
     /**
      * Add a timestamp to a context object on the active side.
      *
-     * Ensure a TS_KEY will be present, and existing timestamps are not being
-     * overwritten, except possibly for any value already present at [TS_KEY][op].
+     * Ensure a KEY_TS will be present, and existing timestamps are not being
+     * overwritten, except possibly for any value already present at [KEY_TS][op].
      *
      * @param context
      *   Mutated. The context to stamp.
      * @param op
      *   The operation for which to add a timestamp.
+     * @param side
+     *   The side on which the operation is to be logged.
      *
      * @protected
      */
-    static stamp(context: IContext, op: string, side: keyof ITimestampsHash): void;
+    static stamp(context: IContext, op: string, side: keyof ITimestamps): void;
     processors: IProcessor[];
     side: string;
     tk: any;

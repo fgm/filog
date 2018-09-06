@@ -5,14 +5,12 @@
  */
 
 import NullFn from "../NullFn";
-import { SenderBase } from "./SenderBase";
+import {ISender} from "./ISender";
 
 /**
  * MeteorClientHttpSender send data from the client to the server over HTTP.
- *
- * @extends SenderBase
  */
-const MeteorClientHttpSender = class extends SenderBase {
+class MeteorClientHttpSender implements ISender {
   public http: typeof HTTP;
   public requestHeaders: { [key: string]: string };
 
@@ -24,7 +22,6 @@ const MeteorClientHttpSender = class extends SenderBase {
    *   The absolute URL of the logger server. Usually /logger on the Meteor app.
    */
   constructor(public loggerUrl: string) {
-    super();
     if (typeof Meteor === "undefined" || !Meteor.isClient) {
       throw new Error("MeteorClientHttpSender is only meant for Meteor client side.");
     }
@@ -51,6 +48,8 @@ const MeteorClientHttpSender = class extends SenderBase {
     };
     this.http.post(this.loggerUrl, options, NullFn);
   }
-};
+}
 
-export default MeteorClientHttpSender;
+export {
+  MeteorClientHttpSender,
+};

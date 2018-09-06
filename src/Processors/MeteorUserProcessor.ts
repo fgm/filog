@@ -5,11 +5,11 @@
  */
 
 import {IProcessor} from "./IProcessor";
-import ProcessorBase from "./ProcessorBase";
+import { ProcessorBase } from "./ProcessorBase";
 
 import stack from "callsite";
 import User = Meteor.User;
-import {IContext, SOURCE_KEY} from "../IContext";
+import {IContext, KEY_SOURCE} from "../IContext";
 
 interface IPackage {
   "accounts-base": {
@@ -28,7 +28,7 @@ declare var Package: IPackage;
  *
  * @extends ProcessorBase
  */
-const MeteorUserProcessor = class extends ProcessorBase implements IProcessor {
+class MeteorUserProcessor extends ProcessorBase implements IProcessor {
   public platform: string;
   public userCache: { [key: string]: object };
 
@@ -182,7 +182,7 @@ const MeteorUserProcessor = class extends ProcessorBase implements IProcessor {
     // mobile information, a straight server-side log context is not rebuilt by
     // a call to logExtended, so it needs to be set directly in place under a
     // platform key.
-    const userContext = (context[SOURCE_KEY] === this.platform)
+    const userContext = (context[KEY_SOURCE] === this.platform)
       ? { [this.platform]: { user } }
       : { user };
     let result = Object.assign({}, context, userContext);
@@ -193,6 +193,8 @@ const MeteorUserProcessor = class extends ProcessorBase implements IProcessor {
 
     return result;
   }
-};
+}
 
-export default MeteorUserProcessor;
+export {
+  MeteorUserProcessor,
+};

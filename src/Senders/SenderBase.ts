@@ -1,7 +1,9 @@
 /**
- * @fileOverview Base Sender class.
+ * @fileOverview
+ * Base Sender class.
  */
 
+import {IContext} from "../IContext";
 import * as LogLevel from "../LogLevel";
 import {ISender} from "./ISender";
 
@@ -10,7 +12,7 @@ import {ISender} from "./ISender";
  */
 class SenderBase implements ISender {
   /** @inheritDoc */
-  public send(_1: LogLevel.Levels, _2: string, _3: object): void { return; }
+  public send(_1: LogLevel.Levels, _2: string, _3: IContext): void { return; }
 }
 
 export {

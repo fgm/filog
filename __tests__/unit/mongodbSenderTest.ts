@@ -1,7 +1,7 @@
 import sinon = require("sinon");
-import {TS_KEY} from "../../src/IContext";
+import {IContext, IDetails, KEY_TS} from "../../src/IContext";
 import * as LogLevel from "../../src/LogLevel";
-import MongoDbSender from "../../src/Senders/MongodbSender";
+import { MongodbSender } from "../../src/Senders/MongodbSender";
 
 // This is a builtin Meteor interface: cannot rename it.
 // tslint:disable-next-line
@@ -24,34 +24,34 @@ function testMongoDbSender() {
 
   test("should accept a collection name", () => {
     const spy = sinon.spy(mongo, "Collection");
-    const sender = new MongoDbSender(mongo, "some_collection");
-    expect(sender).toBeInstanceOf(MongoDbSender);
+    const sender = new MongodbSender(mongo, "some_collection");
+    expect(sender).toBeInstanceOf(MongodbSender);
     expect(spy.calledOnce).toBe(true);
   });
 
   test("should accept an existing collection", () => {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
-    expect(sender).toBeInstanceOf(MongoDbSender);
+    const sender = new MongodbSender(mongo, collection);
+    expect(sender).toBeInstanceOf(MongodbSender);
     expect(sender.store).toBe(collection);
   });
 
   test("should reject invalid collection values", () => {
     const collection = 42;
     // Force type to accept invalid data.
-    expect(() => new MongoDbSender(mongo, collection as any)).toThrowError(Error);
+    expect(() => new MongodbSender(mongo, collection as any)).toThrowError(Error);
   });
 
   test("should add a \"send\" timestamp to empty context", () => {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
+    const sender = new MongodbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
     const level: LogLevel.Levels = LogLevel.WARNING;
     const message = "message";
-    const details = {};
+    const context: IContext = {};
 
-    sender.send(level, message, details);
+    sender.send(level, message, context);
 
     const after = +new Date();
     // Collection.insert was called once.
@@ -63,7 +63,7 @@ function testMongoDbSender() {
     // Message is passed.
     expect(callArgs.message).toBe(message);
 
-    const timestamp = callArgs.context[TS_KEY].server.send;
+    const timestamp = callArgs.context[KEY_TS].server.send;
     // A numeric store timestamp is passed.
     expect(typeof timestamp).toBe("number");
     // Timestamp is later than 'before'.
@@ -74,18 +74,20 @@ function testMongoDbSender() {
 
   test("should add a \"send\" timestamp to non-empty context", () => {
     const collection = new mongo.Collection("fake");
-    const sender = new MongoDbSender(mongo, collection);
+    const sender = new MongodbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
     const level: LogLevel.Levels = LogLevel.Levels.WARNING;
     const message = "message";
-    const details = {
-      [TS_KEY]: {
-        whatever: 1480849124018,
+    const context: IContext = {
+      [KEY_TS]: {
+        whatever: {
+          rocks: 1480849124018,
+        },
       },
     };
 
-    sender.send(level, message, details);
+    sender.send(level, message, context);
     const after = +new Date();
     // Collection.insert was called once.
     expect(insertSpy.calledOnce).toBe(true);
@@ -95,7 +97,7 @@ function testMongoDbSender() {
     // Message is passed.
     expect(callArgs.message).toBe(message);
 
-    const timestamp = callArgs.context[TS_KEY].server.send;
+    const timestamp = callArgs.context[KEY_TS].server.send;
     // A numeric store timestamp is passed.
     expect(typeof timestamp).toBe("number");
     // Timestamp is later than 'before'.

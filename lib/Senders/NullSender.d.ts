@@ -1,17 +1,14 @@
 /**
  * @fileOverview NulllSender class.
  */
+import { ISender } from "./ISender";
+import { IContext } from "../IContext";
+import * as LogLevel from "../LogLevel";
 /**
  * NullSender defines an explicit null sender.
- *
- * Although SenderBase is also null, this is not its defining characteristic
- * hence this alias.
- *
- * @extends SenderBase
  */
-declare const NullSender: {
-    new (): {
-        send(_1: Levels, _2: string, _3: object): void;
-    };
-};
-export default NullSender;
+declare class NullSender implements ISender {
+    /** @inheritDoc */
+    send(_1: LogLevel.Levels, _2: string, _3: IContext): void;
+}
+export { NullSender, };

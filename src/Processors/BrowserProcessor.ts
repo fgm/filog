@@ -3,7 +3,7 @@
  */
 import {IContext} from "../IContext";
 import {IProcessor} from "./IProcessor";
-import ProcessorBase from "./ProcessorBase";
+import { ProcessorBase } from "./ProcessorBase";
 
 interface IMemoryInfo {
   jsHeapSizeLimit: number;
@@ -41,7 +41,7 @@ interface INavigator {
  *
  * @extends ProcessorBase
  */
-const BrowserProcessor = class extends ProcessorBase implements IProcessor {
+class BrowserProcessor extends ProcessorBase implements IProcessor {
   public navigator: INavigator;
   public window: IWindow;
 
@@ -104,7 +104,7 @@ const BrowserProcessor = class extends ProcessorBase implements IProcessor {
 
     return result;
   }
-};
+}
 
 export {
   BrowserProcessor,

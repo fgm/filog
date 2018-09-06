@@ -5,10 +5,12 @@
 import TraceKit from "tracekit";
 
 import {
-  DETAILS_KEY, HOST_KEY,
   IContext,
-  ITimestampsHash, SOURCE_KEY,
-  TS_KEY,
+  ITimestamps,
+  KEY_DETAILS,
+  KEY_HOST,
+  KEY_SOURCE,
+  KEY_TS,
 } from "../IContext";
 import InvalidArgumentException from "../InvalidArgumentException";
 import * as LogLevel from "../LogLevel";
@@ -49,25 +51,27 @@ class Logger implements ILogger {
   /**
    * Add a timestamp to a context object on the active side.
    *
-   * Ensure a TS_KEY will be present, and existing timestamps are not being
-   * overwritten, except possibly for any value already present at [TS_KEY][op].
+   * Ensure a KEY_TS will be present, and existing timestamps are not being
+   * overwritten, except possibly for any value already present at [KEY_TS][op].
    *
    * @param context
    *   Mutated. The context to stamp.
    * @param op
    *   The operation for which to add a timestamp.
+   * @param side
+   *   The side on which the operation is to be logged.
    *
    * @protected
    */
-  public static stamp(context: IContext, op: string, side: keyof ITimestampsHash): void {
+  public static stamp(context: IContext, op: string, side: keyof ITimestamps): void {
     const now = + new Date();
-    // Ensure context actually contains a TS_KEY.
-    if (typeof context[TS_KEY] === "undefined") {
-      context[TS_KEY] = {} as ITimestampsHash;
+    // Ensure context actually contains a KEY_TS.
+    if (typeof context[KEY_TS] === "undefined") {
+      context[KEY_TS] = {} as ITimestamps;
     }
 
-    // We know context[TS_KEY] is defined because we just ensured it was.
-    const contextTs: ITimestampsHash = context[TS_KEY]!;
+    // We know context[KEY_TS] is defined because we just ensured it was.
+    const contextTs: ITimestamps = context[KEY_TS]!;
 
     const sideTs = contextTs[side] || {};
     sideTs[op] = now;
@@ -145,13 +149,13 @@ class Logger implements ILogger {
    */
   public getInitialContext(details = {}): IContext {
     const cx: IContext = {
-      [DETAILS_KEY]: details,
-      [SOURCE_KEY]: this.side,
+      [KEY_DETAILS]: details,
+      [KEY_SOURCE]: this.side,
     };
 
     const hostName = this._getHostname();
     if (typeof hostName === "string") {
-      cx[HOST_KEY] = hostName;
+      cx[KEY_HOST] = hostName;
     }
 
     Logger.stamp(cx, "log", this.side);

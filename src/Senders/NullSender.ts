@@ -2,16 +2,21 @@
  * @fileOverview NulllSender class.
  */
 
-import { SenderBase } from "./SenderBase";
+import {ISender} from "./ISender";
+import {IContext} from "../IContext";
+import * as LogLevel from "../LogLevel";
 
 /**
  * NullSender defines an explicit null sender.
- *
- * Although SenderBase is also null, this is not its defining characteristic
- * hence this alias.
- *
- * @extends SenderBase
  */
-const NullSender = class extends SenderBase {};
+class NullSender implements ISender {
+  /** @inheritDoc */
+  public send(_1: LogLevel.Levels, _2: string, _3: IContext): void {
+    // Explicit return is needed to avoid the TSlint no-empty warning.
+    return;
+  }
+}
 
-export default NullSender;
+export {
+  NullSender,
+};

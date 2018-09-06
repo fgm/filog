@@ -1,13 +1,11 @@
 /** global: Meteor */
+import { ISender } from "./ISender";
 /**
  * MeteorClientMethodSender send data from the client to the server over DDP.
- *
- * @extends SenderBase
  */
-declare const MeteorClientMethodSender: {
-    new (): {
-        /** @inheritDoc */
-        send(level: number, message: string, context: object): void;
-    };
-};
-export default MeteorClientMethodSender;
+declare class MeteorClientMethodSender implements ISender {
+    constructor();
+    /** @inheritDoc */
+    send(level: number, message: string, context: object): void;
+}
+export { MeteorClientMethodSender, };

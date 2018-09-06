@@ -1,1 +1,1 @@
-{"version":3,"file":"SenderBase.js","sourceRoot":"","sources":["../../src/Senders/SenderBase.ts"],"names":[],"mappings":";AAAA;;GAEG;;AAKH;;GAEG;AACH;IAAA;IAGA,CAAC;IAFC,kBAAkB;IACX,yBAAI,GAAX,UAAY,EAAmB,EAAE,EAAU,EAAE,EAAU,IAAU,OAAO,CAAC,CAAC;IAC5E,iBAAC;AAAD,CAAC,AAHD,IAGC;AAGC,gCAAU"}
+{"version":3,"file":"SenderBase.js","sourceRoot":"","sources":["../../src/Senders/SenderBase.ts"],"names":[],"mappings":";AAAA;;;GAGG;;AAMH;;GAEG;AACH;IAAA;IAGA,CAAC;IAFC,kBAAkB;IACX,yBAAI,GAAX,UAAY,EAAmB,EAAE,EAAU,EAAE,EAAY,IAAU,OAAO,CAAC,CAAC;IAC9E,iBAAC;AAAD,CAAC,AAHD,IAGC;AAGC,gCAAU"}

@@ -1,5 +1,6 @@
 /**
- * @fileOverview Package exported constants.
+ * @fileOverview
+ * Package exported constants.
  */
 
 const Names = [

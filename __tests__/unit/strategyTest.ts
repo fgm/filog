@@ -1,5 +1,6 @@
-import LeveledStrategy from "../../src/Strategies/LeveledStrategy";
-import NullSender from "../../src/Senders/NullSender";
+import { NullSender } from "../../src/Senders/NullSender";
+import { LeveledStrategy } from "../../src/Strategies/LeveledStrategy";
+import {ISender} from "../../src/Senders/ISender";
 
 function testStrategyConstruction() {
   "use strict";
@@ -19,9 +20,9 @@ function testStrategyConstruction() {
 
   test("Should reject non-senders passed as senders at any position", () => {
     const nullSender = new NullSender();
-    expect(() => new LeveledStrategy({}, nullSender, nullSender)).toThrow();
-    expect(() => new LeveledStrategy(nullSender, {}, nullSender)).toThrow();
-    expect(() => new LeveledStrategy(nullSender, nullSender, {}).toThrow());
+    expect(() => new LeveledStrategy({} as ISender, nullSender, nullSender)).toThrow();
+    expect(() => new LeveledStrategy(nullSender, {} as ISender, nullSender)).toThrow();
+    expect(() => new LeveledStrategy(nullSender, nullSender, {} as ISender)).toThrow();
   });
 }
 

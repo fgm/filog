@@ -3,14 +3,14 @@
  */
 import {IContext} from "../IContext";
 import {IProcessor} from "./IProcessor";
-import ProcessorBase from "./ProcessorBase";
+import { ProcessorBase } from "./ProcessorBase";
 
 /**
  * RoutingProcessor adds route information to logs.
  *
  * @extends ProcessorBase
  */
-const RoutingProcessor = class extends ProcessorBase implements IProcessor {
+class RoutingProcessor extends ProcessorBase implements IProcessor {
   /**
    * Constructor ensures the processor is used in a browser context.
    */
@@ -34,6 +34,8 @@ const RoutingProcessor = class extends ProcessorBase implements IProcessor {
     const result = Object.assign({}, context, { routing: { location: window.location } });
     return result;
   }
-};
+}
 
-export default RoutingProcessor;
+export {
+  RoutingProcessor,
+};

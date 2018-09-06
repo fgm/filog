@@ -5,22 +5,14 @@
  */
 
 import { Logger } from "../Loggers/Logger";
-import { SenderBase } from "./SenderBase";
+import {ISender} from "./ISender";
 
 /**
  * MeteorClientMethodSender send data from the client to the server over DDP.
- *
- * @extends SenderBase
  */
-const MeteorClientMethodSender = class extends SenderBase {
-  /**
-   * @constructor
-   *
-   * @param {String} loggerUrl
-   *   The absolute URL of the logger server. Usually /logger on the Meteor app.
-   */
+class MeteorClientMethodSender implements ISender {
+
   constructor() {
-    super();
     if (typeof Meteor === "undefined" || !Meteor.isClient) {
       throw new Error("MeteorClientMethodSender is only meant for Meteor client side.");
     }
@@ -35,6 +27,8 @@ const MeteorClientMethodSender = class extends SenderBase {
 
     Meteor.call(Logger.METHOD, data);
   }
-};
+}
 
-export default MeteorClientMethodSender;
+export {
+  MeteorClientMethodSender,
+};

@@ -12,13 +12,8 @@ const SIDE = "client";
  *
  * In its current state, it brings nothing over Logger, simply providing an
  * extension-specialization point.
- *
- * @extends Logger
- *
- * @property {string} side
  */
 class ClientLogger extends Logger {
-  public static readonly side = SIDE;
 
   constructor(strategy: IStrategy) {
     super(strategy);
@@ -35,4 +30,5 @@ class ClientLogger extends Logger {
 
 export {
   ClientLogger,
+  SIDE as ClientSide,
 };

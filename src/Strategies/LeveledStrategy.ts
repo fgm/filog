@@ -2,20 +2,21 @@
  * @fileOverview Level-based Strategy.
  */
 
+import {IContext} from "../IContext";
 import {ILogger} from "../Loggers/ILogger";
 import * as LogLevel from "../LogLevel";
 import NullFn from "../NullFn";
 import {ISender} from "../Senders/ISender";
-import NullSender from "../Senders/NullSender";
-import { SenderBase } from "../Senders/SenderBase";
-import StrategyBase from "./StrategyBase";
+import { NullSender } from "../Senders/NullSender";
+import {IStrategy} from "./IStrategy";
+import { StrategyBase } from "./StrategyBase";
 
 /**
  * LeveledStrategy defines a single sender per level.
  *
  * @extends StrategyBase
  */
-const LeveledStrategy = class extends StrategyBase {
+class LeveledStrategy extends StrategyBase implements IStrategy {
 
   // noinspection JSClassNamingConvention
   /**
@@ -43,12 +44,14 @@ const LeveledStrategy = class extends StrategyBase {
     this.senders = [low, medium, high];
 
     this.senders.forEach((sender) => {
-      if (!(sender instanceof SenderBase)) {
-        throw new Error("LeveledStrategy: senders must be instances of a Sender class.");
+      // Not really an "implements ISender" check, but cheaper and more useful.
+      if (!sender.send) {
+        throw new Error(`LeveledStrategy: senders must implement the ISender "send()" method.`);
       }
     });
   }
 
+  /** @inheritDoc */
   public customizeLogger(logger: ILogger): void {
     ["low", "medium", "high"].forEach((level) => {
       if (this[level as keyof this] instanceof NullSender) {
@@ -57,7 +60,7 @@ const LeveledStrategy = class extends StrategyBase {
     });
   }
 
-  public selectSenders(level: LogLevel.Levels, _2: string, _3: object) {
+  public selectSenders(level: LogLevel.Levels, _2: string, _3: IContext): ISender[] {
     let sender;
     if (level >= this.minLow) {
       sender = this.low;
@@ -69,6 +72,8 @@ const LeveledStrategy = class extends StrategyBase {
 
     return [sender];
   }
-};
+}
 
-export default LeveledStrategy;
+export {
+  LeveledStrategy,
+};

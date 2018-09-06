@@ -2,6 +2,8 @@
  * @fileOverview Browser Processor class.
  */
 import { IContext } from "../IContext";
+import { IProcessor } from "./IProcessor";
+import { ProcessorBase } from "./ProcessorBase";
 interface IMemoryInfo {
     jsHeapSizeLimit: number;
     totalJSHeapSize: number;
@@ -32,12 +34,19 @@ interface INavigator {
  *
  * @extends ProcessorBase
  */
-declare const BrowserProcessor: {
-    new (nav: INavigator, win: IWindow): {
-        navigator: INavigator;
-        window: IWindow;
-        /** @inheritDoc */
-        process(context: object): IContext;
-    };
-};
+declare class BrowserProcessor extends ProcessorBase implements IProcessor {
+    navigator: INavigator;
+    window: IWindow;
+    /**
+     * ProcessorBase ensures it is not being built outside a browser.
+     *
+     * @param {object} nav
+     *   window.Navigator.
+     * @param {object} win
+     *   window.
+     */
+    constructor(nav: INavigator, win: IWindow);
+    /** @inheritDoc */
+    process(context: object): IContext;
+}
 export { BrowserProcessor, IBrowserInfo, IMemoryInfo, INavigator, IPerformance, IWindow, };

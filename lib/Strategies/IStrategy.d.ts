@@ -1,3 +1,4 @@
+import { IContext } from "../IContext";
 import { ILogger } from "../Loggers/ILogger";
 import * as LogLevel from "../LogLevel";
 import { ISender } from "../Senders/ISender";
@@ -15,7 +16,7 @@ interface IStrategy {
      * @returns
      *   An array of senders to use for this event.
      */
-    selectSenders(level: LogLevel.Levels, message: string, context: object): ISender[];
+    selectSenders(level: LogLevel.Levels, message: string, context: IContext): ISender[];
     /**
      * This method may modify the logger methods, e.g. to do nothing on debug.
      *

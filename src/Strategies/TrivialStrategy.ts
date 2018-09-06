@@ -4,7 +4,7 @@
 
 import {ISender} from "../Senders/ISender";
 import {IStrategy} from "./IStrategy";
-import StrategyBase from "./StrategyBase";
+import { StrategyBase } from "./StrategyBase";
 
 /**
  * This strategy uses a single sender for all configurations.
@@ -13,7 +13,7 @@ import StrategyBase from "./StrategyBase";
  *
  * @extends StrategyBase
  */
-const TrivialStrategy = class extends StrategyBase implements IStrategy {
+class TrivialStrategy extends StrategyBase implements IStrategy {
   // noinspection JSClassNamingConvention
   /**
    * @constructor
@@ -25,6 +25,8 @@ const TrivialStrategy = class extends StrategyBase implements IStrategy {
     super(false);
     this.senders = [sender];
   }
-};
+}
 
-export default TrivialStrategy;
+export {
+  TrivialStrategy,
+};

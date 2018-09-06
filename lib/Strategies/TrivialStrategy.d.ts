@@ -2,6 +2,8 @@
  * @fileOverview Trivial Strategy.
  */
 import { ISender } from "../Senders/ISender";
+import { IStrategy } from "./IStrategy";
+import { StrategyBase } from "./StrategyBase";
 /**
  * This strategy uses a single sender for all configurations.
  *
@@ -9,11 +11,13 @@ import { ISender } from "../Senders/ISender";
  *
  * @extends StrategyBase
  */
-declare const TrivialStrategy: {
-    new (sender: ISender): {
-        senders: ISender[];
-        selectSenders(_1: Levels, _2: string, _3: object): ISender[];
-        customizeLogger(_: import("../Loggers/ILogger").ILogger): void;
-    };
-};
-export default TrivialStrategy;
+declare class TrivialStrategy extends StrategyBase implements IStrategy {
+    /**
+     * @constructor
+     *
+     * @param {function} sender
+     *   The Sender to use for all events
+     */
+    constructor(sender: ISender);
+}
+export { TrivialStrategy, };

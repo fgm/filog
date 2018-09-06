@@ -41,7 +41,7 @@ describe("Unit", () => {
   });
   describe("Senders", () => {
     describe("ConsoleSender", testConsoleSender);
-    describe("MongoDbSender", testMongoDbSender);
+    describe("MongodbSender", testMongoDbSender);
   });
   describe("MeteorUserProcessor", testMeteorUserProcessor);
   describe("BrowserProcessor", testBrowserProcessor);

@@ -1,11 +1,10 @@
 import {
-  DETAILS_KEY,
-  HOST_KEY,
-  IContext,
+  KEY_DETAILS,
+  KEY_HOST,
+  IContext, IDetails,
   ITimestamps,
-  ITimestampsHash,
-  SOURCE_KEY,
-  TS_KEY,
+  KEY_SOURCE,
+  KEY_TS,
 } from "../../src/IContext";
 import { ClientLogger } from "../../src/Loggers/ClientLogger";
 import {ILogger} from "../../src/Loggers/ILogger";
@@ -35,8 +34,8 @@ function testContextSourcing(): void {
     const side = "client";
 
     // Const objects are not immutable: catch details being overwritten.
-    const details = { a: "A" };
-    const expectedDetails = { ...details };
+    const details: IDetails = { a: "A" };
+    const expectedDetails: IDetails = { ...details };
 
     const t1: number = +new Date();
     cl.log(level, message, details);
@@ -44,10 +43,10 @@ function testContextSourcing(): void {
 
     const expected = {
       context: {
-        [DETAILS_KEY]: expectedDetails,
-        // HOST_KEY: not on client contexts.
-        [SOURCE_KEY]: side,
-        // TS_KEY: Cannot test content just with toMatchObject.
+        [KEY_DETAILS]: expectedDetails,
+        // KEY_HOST: not on client contexts.
+        [KEY_SOURCE]: side,
+        // KEY_TS: Cannot test content just with toMatchObject.
       },
       level,
       message,
@@ -55,15 +54,15 @@ function testContextSourcing(): void {
     expect(t2).toBeGreaterThanOrEqual(t1);
     const result = sender.result;
     expect(typeof result).toBe("object");
-    expect(result).not.toHaveProperty(HOST_KEY);
+    expect(result).not.toHaveProperty(KEY_HOST);
     expect(result).toMatchObject(expected);
 
     const actualContext = result.context;
     // No side properties without processors.
     expect(actualContext).not.toHaveProperty(side);
 
-    expect(actualContext).toHaveProperty(TS_KEY);
-    const ts: ITimestampsHash = actualContext[TS_KEY];
+    expect(actualContext).toHaveProperty(KEY_TS);
+    const ts: ITimestamps = actualContext[KEY_TS];
     expect(typeof ts).toBe("object");
     expect(ts).toHaveProperty(side);
     expect(ts[side]).toHaveProperty("log");
@@ -82,8 +81,8 @@ function testContextSourcing(): void {
     const side = "server";
 
     // Const objects are not immutable: catch details being overwritten.
-    const details = { a: "A" };
-    const expectedDetails = { ...details };
+    const details: IDetails = { a: "A" };
+    const expectedDetails: IDetails = { ...details };
 
     const t1: number = +new Date();
     sl.log(level, message, details);
@@ -91,10 +90,10 @@ function testContextSourcing(): void {
 
     const expected = {
       context: {
-        [DETAILS_KEY]: expectedDetails,
-        [HOST_KEY]: host,
-        [SOURCE_KEY]: side,
-        // TS_KEY: Cannot test content just with toMatchObject.
+        [KEY_DETAILS]: expectedDetails,
+        [KEY_HOST]: host,
+        [KEY_SOURCE]: side,
+        // KEY_TS: Cannot test content just with toMatchObject.
       },
       level,
       message,
@@ -105,8 +104,8 @@ function testContextSourcing(): void {
     expect(result).toMatchObject(expected);
 
     const actualContext = result.context;
-    expect(actualContext).toHaveProperty(TS_KEY);
-    const ts: ITimestampsHash = actualContext[TS_KEY];
+    expect(actualContext).toHaveProperty(KEY_TS);
+    const ts: ITimestamps = actualContext[KEY_TS];
     expect(typeof ts).toBe("object");
     expect(ts).toHaveProperty(side);
     expect(ts[side]).toHaveProperty("log");
@@ -124,8 +123,8 @@ function testContextSourcing(): void {
     const host = hostname();
 
     // Const objects are not immutable: catch details being overwritten.
-    const details = { a: "A" };
-    const expectedDetails = { ...details };
+    const details: IDetails = { a: "A" };
+    const expectedDetails: IDetails = { ...details };
 
     const clientContext: IContext = {
       processorObject: { foo: "bar" },
@@ -139,16 +138,16 @@ function testContextSourcing(): void {
     const t1: number = +new Date() - 3;
 
     const initialContext = {
-      [DETAILS_KEY]: expectedDetails,
-      // HOST_KEY: not on client contexts.
-      [TS_KEY]: {
+      [KEY_DETAILS]: expectedDetails,
+      // KEY_HOST: not on client contexts.
+      [KEY_TS]: {
         [side]: {
           log: t1 + 1,
           send: t1 + 2,
-        } as ITimestamps,
+        },
         // No "server" yet.
-      } as ITimestampsHash,
-      [SOURCE_KEY]: side,
+      } as ITimestamps,
+      [KEY_SOURCE]: side,
       [side]: clientContext,
     };
 
@@ -157,10 +156,10 @@ function testContextSourcing(): void {
 
     const expected = {
       context: {
-        [DETAILS_KEY]: expectedDetails,
-        [HOST_KEY]: host,
-        [SOURCE_KEY]: side,
-        // TS_KEY: Cannot test content just with toMatchObject.
+        [KEY_DETAILS]: expectedDetails,
+        [KEY_HOST]: host,
+        [KEY_SOURCE]: side,
+        // KEY_TS: Cannot test content just with toMatchObject.
         [side]: expectedClientContext,
         // No "server" content without a server processor.
       },
@@ -178,9 +177,9 @@ function testContextSourcing(): void {
     // No side property without a processor.
     expect(actualContext).not.toHaveProperty("server");
 
-    expect(actualContext).toHaveProperty(TS_KEY);
-    const ts: ITimestampsHash = actualContext[TS_KEY];
-    expect(typeof actualContext[TS_KEY]).toBe("object");
+    expect(actualContext).toHaveProperty(KEY_TS);
+    const ts: ITimestamps = actualContext[KEY_TS];
+    expect(typeof actualContext[KEY_TS]).toBe("object");
     expect(typeof ts).toBe("object");
     expect(ts).toHaveProperty(side);
     expect(ts).toHaveProperty("server");

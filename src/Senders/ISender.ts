@@ -1,3 +1,4 @@
+import {IContext} from "../IContext";
 import * as LogLevel from "../LogLevel";
 
 interface ISender {
@@ -11,7 +12,7 @@ interface ISender {
    * @param context
    *   A log event context object.
    */
-  send(level: LogLevel.Levels, message: string, context: object): void;
+  send(level: LogLevel.Levels, message: string, context: IContext): void;
 }
 
 export {

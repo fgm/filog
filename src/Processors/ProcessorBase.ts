@@ -10,11 +10,13 @@ import {IProcessor} from "./IProcessor";
  *
  * It exists only to document the processor interface.
  */
-const ProcessorBase = class implements IProcessor {
+class ProcessorBase implements IProcessor {
   /** @inheritDoc */
   public process(context: IContext): IContext {
     return context as IContext;
   }
-};
+}
 
-export default ProcessorBase;
+export {
+  ProcessorBase,
+};
