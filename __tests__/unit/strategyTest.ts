@@ -1,6 +1,6 @@
+import {ISender} from "../../src/Senders/ISender";
 import { NullSender } from "../../src/Senders/NullSender";
 import { LeveledStrategy } from "../../src/Strategies/LeveledStrategy";
-import {ISender} from "../../src/Senders/ISender";
 
 function testStrategyConstruction() {
   "use strict";

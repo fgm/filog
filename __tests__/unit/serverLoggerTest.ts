@@ -1,4 +1,5 @@
 import * as os from "os";
+
 import sinon = require("sinon");
 
 import {
@@ -10,8 +11,8 @@ import {
   KEY_SOURCE,
   KEY_TS,
 } from "../../src/IContext";
-import { ClientSide } from "../../src/Loggers/ClientLogger";
-import { ILogger } from "../../src/Loggers/ILogger";
+import {ClientSide} from "../../src/Loggers/ClientLogger";
+import {ILogger} from "../../src/Loggers/ILogger";
 import {
   IServerLoggerConstructorParameters,
   ServerLogger,
@@ -19,17 +20,17 @@ import {
 } from "../../src/Loggers/ServerLogger";
 import * as LogLevel from "../../src/LogLevel";
 import NullFn from "../../src/NullFn";
-import { IProcessor } from "../../src/Processors/IProcessor";
-import { ProcessorBase } from "../../src/Processors/ProcessorBase";
+import {IProcessor} from "../../src/Processors/IProcessor";
+import {ProcessorBase} from "../../src/Processors/ProcessorBase";
 import {
   IConstructor,
   IResult,
   newEmptyStrategy,
   newLogStrategy,
+  TEST_SOURCE,
   TestSender,
 } from "./types";
 
-const LOG_SOURCE = "test";
 const MAGIC = "xyzzy";
 
 const testConstructor = () => {
@@ -115,12 +116,12 @@ const testConnect = () => {
 const testBuildContext = () => {
   test("Should apply logger source over context", () => {
     const logger: ServerLogger = new ServerLogger(newEmptyStrategy());
-    logger.side = LOG_SOURCE;
+    logger.side = TEST_SOURCE;
     const details: IDetails = {
       [KEY_SOURCE]: "other",
     };
     const actual = logger.getInitialContext(details);
-    expect(actual).toHaveProperty(KEY_SOURCE, LOG_SOURCE);
+    expect(actual).toHaveProperty(KEY_SOURCE, TEST_SOURCE);
   });
 
   test("Should import details as details key", () => {
@@ -147,13 +148,13 @@ const testLogExtended = () => {
   test("Should reject invalid log levels", () => {
     const logger = new ServerLogger(newEmptyStrategy());
     expect(() => {
-      logger.logExtended(-1, "message", {}, LOG_SOURCE);
+      logger.logExtended(-1, "message", {}, TEST_SOURCE);
     }).toThrow();
   });
 
   test("Should default context", () => {
     const logger = new ServerLogger(newEmptyStrategy());
-    logger.logExtended(LogLevel.INFO, "message", {}, LOG_SOURCE);
+    logger.logExtended(LogLevel.INFO, "message", {}, TEST_SOURCE);
     expect(defaultContextSpy.calledOnce).toBe(true);
   });
 
@@ -162,7 +163,7 @@ const testLogExtended = () => {
     const logger = new ServerLogger(newLogStrategy(sender));
 
     const t0 = + new Date();
-    logger.logExtended(LogLevel.INFO, "message", {}, LOG_SOURCE);
+    logger.logExtended(LogLevel.INFO, "message", {}, TEST_SOURCE);
     const t1 = + new Date();
     const result: IResult = sender.result;
     expect(result).toHaveProperty("context.timestamp.server.log");
@@ -178,18 +179,18 @@ const testLogExtended = () => {
     const clientTsKey = "whatever";
     const sourceContext = {
       [KEY_TS]: {
-        [LOG_SOURCE]: {
+        [TEST_SOURCE]: {
           [clientTsKey]: t0,
         },
       },
     };
-    logger.logExtended(LogLevel.INFO, "message", sourceContext, LOG_SOURCE);
+    logger.logExtended(LogLevel.INFO, "message", sourceContext, TEST_SOURCE);
     const result: IResult = sender.result;
-    expect(result).not.toHaveProperty(`context.${LOG_SOURCE}.${KEY_TS}`);
+    expect(result).not.toHaveProperty(`context.${TEST_SOURCE}.${KEY_TS}`);
     expect(result).toHaveProperty(`context.${KEY_TS}`);
-    expect(result).toHaveProperty(`context.${KEY_TS}.${LOG_SOURCE}`);
-    expect(result).toHaveProperty(`context.${KEY_TS}.${LOG_SOURCE}.${clientTsKey}`);
-    const actual = result.context[KEY_TS][LOG_SOURCE][clientTsKey];
+    expect(result).toHaveProperty(`context.${KEY_TS}.${TEST_SOURCE}`);
+    expect(result).toHaveProperty(`context.${KEY_TS}.${TEST_SOURCE}.${clientTsKey}`);
+    const actual = result.context[KEY_TS][TEST_SOURCE][clientTsKey];
     expect(actual).toBe(t0);
   });
 
@@ -215,8 +216,8 @@ const testLogExtended = () => {
     logger.processors.push(new P1());
     logger.processors.push(new P2());
     const initialContext: IContext = {
-      [KEY_SOURCE]: LOG_SOURCE,
-      [LOG_SOURCE]: {
+      [KEY_SOURCE]: TEST_SOURCE,
+      [TEST_SOURCE]: {
         // Should remain.
         c: "C",
       },
@@ -230,13 +231,13 @@ const testLogExtended = () => {
 
     const hostname = os.hostname();
 
-    logger.logExtended(LogLevel.INFO, "message", initialContext, LOG_SOURCE);
+    logger.logExtended(LogLevel.INFO, "message", initialContext, TEST_SOURCE);
     const expectedContext: IContext = {
       // No [KEY_DETAILS]: any.
       [KEY_HOST]: hostname,
-      [KEY_SOURCE]: LOG_SOURCE,
+      [KEY_SOURCE]: TEST_SOURCE,
       // [KEY_TS]: more complex to match, so not included here.
-      [LOG_SOURCE]: { c: "C" },
+      [TEST_SOURCE]: { c: "C" },
       [ServerSide]: {
         // Extra is "initial" originally, "p1" after p1, and "p2" after p2.
         extra: "p2",

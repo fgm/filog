@@ -5,6 +5,8 @@ import {IStrategy} from "../../src/Strategies/IStrategy";
 
 type StrategyFactory = (sender?: ISender) => IStrategy;
 
+const TEST_SOURCE = "test";
+
 const newEmptyStrategy: StrategyFactory = () => ({
   customizeLogger: () => [],
   selectSenders: () => [],
@@ -34,9 +36,11 @@ interface IResult {
  */
 class TestSender implements ISender {
   public result: IResult = {};
+  public isEmpty: boolean = true;
 
   public send(level, message, context): void {
     this.result = { level, message, context };
+    this.isEmpty = false;
   }
 }
 
@@ -48,8 +52,9 @@ const newLogStrategy: StrategyFactory = (sender: TestSender) => ({
 export {
   IConstructor,
   IResult,
-  StrategyFactory,
   newEmptyStrategy,
   newLogStrategy,
+  StrategyFactory,
+  TEST_SOURCE,
   TestSender,
 };

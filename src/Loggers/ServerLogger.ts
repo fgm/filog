@@ -38,7 +38,7 @@ interface IServerLoggerConstructorParameters {
   verbose?: boolean;
 }
 
-const SIDE = "server";
+const ServerSide = "server";
 
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
@@ -159,7 +159,7 @@ class ServerLogger extends Logger implements ILogger {
   ) {
     super(strategy);
     this.output = process.stdout;
-    this.side = SIDE;
+    this.side = ServerSide;
     const defaultParameters: IServerLoggerConstructorParameters = {
       enableMethod: true,
       logRequestHeaders: true,
@@ -266,7 +266,8 @@ class ServerLogger extends Logger implements ILogger {
    * @param context
    *   The context added to the details by upstream processors.
    * @param source
-   *   The upstream sender type.
+   *   The upstream sender type. Allow logging with source set from an incoming
+   *   log event, as in client-sender logging or during tests.
    *
    * @throws InvalidArgumentException
    */
@@ -274,7 +275,7 @@ class ServerLogger extends Logger implements ILogger {
     level: LogLevel.Levels,
     message: object|string,
     context: IContext,
-    source: string): void {
+    source: string = ServerSide): void {
     Logger.validateLevel(level);
 
     const c1: IContext = {
@@ -345,5 +346,5 @@ class ServerLogger extends Logger implements ILogger {
 export {
   IServerLoggerConstructorParameters,
   ServerLogger,
-  SIDE as ServerSide,
+  ServerSide,
 };

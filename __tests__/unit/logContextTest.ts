@@ -1,16 +1,23 @@
+import * as os from "os";
+
 import {
-  IContext,
-  KEY_DETAILS,
+  IContext, IDetails,
+  KEY_DETAILS, KEY_HOST,
   KEY_SOURCE,
   KEY_TS,
 } from "../../src/IContext";
+import {ILogger} from "../../src/Loggers";
 import { Logger } from "../../src/Loggers/Logger";
 import { ServerLogger } from "../../src/Loggers/ServerLogger";
 import * as LogLevel from "../../src/LogLevel";
 import { IProcessor } from "../../src/Processors/IProcessor";
 import { ProcessorBase } from "../../src/Processors/ProcessorBase";
-import { ISender} from "../../src/Senders/ISender";
-import { newEmptyStrategy, newLogStrategy, TestSender } from "./types";
+import {
+  newEmptyStrategy,
+  newLogStrategy,
+  TEST_SOURCE,
+  TestSender,
+} from "./types";
 
 function testImmutableContext() {
   test("should not modify context in log() calls", () => {
@@ -304,18 +311,9 @@ function testObjectifyContext() {
 }
 
 function testProcessors() {
-  const Sender = class extends ProcessorBase implements ISender {
-    public logs: any[][];
-
-    constructor() {
-      super();
-      this.logs = [];
-    }
-
-    public send(level, message, context) {
-      this.logs.push([level, message, context]);
-    }
-  };
+  let details: IDetails;
+  let sender: TestSender;
+  let logger: ILogger;
 
   const Adder = class extends ProcessorBase implements IProcessor {
     public process(context) {
@@ -349,94 +347,110 @@ function testProcessors() {
   };
 
   const TimeWarp = class extends ProcessorBase {
+    public readonly HOST = "remote";
+
     // Let's do the time warp again.
     public process(context: IContext): IContext {
       context[KEY_TS] = {
         test: { log: +new Date("1978-11-19 05:00:00") },
       };
-      context.hostname = "remote";
+      context[KEY_HOST] = this.HOST;
       return context;
     }
   };
 
   beforeEach(() => {
-    this.initialContext = { initial: "initial" };
-    this.sender = new Sender();
-    this.strategy = {
-      customizeLogger: () => [],
-      selectSenders: () => [this.sender],
-    };
-    this.logger = new Logger(this.strategy);
-    this.logger.side = "test";
+    details = { initial: "initial" };
+    sender = new TestSender();
+    logger = new Logger(newLogStrategy(sender));
+    logger.side = TEST_SOURCE;
   });
 
   test("processors should be able to modify the content of ordinary existing keys", () => {
-    this.logger.processors.push(new Modifier());
-    expect(this.sender.logs.length).toBe(0);
-    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
-    expect(this.sender.logs.length).toBe(1);
-    const [, , context] = this.sender.logs.pop();
-    expect(context).toHaveProperty("initial", "cost");
+    logger.processors.push(new Modifier());
+    expect(sender.isEmpty).toBe(true);
+    logger.log(LogLevel.WARNING, "hello, world", details);
+    expect(sender.isEmpty).toBe(false);
+    expect(sender.result.context).toHaveProperty(`${TEST_SOURCE}.initial`, "cost");
   });
 
   test("processors should be able to add new keys", () => {
-    this.logger.processors.push(new Adder());
-    expect(this.sender.logs.length).toBe(0);
-    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
-    expect(this.sender.logs.length).toBe(1);
-    const [, , context] = this.sender.logs.pop();
-    expect(context).toHaveProperty("added", "value");
+    logger.processors.push(new Adder());
+    expect(sender.isEmpty).toBe(true);
+    logger.log(LogLevel.WARNING, "hello, world", details);
+    expect(sender.isEmpty).toBe(false);
+    expect(sender.result.context).toHaveProperty(`${TEST_SOURCE}.added`, "value");
   });
 
   test("processors should be able to remove existing keys", () => {
-    this.logger.processors.push(new Remover());
-    expect(this.sender.logs.length).toBe(0);
-    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
-    expect(this.sender.logs.length).toBe(1);
-    const [, , context] = this.sender.logs.pop();
-    expect(context.added).toBeUndefined();
-    expect(context.initial).toBeUndefined();
-    // By default, pre-processing content goes to the message_details key.
-    expect(context.message_details).toHaveProperty("initial", "initial");
+    logger.processors.push(new Remover());
+    expect(sender.isEmpty).toBe(true);
+    logger.log(LogLevel.WARNING, "hello, world", details);
+    expect(sender.isEmpty).toBe(false);
+    const actualContext: IContext = sender.result.context;
+    expect(actualContext.added).toBeUndefined();
+    expect(actualContext.initial).toBeUndefined();
+    expect(actualContext[KEY_DETAILS]).toHaveProperty("initial", "initial");
   });
 
-  test("processors should be able to remove the message_details", () => {
-    this.logger.processors.push(new Purger());
-    expect(this.sender.logs.length).toBe(0);
-    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
-    expect(this.sender.logs.length).toBe(1);
-    const [, , context] = this.sender.logs.pop();
-    expect(context).not.toHaveProperty("added");
-    expect(context).not.toHaveProperty("initial");
-    expect(context).not.toHaveProperty("message_details");
+  test("processors should not be able to remove the message_details", () => {
+    logger.processors.push(new Purger());
+    expect(sender.isEmpty).toBe(true);
+    logger.log(LogLevel.WARNING, "hello, world", details);
+    expect(sender.isEmpty).toBe(false);
+    const actualContext = sender.result.context;
+    // Can remove other keys
+    expect(actualContext).not.toHaveProperty("added");
+    expect(actualContext).not.toHaveProperty("initial");
+    // But cannot remove details.
+    expect(actualContext).toHaveProperty(KEY_DETAILS, details);
   });
 
   test("processors should not be able to remove the timestamp or hostname key", () => {
-    this.logger.processors.push(new Purger());
-    expect(this.sender.logs.length).toBe(0);
-    this.logger.log(LogLevel.WARNING, "hello, world", { hostname: "local", ...this.initialContext });
+    const serverLogger: ServerLogger = new ServerLogger(newLogStrategy(sender));
+    serverLogger.processors.push(new Purger());
+    expect(sender.isEmpty).toBe(true);
+    const expectedHost = os.hostname();
+    const fakeHost = `wrong-${expectedHost}`;
+    serverLogger.logExtended(LogLevel.WARNING, "hello, world", {
+      // Provide the current hostname in context, it should be overwritten by
+      // the logging logic anyway: we know this value not correct.
+      [KEY_HOST]: fakeHost,
+      ...details,
+    });
     const ts = +new Date();
-    expect(this.sender.logs.length).toBe(1);
-    const [, , context] = this.sender.logs.pop();
-    expect(context).toHaveProperty("hostname", "local");
-    expect(context).toHaveProperty(`${KEY_TS}.${this.logger.side}.log`);
-    const lag = ts - context[KEY_TS][this.logger.side].log;
+    expect(sender.isEmpty).toBe(false);
+    const actualContext = sender.result.context;
+    expect(actualContext).toHaveProperty(KEY_HOST, expectedHost);
+    expect(actualContext).toHaveProperty(`${KEY_TS}.${serverLogger.side}.log`);
+    const lag = ts - actualContext[KEY_TS][serverLogger.side].log;
     expect(lag).toBeGreaterThanOrEqual(0);
     // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration.
     expect(lag).toBeLessThan(100);
   });
 
-  test("processors should not be able to modify the timestamp, but be able to modify the hostname", () => {
-    this.logger.processors.push(new TimeWarp());
-    expect(this.sender.logs.length).toBe(0);
-    this.logger.log(LogLevel.WARNING, "hello, world", this.initialContext);
+  test("processors should neither be able to modify the timestamp, nor the hostname", () => {
+    const timeWarp = new TimeWarp();
+    logger.processors.push(timeWarp);
+    expect(sender.isEmpty).toBe(true);
+    const expectedHost = os.hostname();
+    const fakeHost = `wrong-${expectedHost}`;
+    logger.log(LogLevel.WARNING, "hello, world", { [KEY_HOST]: fakeHost, ...details});
     const ts = +new Date();
-    expect(this.sender.logs.length).toBe(1);
-    const [, , context] = this.sender.logs.pop();
-    expect(context).toHaveProperty("hostname", "remote");
-    expect(context).toHaveProperty(`${KEY_TS}.${this.logger.side}.log`);
-    const lag = ts - context[KEY_TS][this.logger.side].log;
+    expect(sender.isEmpty).toBe(false);
+    const actualContext = sender.result.context;
+
+    // Hostname is a reserved key, so it is not taken from the sourced context.
+    // Since this is a Logger, not a ServerLogger, the key is not present.
+    expect(actualContext).not.toHaveProperty(KEY_HOST);
+    // Instead, it remains in the sourced part of the context.
+    const actualSourcedContext: IDetails = actualContext[TEST_SOURCE];
+    expect(actualSourcedContext).not.toHaveProperty(KEY_HOST, fakeHost);
+    expect(actualSourcedContext).toHaveProperty(KEY_HOST, timeWarp.HOST);
+
+    expect(actualContext).toHaveProperty(`${KEY_TS}.${TEST_SOURCE}.log`);
+    const lag = ts - actualContext[KEY_TS][TEST_SOURCE].log;
     expect(lag).toBeGreaterThanOrEqual(0);
     // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration. The TimeWarp processor attempts to

@@ -27,7 +27,7 @@ describe("Unit", () => {
     describe("validate log level names", testLogLevelNames);
     describe("logging does not modify context", testImmutableContext);
     // TODO: processors are not yet implemented in this branch.
-    describe.skip("processors can build any context", testProcessors);
+    describe("processors can build any context", testProcessors);
   });
   describe("ServerLogger", () => {
     describe("constructor", testConstructor);

@@ -10,7 +10,7 @@ function testInvalidMethod() {
     expect.assertions(2);
     // ServerLogger rejects GET methods as invalid.
     return axios.get(url)
-      .catch(err => {
+      .catch((err) => {
         const res = err.response;
         expect(res).toBeDefined();
         expect(res.status).toBe(405);

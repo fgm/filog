@@ -1,7 +1,7 @@
 import {IContext} from "../../src/IContext";
 import {ServerSide} from "../../src/Loggers/ServerLogger";
 import {IProcessor} from "../../src/Processors/IProcessor";
-import MeteorUserProcessor from "../../src/Processors/MeteorUserProcessor";
+import { MeteorUserProcessor } from "../../src/Processors/MeteorUserProcessor";
 
 interface IUserSubContext {
   user: {

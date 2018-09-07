@@ -11,7 +11,7 @@ function testStringifyMessage() {
         this.k = v;
       }
 
-      toString() {
+      public toString() {
         return JSON.stringify(this.k);
       }
     }

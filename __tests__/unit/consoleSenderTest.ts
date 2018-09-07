@@ -5,7 +5,7 @@
 /** global: console */
 
 import NullFn from "../../src/NullFn";
-import ConsoleSender from "../../src/Senders/ConsoleSender";
+import { ConsoleSender } from "../../src/Senders/ConsoleSender";
 
 let savedConsole;
 

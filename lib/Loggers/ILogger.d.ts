@@ -1,6 +1,9 @@
 import { IContext, IDetails } from "../IContext";
 import * as LogLevel from "../LogLevel";
+import { IProcessor } from "../Processors/IProcessor";
 interface ILogger {
+    processors: IProcessor[];
+    side: string;
     /**
      * Log an event. This is the *MAIN* method in the whole package.
      *

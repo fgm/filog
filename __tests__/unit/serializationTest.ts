@@ -1,4 +1,4 @@
-const sinon = require("sinon");
+import sinon = require("sinon");
 
 import { SyslogSender } from "../../src/Senders/SyslogSender";
 
@@ -7,14 +7,14 @@ function testSerializeDeepObject() {
   const logLevelWarn = 3;
 
   const makeSyslog = () => ({
-    level: {
-      [logLevelWarn]: "warn",
-    },
     facility: {
       [LOCAL0]: "local0",
     },
-    open: () => {},
-    log: () => {},
+    level: {
+      [logLevelWarn]: "warn",
+    },
+    log: () => undefined,
+    open: () => undefined,
   });
 
   const deepContext = () => ({

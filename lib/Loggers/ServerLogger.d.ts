@@ -22,7 +22,7 @@ interface IServerLoggerConstructorParameters {
     servePath?: string;
     verbose?: boolean;
 }
-declare const SIDE = "server";
+declare const ServerSide = "server";
 /**
  * An extension of the base logger which accepts log input on a HTTP URL.
  *
@@ -104,11 +104,12 @@ declare class ServerLogger extends Logger implements ILogger {
      * @param context
      *   The context added to the details by upstream processors.
      * @param source
-     *   The upstream sender type.
+     *   The upstream sender type. Allow logging with source set from an incoming
+     *   log event, as in client-sender logging or during tests.
      *
      * @throws InvalidArgumentException
      */
-    logExtended(level: LogLevel.Levels, message: object | string, context: IContext, source: string): void;
+    logExtended(level: LogLevel.Levels, message: object | string, context: IContext, source?: string): void;
     /**
      * The Meteor server method registered a ${Logger.METHOD}.
      *
@@ -140,4 +141,4 @@ declare class ServerLogger extends Logger implements ILogger {
      */
     protected _getHostname(): string | undefined;
 }
-export { IServerLoggerConstructorParameters, ServerLogger, SIDE as ServerSide, };
+export { IServerLoggerConstructorParameters, ServerLogger, ServerSide, };
