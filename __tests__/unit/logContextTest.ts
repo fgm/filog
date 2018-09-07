@@ -1,10 +1,16 @@
-import {KEY_DETAILS, IContext, KEY_SOURCE, KEY_TS } from "../../src/IContext";
-import {Logger} from "../../src/Loggers/Logger";
-import {ServerLogger} from "../../src/Loggers/ServerLogger";
+import {
+  IContext,
+  KEY_DETAILS,
+  KEY_SOURCE,
+  KEY_TS,
+} from "../../src/IContext";
+import { Logger } from "../../src/Loggers/Logger";
+import { ServerLogger } from "../../src/Loggers/ServerLogger";
 import * as LogLevel from "../../src/LogLevel";
-import {IProcessor} from "../../src/Processors/IProcessor";
-import ProcessorBase from "../../src/Processors/ProcessorBase";
-import {newEmptyStrategy, newLogStrategy, TestSender} from "./types";
+import { IProcessor } from "../../src/Processors/IProcessor";
+import { ProcessorBase } from "../../src/Processors/ProcessorBase";
+import { ISender} from "../../src/Senders/ISender";
+import { newEmptyStrategy, newLogStrategy, TestSender } from "./types";
 
 function testImmutableContext() {
   test("should not modify context in log() calls", () => {
@@ -298,7 +304,7 @@ function testObjectifyContext() {
 }
 
 function testProcessors() {
-  const Sender = class extends ProcessorBase implements IProcessor {
+  const Sender = class extends ProcessorBase implements ISender {
     public logs: any[][];
 
     constructor() {

@@ -5,7 +5,7 @@
 import * as connect from "connect";
 import { IncomingMessage, ServerResponse } from "http";
 import { WebApp } from "meteor/webapp";
-import { IContext, IDetails } from "../IContext";
+import { IContext } from "../IContext";
 import * as LogLevel from "../LogLevel";
 import { IStrategy } from "../Strategies/IStrategy";
 import { ILogger } from "./ILogger";
@@ -36,6 +36,7 @@ declare class ServerLogger extends Logger implements ILogger {
      * Return a plain object for all types of context values.
      *
      * @param rawContext
+     *   Expect a POJO but accept just about anything.
      *   Expect a POJO but accept just about anything.
      *
      * @returns {{}}
@@ -79,22 +80,6 @@ declare class ServerLogger extends Logger implements ILogger {
      */
     constructor(strategy: IStrategy, webapp?: OptionalWebApp, parameters?: IServerLoggerConstructorParameters);
     /**
-     * Add defaults to the initial context.
-     *
-     * @param initialContext
-     *   The context passed to logExtended().
-     * @param source
-     *   The source whence the event originated.
-     *
-     * @see logExtended()
-     *
-     * This method is only made public for the benefit of tests: it is not meant
-     * to be used outside the class and its tests.
-     *
-     * @protected
-     */
-    defaultContext(initialContext: IContext, source: string): IContext;
-    /**
      * Handle a log message from the client.
      *
      * @param req
@@ -107,10 +92,6 @@ declare class ServerLogger extends Logger implements ILogger {
      * @returns {void}
      */
     handleClientLogRequest(req: IncomingMessage, res: ServerResponse, _NEXT: () => void): void;
-    /**
-     * @inheritDoc
-     */
-    log(level: LogLevel.Levels, message: string, rawContext: IDetails): void;
     /**
      * Extended syntax for log() method.
      *
@@ -127,7 +108,7 @@ declare class ServerLogger extends Logger implements ILogger {
      *
      * @throws InvalidArgumentException
      */
-    logExtended(level: LogLevel.Levels, message: string, context: IContext, source: string): void;
+    logExtended(level: LogLevel.Levels, message: object | string, context: IContext, source: string): void;
     /**
      * The Meteor server method registered a ${Logger.METHOD}.
      *

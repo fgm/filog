@@ -1,8 +1,9 @@
 import {
+  IContext,
+  IDetails,
+  ITimestamps,
   KEY_DETAILS,
   KEY_HOST,
-  IContext, IDetails,
-  ITimestamps,
   KEY_SOURCE,
   KEY_TS,
 } from "../../src/IContext";

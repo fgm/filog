@@ -2,21 +2,21 @@
  * @fileOverview Server-side Logger.
  */
 
-// Meteor imports.
-import * as connect from "connect";
-import {IncomingMessage, ServerResponse} from "http";
-import {WebApp} from "meteor/webapp";
 // Node.JS packages: this is server-side code.
 import * as os from "os";
 import process from "process";
 import * as util from "util";
+
+// Meteor imports.
+import * as connect from "connect";
+import { IncomingMessage, ServerResponse } from "http";
+import { WebApp } from "meteor/webapp";
+
 // Package imports.
 import {
-  KEY_DETAILS,
-  KEY_HOST,
   IContext,
-  IDetails,
-  KEY_SOURCE
+  KEY_DETAILS,
+  KEY_SOURCE,
 } from "../IContext";
 import * as LogLevel from "../LogLevel";
 import {IStrategy} from "../Strategies/IStrategy";
@@ -53,6 +53,7 @@ class ServerLogger extends Logger implements ILogger {
    * Return a plain object for all types of context values.
    *
    * @param rawContext
+   *   Expect a POJO but accept just about anything.
    *   Expect a POJO but accept just about anything.
    *
    * @returns {{}}
@@ -190,31 +191,6 @@ class ServerLogger extends Logger implements ILogger {
   }
 
   /**
-   * Add defaults to the initial context.
-   *
-   * @param initialContext
-   *   The context passed to logExtended().
-   * @param source
-   *   The source whence the event originated.
-   *
-   * @see logExtended()
-   *
-   * This method is only made public for the benefit of tests: it is not meant
-   * to be used outside the class and its tests.
-   *
-   * @protected
-   */
-  public defaultContext(initialContext: IContext, source: string): IContext {
-    const cx1 = {
-      [KEY_HOST]: this._getHostname(),
-      [KEY_SOURCE]: source,
-      ...initialContext,
-    };
-    Logger.stamp(cx1, "log", this.side);
-    return cx1;
-  }
-
-  /**
    * Handle a log message from the client.
    *
    * @param req
@@ -279,14 +255,6 @@ class ServerLogger extends Logger implements ILogger {
   }
 
   /**
-   * @inheritDoc
-   */
-  public log(level: LogLevel.Levels, message: string, rawContext: IDetails): void {
-    rawContext.hostname = this.hostname;
-    super.log(level, message, rawContext);
-  }
-
-  /**
    * Extended syntax for log() method.
    *
    * @private
@@ -302,10 +270,25 @@ class ServerLogger extends Logger implements ILogger {
    *
    * @throws InvalidArgumentException
    */
-  public logExtended(level: LogLevel.Levels, message: string, context: IContext, source: string): void {
-    this.validateLevel(level);
-    const cx1 = this.defaultContext(context, source);
-    this.send(this.strategy, level, message, cx1);
+  public logExtended(
+    level: LogLevel.Levels,
+    message: object|string,
+    context: IContext,
+    source: string): void {
+    Logger.validateLevel(level);
+
+    const c1: IContext = {
+      ...context,
+      [KEY_SOURCE]: source,
+    };
+
+    const c2 = this.defaultContext(c1);
+    const preservedTop = this.getReservedContext(c2);
+    const initialKeys = Object.keys(c2);
+    const c3 = this.process(c2);
+    const c4 = this.source(c3, preservedTop, initialKeys);
+
+    this.send(this.strategy, level, String(message), c4);
   }
 
   /**

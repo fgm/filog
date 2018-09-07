@@ -6,6 +6,7 @@ import TraceKit from "tracekit";
 
 import {
   IContext,
+  IDetails,
   ITimestamps,
   KEY_DETAILS,
   KEY_HOST,
@@ -49,6 +50,18 @@ class Logger implements ILogger {
   }
 
   /**
+   * Module-private processor reducer.
+   *
+   * @see Logger.process
+   *
+   * @internal
+   * @protected
+   */
+  public static processorReducer(accu: IContext, processor: IProcessor): IContext {
+    return processor.process(accu);
+  }
+
+  /**
    * Add a timestamp to a context object on the active side.
    *
    * Ensure a KEY_TS will be present, and existing timestamps are not being
@@ -76,6 +89,28 @@ class Logger implements ILogger {
     const sideTs = contextTs[side] || {};
     sideTs[op] = now;
     contextTs[side] = sideTs;
+  }
+
+  /**
+   * Ensure a log level is in the allowed value set.
+   *
+   * While this is useless for TS code, JS code using the compiled version of
+   * the module still needs that check.
+   *
+   * @see Logger.log()
+   *
+   * @param {Number} requestedLevel
+   *   A RFC5424 level.
+   *
+   * @throws InvalidArgumentException
+   *   As per PSR-3, if level is not a valid RFC5424 level.
+   */
+  public static validateLevel(requestedLevel: LogLevel.Levels): void {
+    if (!Number.isInteger(requestedLevel as number)
+      || +requestedLevel < LogLevel.EMERGENCY
+      || +requestedLevel > LogLevel.DEBUG) {
+      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
+    }
   }
 
   public processors: IProcessor[] = [];
@@ -114,6 +149,27 @@ class Logger implements ILogger {
   }
 
   /**
+   * Add defaults to the initial context.
+   *
+   * @param initialContext
+   *   The context passed to logExtended().
+   *
+   * This method is only made public for the benefit of tests: it is not meant
+   * to be used outside the class and its tests.
+   *
+   * @protected
+   */
+  public defaultContext(initialContext: IContext): IContext {
+    const hostName = this._getHostname();
+    if (typeof hostName === "string") {
+      initialContext[KEY_HOST] = hostName;
+    }
+
+    Logger.stamp(initialContext, "log", this.side);
+    return initialContext;
+  }
+
+  /**
    * Disarm the subscriber.
    *
    * In most cases, we do not want to disarm immediately: a stack trace being
@@ -147,19 +203,30 @@ class Logger implements ILogger {
    *
    * @protected
    */
-  public getInitialContext(details = {}): IContext {
-    const cx: IContext = {
+  public getInitialContext(details: IDetails = {}): IContext {
+    return {
       [KEY_DETAILS]: details,
       [KEY_SOURCE]: this.side,
     };
+  }
 
-    const hostName = this._getHostname();
-    if (typeof hostName === "string") {
-      cx[KEY_HOST] = hostName;
-    }
-
-    Logger.stamp(cx, "log", this.side);
-    return cx;
+  /**
+   * Return the "reserved" keys of a context, made of its predefined keys.
+   *
+   * @param context
+   *   The initial context.
+   *
+   * @return
+   *   A context containing only these keys.
+   */
+  public getReservedContext(context: IContext): IContext {
+    const result: IContext = {};
+    [KEY_DETAILS, KEY_HOST, KEY_SOURCE, KEY_TS].forEach((v: keyof IContext) => {
+      if (context[v] !== undefined) {
+        result[v] = context[v];
+      }
+    });
+    return result;
   }
 
   /** @inheritDoc */
@@ -171,11 +238,38 @@ class Logger implements ILogger {
   public log(
     level: LogLevel.Levels,
     message: object|string,
-    details: {} = {},
+    details: IDetails,
   ): void {
-    this.validateLevel(level);
+    Logger.validateLevel(level);
+
     const c1 = this.getInitialContext(details);
-    this.send(this.strategy, level, String(message), c1);
+
+    const c2 = this.defaultContext(c1);
+    const preservedTop = this.getReservedContext(c2);
+    const initialKeys = Object.keys(c2);
+    const c3 = this.process(c2);
+    const c4 = this.source(c3, preservedTop, initialKeys);
+
+    this.send(this.strategy, level, String(message), c4);
+  }
+
+  /**
+   * Process a context by applying processors, returning a non-sourced result.
+   *
+   * This is an internal step, only made public to enable testing. Do not use it
+   * in userland code.
+   *
+   * @param context
+   *   The context to process.
+   *
+   * @return
+   *   The context transformed by applying processors to it, but not sourcing.
+   *
+   * @internal
+   * @protected
+   */
+  public process(context: IContext): IContext {
+    return this.processors.reduce(Logger.processorReducer, context);
   }
 
   /**
@@ -226,25 +320,54 @@ class Logger implements ILogger {
   }
 
   /**
-   * Ensure a log level is in the allowed value set.
+   * Source a (typically processed) context.
    *
-   * While this is useless for TS code, JS code using the compiled version of
-   * the module still needs that check.
+   * This is an internal step, only made public to enable testing. Do not use it
+   * in userland code.
    *
-   * @see Logger.log()
+   * @param context
+   *   The context to source
+   * @param initialTop
+   *   A context made of only the reserved keys in the initial context.
+   * @param initialKeys
+   *   An array of all the keys in the initial context.
    *
-   * @param {Number} requestedLevel
-   *   A RFC5424 level.
+   * @return
+   *   The sourced context.
    *
-   * @throws InvalidArgumentException
-   *   As per PSR-3, if level is not a valid RFC5424 level.
+   * @internal
+   * @protected
    */
-  public validateLevel(requestedLevel: LogLevel.Levels): void {
-    if (!Number.isInteger(requestedLevel as number)
-      || +requestedLevel < LogLevel.EMERGENCY
-      || +requestedLevel > LogLevel.DEBUG) {
-      throw new InvalidArgumentException("The level argument to log() must be an RFC5424 level.");
+  public source(context: IContext, initialTop: IContext, initialKeys: string[]): IContext {
+    const keys = Object.keys(context);
+
+    // Shortcut evaluation if no processor added anything.
+    if (keys.length === 0) {
+      return initialTop;
     }
+
+    const c1: IContext = {
+      [this.side]: {},
+    };
+
+    for (const k of keys) {
+      const isInitial = initialKeys.includes(k);
+      if (isInitial) {
+        c1[k] = context[k];
+      } else {
+        (c1[this.side] as IDetails)[k] = context[k];
+      }
+    }
+
+    if (Object.keys(c1[this.side] as {}).length === 0) {
+      delete c1[this.side];
+    }
+
+    const c2: IContext = {
+        ...c1,
+      ...initialTop,
+    };
+    return c2;
   }
 
   /** @inheritDoc */
@@ -257,17 +380,15 @@ class Logger implements ILogger {
    *
    * This method is an implementation detail: do not depend on it.
    *
-   * @param {String} level
-   *   debug, info, warn, or error
+   * @param _LEVEL
+   *   One of the 4 Meteor log levels as a string.
    *
    * @todo (or not ?) merge in the funky Meteor logic from the logging package.
    */
-  public _meteorLog(): void { return; }
+  public _meteorLog(_LEVEL: "debug" | "info" | "warn" | "error"): void { return; }
 
   /**
    * Child classes are expected to re-implement this.
-   *
-   * @protected
    */
   protected _getHostname(): string | undefined {
     return undefined;

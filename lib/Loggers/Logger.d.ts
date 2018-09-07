@@ -1,7 +1,7 @@
 /**
  * @fileOverview Base Logger class.
  */
-import { IContext, ITimestamps } from "../IContext";
+import { IContext, IDetails, ITimestamps } from "../IContext";
 import * as LogLevel from "../LogLevel";
 import { IProcessor } from "../Processors/IProcessor";
 import { IStrategy } from "../Strategies/IStrategy";
@@ -24,6 +24,15 @@ declare class Logger implements ILogger {
      */
     static levelName(level: number): string;
     /**
+     * Module-private processor reducer.
+     *
+     * @see Logger.process
+     *
+     * @internal
+     * @protected
+     */
+    static processorReducer(accu: IContext, processor: IProcessor): IContext;
+    /**
      * Add a timestamp to a context object on the active side.
      *
      * Ensure a KEY_TS will be present, and existing timestamps are not being
@@ -39,6 +48,21 @@ declare class Logger implements ILogger {
      * @protected
      */
     static stamp(context: IContext, op: string, side: keyof ITimestamps): void;
+    /**
+     * Ensure a log level is in the allowed value set.
+     *
+     * While this is useless for TS code, JS code using the compiled version of
+     * the module still needs that check.
+     *
+     * @see Logger.log()
+     *
+     * @param {Number} requestedLevel
+     *   A RFC5424 level.
+     *
+     * @throws InvalidArgumentException
+     *   As per PSR-3, if level is not a valid RFC5424 level.
+     */
+    static validateLevel(requestedLevel: LogLevel.Levels): void;
     processors: IProcessor[];
     side: string;
     tk: any;
@@ -60,6 +84,18 @@ declare class Logger implements ILogger {
     arm(): void;
     /** @inheritDoc */
     debug(message: object | string, context?: IContext): void;
+    /**
+     * Add defaults to the initial context.
+     *
+     * @param initialContext
+     *   The context passed to logExtended().
+     *
+     * This method is only made public for the benefit of tests: it is not meant
+     * to be used outside the class and its tests.
+     *
+     * @protected
+     */
+    defaultContext(initialContext: IContext): IContext;
     /**
      * Disarm the subscriber.
      *
@@ -85,11 +121,37 @@ declare class Logger implements ILogger {
      *
      * @protected
      */
-    getInitialContext(details?: {}): IContext;
+    getInitialContext(details?: IDetails): IContext;
+    /**
+     * Return the "reserved" keys of a context, made of its predefined keys.
+     *
+     * @param context
+     *   The initial context.
+     *
+     * @return
+     *   A context containing only these keys.
+     */
+    getReservedContext(context: IContext): IContext;
     /** @inheritDoc */
     info(message: object | string, context?: IContext): void;
     /** @inheritDoc */
-    log(level: LogLevel.Levels, message: object | string, details?: {}): void;
+    log(level: LogLevel.Levels, message: object | string, details: IDetails): void;
+    /**
+     * Process a context by applying processors, returning a non-sourced result.
+     *
+     * This is an internal step, only made public to enable testing. Do not use it
+     * in userland code.
+     *
+     * @param context
+     *   The context to process.
+     *
+     * @return
+     *   The context transformed by applying processors to it, but not sourcing.
+     *
+     * @internal
+     * @protected
+     */
+    process(context: IContext): IContext;
     /**
      * The callback invoked by TraceKit
      *
@@ -126,20 +188,25 @@ declare class Logger implements ILogger {
      */
     send(strategy: IStrategy, level: LogLevel.Levels, message: string, sentContext: {}): void;
     /**
-     * Ensure a log level is in the allowed value set.
+     * Source a (typically processed) context.
      *
-     * While this is useless for TS code, JS code using the compiled version of
-     * the module still needs that check.
+     * This is an internal step, only made public to enable testing. Do not use it
+     * in userland code.
      *
-     * @see Logger.log()
+     * @param context
+     *   The context to source
+     * @param initialTop
+     *   A context made of only the reserved keys in the initial context.
+     * @param initialKeys
+     *   An array of all the keys in the initial context.
      *
-     * @param {Number} requestedLevel
-     *   A RFC5424 level.
+     * @return
+     *   The sourced context.
      *
-     * @throws InvalidArgumentException
-     *   As per PSR-3, if level is not a valid RFC5424 level.
+     * @internal
+     * @protected
      */
-    validateLevel(requestedLevel: LogLevel.Levels): void;
+    source(context: IContext, initialTop: IContext, initialKeys: string[]): IContext;
     /** @inheritDoc */
     warn(message: object | string, context?: IContext): void;
     /**
@@ -147,16 +214,14 @@ declare class Logger implements ILogger {
      *
      * This method is an implementation detail: do not depend on it.
      *
-     * @param {String} level
-     *   debug, info, warn, or error
+     * @param _LEVEL
+     *   One of the 4 Meteor log levels as a string.
      *
      * @todo (or not ?) merge in the funky Meteor logic from the logging package.
      */
-    _meteorLog(): void;
+    _meteorLog(_LEVEL: "debug" | "info" | "warn" | "error"): void;
     /**
      * Child classes are expected to re-implement this.
-     *
-     * @protected
      */
     protected _getHostname(): string | undefined;
 }
