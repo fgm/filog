@@ -6,7 +6,7 @@ import {BrowserProcessor, IMemoryInfo, IPerformance, IWindow} from "../../src/Pr
  */
 function testBrowserProcessor() {
   class Performance implements IPerformance {
-    public memory: IMemoryInfo;
+    public memory?: IMemoryInfo;
 
     constructor(values = {}) {
       // Avoid an "unused field" warning.
@@ -43,7 +43,9 @@ function testBrowserProcessor() {
 
     processor = null;
     expect(() => {
-      processor = new BrowserProcessor(null, null);
+      // These are invalid values which TS wouldn't allow, so we have to use the
+      // type cast to enable the test to run in the compiled JS.
+      processor = new BrowserProcessor(null as any, null as any);
     }).toThrow(ReferenceError);
     expect(processor).toBeNull();
   });

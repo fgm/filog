@@ -63,7 +63,7 @@ function testContextSourcing(): void {
     expect(actualContext).not.toHaveProperty(side);
 
     expect(actualContext).toHaveProperty(KEY_TS);
-    const ts: ITimestamps = actualContext[KEY_TS];
+    const ts: ITimestamps | undefined = actualContext[KEY_TS];
     expect(typeof ts).toBe("object");
     expect(ts).toHaveProperty(side);
     expect(ts[side]).toHaveProperty("log");

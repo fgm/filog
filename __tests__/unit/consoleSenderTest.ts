@@ -6,6 +6,7 @@
 
 import NullFn from "../../src/NullFn";
 import { ConsoleSender } from "../../src/Senders/ConsoleSender";
+import {ISender} from "../../src/Senders/ISender";
 
 let savedConsole;
 
@@ -37,7 +38,7 @@ function testConsoleSender() {
 
     invalid.forEach((c) => {
       console = c as Console;
-      let sender = null;
+      let sender: ISender | null = null;
       expect(() => {
         sender = new ConsoleSender();
       }).toThrow();

@@ -13,7 +13,7 @@ interface IMemoryInfo {
 }
 
 interface IPerformance {
-  memory: IMemoryInfo;
+  memory?: IMemoryInfo;
 }
 
 interface IWindow {
@@ -53,7 +53,7 @@ class BrowserProcessor extends ProcessorBase implements IProcessor {
    * @param {object} win
    *   window.
    */
-  constructor(nav: INavigator, win: IWindow) {
+  constructor(nav?: INavigator, win?: IWindow) {
     super();
     const actualNav = nav || (typeof navigator === "object" && navigator);
     const actualWin = win || (typeof window === "object" && window);

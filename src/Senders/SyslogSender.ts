@@ -61,7 +61,7 @@ class SyslogSender implements ISender {
    * @see modern-syslog/core.cc
    */
   constructor(
-    ident = null,
+    ident: string | null = null,
     syslogOptions: number = 0,
     syslogFacility: number | null = null,
     public syslog: any, // modernSyslog,

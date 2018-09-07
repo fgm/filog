@@ -10,7 +10,7 @@ interface IMemoryInfo {
     usedJSHeapSize: number;
 }
 interface IPerformance {
-    memory: IMemoryInfo;
+    memory?: IMemoryInfo;
 }
 interface IWindow {
     navigator?: INavigator;
@@ -45,7 +45,7 @@ declare class BrowserProcessor extends ProcessorBase implements IProcessor {
      * @param {object} win
      *   window.
      */
-    constructor(nav: INavigator, win: IWindow);
+    constructor(nav?: INavigator, win?: IWindow);
     /** @inheritDoc */
     process(context: object): IContext;
 }
