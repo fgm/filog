@@ -1,21 +1,14 @@
 import sinon = require("sinon");
 
+import * as MM from "meteor/mongo";
 import {IContext, KEY_TS} from "../../src/IContext";
 import * as LogLevel from "../../src/LogLevel";
 import { MongodbSender } from "../../src/Senders/MongodbSender";
 
-// This is a builtin Meteor interface: cannot rename it.
-// tslint:disable-next-line
-interface Mongo {
-  Collection: (name: string) => void;
-  insert?: () => undefined;
-  name?: string;
-}
-
 function testMongoDbSender() {
-  const mongo: Mongo = {
+  const mongo: any = {
     // Do NOT replace by an arrow function: it breaks the Sinon spy.
-    Collection(name): void {
+    Collection(name: string): void {
       // TSlint ignores the use of this method by Sinon in the 'should add a
       // "send" timestamp to non-empty context' test below, so do not remove it,
       // as it breaks that test.
@@ -33,7 +26,7 @@ function testMongoDbSender() {
   });
 
   test("should accept an existing collection", () => {
-    const collection = new (mongo.Collection("fake") as any)();
+    const collection: MM.Mongo.Collection<object> = new mongo.Collection("fake");
     const sender = new MongodbSender(mongo, collection);
     expect(sender).toBeInstanceOf(MongodbSender);
     expect(sender.store).toBe(collection);
@@ -46,7 +39,7 @@ function testMongoDbSender() {
   });
 
   test("should add a \"send\" timestamp to empty context", () => {
-    const collection = new (mongo.Collection("fake") as any)();
+    const collection: MM.Mongo.Collection<object> = new mongo.Collection("fake");
     const sender = new MongodbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
@@ -76,7 +69,7 @@ function testMongoDbSender() {
   });
 
   test("should add a \"send\" timestamp to non-empty context", () => {
-    const collection = new (mongo.Collection("fake") as any)();
+    const collection: MM.Mongo.Collection<object> = new mongo.Collection("fake");
     const sender = new MongodbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();

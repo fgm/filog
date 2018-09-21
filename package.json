@@ -38,7 +38,7 @@
     "jsdoc": "^3.4.3",
     "npm": "^6.0.0",
     "sinon": "^5.0.3",
-    "ts-jest": "^23.1.4",
+    "ts-jest": "^23.10.1",
     "tslint": "^5.11.0",
     "typescript": "^3.0.1"
   },
@@ -49,11 +49,6 @@
   "engines#1": "We specify npm >= 2 to get proper local dependency support in",
   "engines#2": "application itself ; this is not a package dependency per se.",
   "homepage": "https://github.com/FGM/filog",
-  "jest": {
-    "transform": {
-      "^.+\\.js?$": "babel-jest"
-    }
-  },
   "keywords": [
     "log",
     "logging",
@@ -78,7 +73,7 @@
     "ts-lint": "tslint -p tsconfig.json",
     "compile": "rm -fr lib/* ; rm -fr node_modules ; meteor npm i && meteor npm run test-compile",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
-    "test-ci":          "       npm run test-compile && time -p jest --coverage __tests__/unit/test.ts",
+    "test-ci":                 "npm run test-compile && time -p jest --coverage __tests__/unit/test.ts",
     "test-compile": "time -p tsc",
     "test-integration": "meteor npm run test-compile && time -p jest            __tests__/integration/test.ts",
     "test-unit":        "meteor npm run test-compile && time -p jest            __tests__/unit/test.ts",

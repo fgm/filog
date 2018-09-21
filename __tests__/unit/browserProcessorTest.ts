@@ -16,7 +16,7 @@ function testBrowserProcessor() {
   beforeEach(() => {
     initialContext = { anything: "goes" };
     navigator = {};
-    window = { performance: new Performance() };
+    window = { performance: undefined };
   });
 
   test("should fail outside the browser", () => {
@@ -54,11 +54,14 @@ function testBrowserProcessor() {
 
   test("Should ignore extra defaults on browser", () => {
     const MAGIC = "xyzzy";
-    const win: IPerformanceWindow = { performance: new Performance() };
-    win.performance.memory = {
-      jsHeapSizeLimit: 1,
-      totalJSHeapSize: 2,
-      usedJSHeapSize: 3,
+    const win: IPerformanceWindow = {
+      performance: {
+        memory: {
+          jsHeapSizeLimit: 1,
+          totalJSHeapSize: 2,
+          usedJSHeapSize: 3,
+        },
+      },
     };
 
     const processor = new BrowserProcessor(navigator, win);
@@ -77,12 +80,13 @@ function testBrowserProcessor() {
       "usedJSHeapSize",
     ];
     const win: IPerformanceWindow = {
-      performance: new Performance(),
-    };
-    win.performance.memory = {
-      jsHeapSizeLimit: 1,
-      totalJSHeapSize: 2,
-      usedJSHeapSize: 3,
+      performance: {
+        memory: {
+          jsHeapSizeLimit: 1,
+          totalJSHeapSize: 2,
+          usedJSHeapSize: 3,
+        },
+      },
     };
 
     const processor = new BrowserProcessor(navigator, win);
