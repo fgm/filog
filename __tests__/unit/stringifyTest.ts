@@ -7,7 +7,9 @@ function testStringifyMessage() {
     const value = "foo";
 
     class Printable {
-      constructor(v) {
+      public k: any;
+
+      constructor(v: any) {
         this.k = v;
       }
 

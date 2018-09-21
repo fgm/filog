@@ -4,6 +4,7 @@ lib/
 libts/
 node_modules/
 npm-debug.log
+lib/__tests__
 out/
 yarn-error.log
 

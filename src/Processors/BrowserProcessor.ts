@@ -1,8 +1,8 @@
 /**
  * @fileOverview Browser Processor class.
  */
-import {IContext} from "../IContext";
-import {IProcessor} from "./IProcessor";
+import { IContext } from "../IContext";
+import { IProcessor } from "./IProcessor";
 import { ProcessorBase } from "./ProcessorBase";
 
 interface IMemoryInfo {
@@ -12,22 +12,22 @@ interface IMemoryInfo {
 
 }
 
-interface IPerformance {
+interface Performance {
   memory?: IMemoryInfo;
 }
 
-interface IWindow {
-  navigator?: INavigator;
-  performance: IPerformance;
+interface Window {
+  navigator?: Navigator;
+  performance: Performance;
 }
 
 interface IBrowserInfo {
-  performance?: IPerformance | {};
+  performance?: Performance | {};
   platform: string;
   userAgent: string;
 }
 
-interface INavigator {
+interface Navigator {
   platform?: string;
   userAgent?: string;
   [key: string]: string | undefined;
@@ -42,8 +42,8 @@ interface INavigator {
  * @extends ProcessorBase
  */
 class BrowserProcessor extends ProcessorBase implements IProcessor {
-  public navigator: INavigator;
-  public window: IWindow;
+  public navigator: any;
+  public window: any;
 
   /**
    * ProcessorBase ensures it is not being built outside a browser.
@@ -53,7 +53,7 @@ class BrowserProcessor extends ProcessorBase implements IProcessor {
    * @param {object} win
    *   window.
    */
-  constructor(nav?: INavigator, win?: IWindow) {
+  constructor(nav?: Navigator, win?: Window) {
     super();
     const actualNav = nav || (typeof navigator === "object" && navigator);
     const actualWin = win || (typeof window === "object" && window);
@@ -110,7 +110,4 @@ export {
   BrowserProcessor,
   IBrowserInfo,
   IMemoryInfo,
-  INavigator,
-  IPerformance,
-  IWindow,
 };

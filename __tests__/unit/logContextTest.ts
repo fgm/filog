@@ -1,7 +1,7 @@
 import * as os from "os";
 
 import {
-  IContext, IDetails,
+  IContext, IDetails, ITimestamps,
   KEY_DETAILS, KEY_HOST,
   KEY_SOURCE,
   KEY_TS,
@@ -93,7 +93,8 @@ function testMessageContext() {
     expect(actual).toHaveProperty(KEY_DETAILS);
 
     // Original top-level keys should still be in top [KEY_DETAILS].
-    const actualDetails = actual[KEY_DETAILS];
+    // KEY_DETAILS just checked at previous line.
+    const actualDetails = actual[KEY_DETAILS]!;
     expect(actualDetails).toHaveProperty("a", "A");
     expect(actualDetails).toHaveProperty(KEY_DETAILS);
     expect(actualDetails).not.toHaveProperty("foo");
@@ -126,7 +127,8 @@ function testMessageContext() {
     expect(actual).toHaveProperty(KEY_DETAILS);
 
     // Original top-level keys should still be in top [KEY_DETAILS].
-    const actualDetails = actual[KEY_DETAILS];
+    // KEY_DETAILS Just checked at previous line.
+    const actualDetails = actual[KEY_DETAILS]!;
     expect(Object.keys(actualDetails).length).toBe(2);
     expect(actualDetails).toHaveProperty("a", "A");
     expect(actualDetails).toHaveProperty(KEY_DETAILS);
@@ -150,7 +152,9 @@ function testMessageContext() {
 
     // [KEY_DETAILS] should contain the newly added value for key "a", not the
     // one present in the initial [KEY_DETAILS].
-    const actualDetails: { a?: any } = sender.result.context[KEY_DETAILS];
+    const maybeActualDetails = sender.result.context[KEY_DETAILS];
+    expect(maybeActualDetails).toBeDefined();
+    const actualDetails: { a?: any } = maybeActualDetails!;
     const expected = "A";
     // Message details are set.
     expect(actualDetails).toHaveProperty("a", expected);
@@ -258,8 +262,8 @@ function testObjectifyContext() {
   test("should downgrade miscellaneous classed objects to POJOs", () => {
     const value = "foo";
     class Foo {
-      public k;
-      constructor(v) {
+      public k: any;
+      constructor(v: any) {
         this.k = v;
       }
     }
@@ -316,20 +320,20 @@ function testProcessors() {
   let logger: ILogger;
 
   const Adder = class extends ProcessorBase implements IProcessor {
-    public process(context) {
+    public process(context: IContext) {
       return { added: "value", ...context };
     }
   };
 
   const Modifier = class extends ProcessorBase implements IProcessor {
-    public process(context) {
+    public process(context: IContext) {
       context.initial = "cost";
       return context;
     }
   };
 
   const Remover = class extends ProcessorBase implements IProcessor {
-    public process(context) {
+    public process(context: IContext) {
       const { added, initial, ...rest } = context;
       return rest;
     }
@@ -341,7 +345,7 @@ function testProcessors() {
    * Look at the timestamp test.
    */
   const Purger = class extends ProcessorBase implements IProcessor {
-    public process(context) {
+    public process(_: IContext) {
       return {};
     }
   };
@@ -418,12 +422,15 @@ function testProcessors() {
       [KEY_HOST]: fakeHost,
       ...details,
     });
-    const ts = +new Date();
+    const currentTs: number = +new Date();
     expect(sender.isEmpty).toBe(false);
     const actualContext = sender.result.context;
     expect(actualContext).toHaveProperty(KEY_HOST, expectedHost);
     expect(actualContext).toHaveProperty(`${KEY_TS}.${serverLogger.side}.log`);
-    const lag = ts - actualContext[KEY_TS][serverLogger.side].log;
+    const maybeTs = actualContext[KEY_TS];
+    expect(maybeTs).toBeDefined();
+    const actualTs: ITimestamps = maybeTs!;
+    const lag = currentTs - actualTs[serverLogger.side].log;
     expect(lag).toBeGreaterThanOrEqual(0);
     // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration.
@@ -445,12 +452,15 @@ function testProcessors() {
     // Since this is a Logger, not a ServerLogger, the key is not present.
     expect(actualContext).not.toHaveProperty(KEY_HOST);
     // Instead, it remains in the sourced part of the context.
-    const actualSourcedContext: IDetails = actualContext[TEST_SOURCE];
+    const maybeActualSourcedContext: any = actualContext[TEST_SOURCE];
+    expect(maybeActualSourcedContext).toBeDefined();
+    const actualSourcedContext: IDetails = maybeActualSourcedContext!;
     expect(actualSourcedContext).not.toHaveProperty(KEY_HOST, fakeHost);
     expect(actualSourcedContext).toHaveProperty(KEY_HOST, timeWarp.HOST);
 
     expect(actualContext).toHaveProperty(`${KEY_TS}.${TEST_SOURCE}.log`);
-    const lag = ts - actualContext[KEY_TS][TEST_SOURCE].log;
+    // KEY_TS just checked at previous line.
+    const lag = ts - actualContext[KEY_TS]![TEST_SOURCE].log;
     expect(lag).toBeGreaterThanOrEqual(0);
     // No sane machine should take more than 100 msec to return from log() with
     // such a fast sending configuration. The TimeWarp processor attempts to

@@ -12,7 +12,7 @@ import {ILogger} from "../../src/Loggers/ILogger";
 import {ServerLogger} from "../../src/Loggers/ServerLogger";
 import {Levels} from "../../src/LogLevel";
 import {ISender} from "../../src/Senders/ISender";
-import { newLogStrategy, TestSender } from "./types";
+import {IResult, newLogStrategy, TestSender} from "./types";
 
 // Unit tests run on NodeJS, so we have access to its packages.
 import {hostname} from "os";
@@ -42,7 +42,7 @@ function testContextSourcing(): void {
     cl.log(level, message, details);
     const t2: number = +new Date();
 
-    const expected = {
+    const expected: IResult = {
       context: {
         [KEY_DETAILS]: expectedDetails,
         // KEY_HOST: not on client contexts.
@@ -53,18 +53,20 @@ function testContextSourcing(): void {
       message,
     };
     expect(t2).toBeGreaterThanOrEqual(t1);
-    const result = sender.result;
+    const result: IResult = sender.result;
     expect(typeof result).toBe("object");
     expect(result).not.toHaveProperty(KEY_HOST);
     expect(result).toMatchObject(expected);
+    expect(result).toHaveProperty("context");
 
-    const actualContext = result.context;
+    const actualContext: IContext = result.context;
     // No side properties without processors.
     expect(actualContext).not.toHaveProperty(side);
 
     expect(actualContext).toHaveProperty(KEY_TS);
-    const ts: ITimestamps | undefined = actualContext[KEY_TS];
-    expect(typeof ts).toBe("object");
+    const maybeTs: ITimestamps | undefined = actualContext[KEY_TS];
+    expect(typeof maybeTs).toBe("object");
+    const ts: ITimestamps = maybeTs!;
     expect(ts).toHaveProperty(side);
     expect(ts[side]).toHaveProperty("log");
     expect(ts[side].log).toBeGreaterThanOrEqual(t1);
@@ -106,7 +108,8 @@ function testContextSourcing(): void {
 
     const actualContext = result.context;
     expect(actualContext).toHaveProperty(KEY_TS);
-    const ts: ITimestamps = actualContext[KEY_TS];
+    // Just checked at previous line.
+    const ts: ITimestamps = actualContext[KEY_TS]!;
     expect(typeof ts).toBe("object");
     expect(ts).toHaveProperty(side);
     expect(ts[side]).toHaveProperty("log");
@@ -179,7 +182,8 @@ function testContextSourcing(): void {
     expect(actualContext).not.toHaveProperty("server");
 
     expect(actualContext).toHaveProperty(KEY_TS);
-    const ts: ITimestamps = actualContext[KEY_TS];
+    // Just checked at previous line.
+    const ts: ITimestamps = actualContext[KEY_TS]!;
     expect(typeof actualContext[KEY_TS]).toBe("object");
     expect(typeof ts).toBe("object");
     expect(ts).toHaveProperty(side);

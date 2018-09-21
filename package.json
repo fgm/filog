@@ -75,6 +75,7 @@
     "clean": "rm -fr coverage node_modules",
     "ts-compile": "rm -fr lib src/*.js src/*/*.js; tsc -p tsconfig.json --watch",
     "ts-compile-tests": "rm -fr lib src/*.js src/*/*.js; tsc -p tsconfig_test.json --watch",
+    "ts-lint": "tslint -p tsconfig.json",
     "compile": "rm -fr lib/* ; rm -fr node_modules ; meteor npm i && meteor npm run test-compile",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
     "test-ci":          "       npm run test-compile && time -p jest --coverage __tests__/unit/test.ts",

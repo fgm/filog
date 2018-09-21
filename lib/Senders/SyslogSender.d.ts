@@ -51,8 +51,8 @@ declare class SyslogSender implements ISender {
      * @see serializeDefault
      * @see modern-syslog/core.cc
      */
-    constructor(ident: string | null | undefined, syslogOptions: number | undefined, syslogFacility: number | null | undefined, syslog: any, // modernSyslog,
-    formatOptions?: null, serialize?: null);
+    constructor(ident: string | null | undefined, syslogOptions: number | null | undefined, syslogFacility: number | null | undefined, syslog: any, // modernSyslog,
+    formatOptions?: {}, serialize?: null);
     /**
      * @inheritDoc
      */

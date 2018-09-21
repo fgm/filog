@@ -1,4 +1,12 @@
 module.exports = {
+  globals: {
+    "ts-jest": {
+      diagnostics: {
+        // Ignore noImplicitAny during tests (needed by browserProcessorTests).
+        ignoreCodes: [7017],
+      },
+    },
+  },
   moduleFileExtensions: [
     "ts",
     "tsx",

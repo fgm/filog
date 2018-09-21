@@ -4,9 +4,6 @@ import * as LL from "../../src/LogLevel";
 import {newEmptyStrategy} from "./types";
 
 function testLogLevels() {
-  const strategy = {
-    customizeLogger: () => [],
-  };
   test("log() should throw on non-integer levels", () => {
     const logger = new Logger(newEmptyStrategy());
     expect(() => {

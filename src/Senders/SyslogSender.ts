@@ -62,10 +62,10 @@ class SyslogSender implements ISender {
    */
   constructor(
     ident: string | null = null,
-    syslogOptions: number = 0,
+    syslogOptions: number | null = 0,
     syslogFacility: number | null = null,
     public syslog: any, // modernSyslog,
-    formatOptions = null,
+    formatOptions?: {},
     serialize = null,
   ) {
     const programName = path.basename(process.argv[1]);
@@ -75,7 +75,9 @@ class SyslogSender implements ISender {
 
     this.facility = syslogFacility || this.syslog.facility.LOG_LOCAL0;
     this.ident = actualIdent;
-    this.option = syslogOptions || (this.syslog.option.LOG_PID);
+    this.option = syslogOptions !== null
+      ? syslogOptions
+      : (this.syslog.option.LOG_PID);
     this.formatOptions = formatOptions || { depth: 5 };
     this.serialize = serialize || this.serializeDefault.bind(this);
 

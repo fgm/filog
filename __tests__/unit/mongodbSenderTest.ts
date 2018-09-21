@@ -1,5 +1,6 @@
 import sinon = require("sinon");
-import {IContext, IDetails, KEY_TS} from "../../src/IContext";
+
+import {IContext, KEY_TS} from "../../src/IContext";
 import * as LogLevel from "../../src/LogLevel";
 import { MongodbSender } from "../../src/Senders/MongodbSender";
 
@@ -7,6 +8,8 @@ import { MongodbSender } from "../../src/Senders/MongodbSender";
 // tslint:disable-next-line
 interface Mongo {
   Collection: (name: string) => void;
+  insert?: () => undefined;
+  name?: string;
 }
 
 function testMongoDbSender() {
@@ -30,7 +33,7 @@ function testMongoDbSender() {
   });
 
   test("should accept an existing collection", () => {
-    const collection = new mongo.Collection("fake");
+    const collection = new (mongo.Collection("fake") as any)();
     const sender = new MongodbSender(mongo, collection);
     expect(sender).toBeInstanceOf(MongodbSender);
     expect(sender.store).toBe(collection);
@@ -43,7 +46,7 @@ function testMongoDbSender() {
   });
 
   test("should add a \"send\" timestamp to empty context", () => {
-    const collection = new mongo.Collection("fake");
+    const collection = new (mongo.Collection("fake") as any)();
     const sender = new MongodbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();
@@ -73,7 +76,7 @@ function testMongoDbSender() {
   });
 
   test("should add a \"send\" timestamp to non-empty context", () => {
-    const collection = new mongo.Collection("fake");
+    const collection = new (mongo.Collection("fake") as any)();
     const sender = new MongodbSender(mongo, collection);
     const insertSpy = sinon.spy(sender.store, "insert");
     const before = +new Date();

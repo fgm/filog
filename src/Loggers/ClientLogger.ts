@@ -2,7 +2,7 @@
  * @fileOverview Client-side Logger implementation.
  */
 
-import {IStrategy} from "../Strategies/IStrategy";
+import { IStrategy } from "../Strategies/IStrategy";
 import { Logger } from "./Logger";
 
 const SIDE = "client";

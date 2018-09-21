@@ -1,26 +1,17 @@
 import NullFn from "../../src/NullFn";
-import {BrowserProcessor, IMemoryInfo, IPerformance, IWindow} from "../../src/Processors/BrowserProcessor";
+import { BrowserProcessor } from "../../src/Processors/BrowserProcessor";
+
+interface IPerformanceWindow {
+  performance: any;
+}
 
 /* This test hand-builds the MemoryInfo object in window.Performance, because
  * that class is not defined outside Chrome.
  */
 function testBrowserProcessor() {
-  class Performance implements IPerformance {
-    public memory?: IMemoryInfo;
-
-    constructor(values = {}) {
-      // Avoid an "unused field" warning.
-      this.memory = undefined;
-
-      for (const key of Object.keys(values)) {
-        this[key] = values[key];
-      }
-    }
-  }
-
-  let initialContext;
+  let initialContext: {};
   let navigator = {};
-  let window: IWindow;
+  let window: IPerformanceWindow;
 
   beforeEach(() => {
     initialContext = { anything: "goes" };
@@ -63,13 +54,11 @@ function testBrowserProcessor() {
 
   test("Should ignore extra defaults on browser", () => {
     const MAGIC = "xyzzy";
-    const win = { performance: new Performance({
-        memory: {
-          jsHeapSizeLimit: 1,
-          totalJSHeapSize: 2,
-          usedJSHeapSize: 3,
-        },
-      }),
+    const win: IPerformanceWindow = { performance: new Performance() };
+    win.performance.memory = {
+      jsHeapSizeLimit: 1,
+      totalJSHeapSize: 2,
+      usedJSHeapSize: 3,
     };
 
     const processor = new BrowserProcessor(navigator, win);
@@ -87,15 +76,15 @@ function testBrowserProcessor() {
       "totalJSHeapSize",
       "usedJSHeapSize",
     ];
-    const win: IWindow = {
-      performance: new Performance({
-        memory: {
-          jsHeapSizeLimit: 1,
-          totalJSHeapSize: 2,
-          usedJSHeapSize: 3,
-        },
-      }),
+    const win: IPerformanceWindow = {
+      performance: new Performance(),
     };
+    win.performance.memory = {
+      jsHeapSizeLimit: 1,
+      totalJSHeapSize: 2,
+      usedJSHeapSize: 3,
+    };
+
     const processor = new BrowserProcessor(navigator, win);
     expect(processor).toBeInstanceOf(BrowserProcessor);
 

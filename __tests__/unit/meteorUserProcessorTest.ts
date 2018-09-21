@@ -18,16 +18,22 @@ interface IMeteorAccountContext extends IContext {
 function testMeteorUserProcessor() {
   const mockMeteor = { isServer: true };
   const mockAccountsPackage = { "accounts-base": { AccountsServer: true } };
-  const postProcessorDelete = (data) => {
-    const result = Object.assign({}, data);
-    delete result.server.user.services;
+  const postProcessorDelete = (data: {}) => {
+    const result: { server?: IUserSubContext } = Object.assign({}, data);
+    if (result.server) {
+      delete result.server.user.services;
+    }
     return result;
   };
 
   const forcedUserId = 42;
-  const postProcessorUpdate = (data) => {
-    const result = Object.assign({}, data);
-    result.server.user = forcedUserId;
+  const postProcessorUpdate = (data: {} ) => {
+    // Do not use IUserSubContext, we want to validate runtime checks agains
+    // invalid user structure, which the compiler would not allow.
+    const result: { server?: { user?: any }} = Object.assign({}, data);
+    if (result.server) {
+      result.server.user = forcedUserId;
+    }
     return result;
   };
 
@@ -47,15 +53,20 @@ function testMeteorUserProcessor() {
     expect(processorRaw).toBeInstanceOf(MeteorUserProcessor);
     const resultRaw: IMeteorAccountContext = processorRaw.process(data);
     expect(resultRaw).toHaveProperty(ServerSide);
-    expect(resultRaw[ServerSide].user.services).toBeDefined();
+    const serverSideRaw: IUserSubContext = resultRaw[ServerSide]!;
+    expect(serverSideRaw.user.services).toBeDefined();
 
     expect(processorDeletor).toBeInstanceOf(MeteorUserProcessor);
     const resultDeleted: IMeteorAccountContext = processorDeletor.process(data);
-    expect(resultDeleted[ServerSide].user.services).toBeUndefined();
+    expect(resultDeleted).toHaveProperty(ServerSide);
+    const serverSideDeleted = resultDeleted[ServerSide]!;
+    expect(serverSideDeleted.user.services).toBeUndefined();
 
     expect(processorUpdater).toBeInstanceOf(MeteorUserProcessor);
     const resultUpdated: IMeteorAccountContext = processorUpdater.process(data);
-    expect(resultUpdated[ServerSide].user).toBe(forcedUserId);
+    expect(resultUpdated).toHaveProperty(ServerSide);
+    const serverSideUpdated: IUserSubContext = resultUpdated[ServerSide]!;
+    expect(serverSideUpdated.user).toBe(forcedUserId);
   });
 }
 

@@ -9,19 +9,19 @@ interface IMemoryInfo {
     totalJSHeapSize: number;
     usedJSHeapSize: number;
 }
-interface IPerformance {
+interface Performance {
     memory?: IMemoryInfo;
 }
-interface IWindow {
-    navigator?: INavigator;
-    performance: IPerformance;
+interface Window {
+    navigator?: Navigator;
+    performance: Performance;
 }
 interface IBrowserInfo {
-    performance?: IPerformance | {};
+    performance?: Performance | {};
     platform: string;
     userAgent: string;
 }
-interface INavigator {
+interface Navigator {
     platform?: string;
     userAgent?: string;
     [key: string]: string | undefined;
@@ -35,8 +35,8 @@ interface INavigator {
  * @extends ProcessorBase
  */
 declare class BrowserProcessor extends ProcessorBase implements IProcessor {
-    navigator: INavigator;
-    window: IWindow;
+    navigator: any;
+    window: any;
     /**
      * ProcessorBase ensures it is not being built outside a browser.
      *
@@ -45,8 +45,8 @@ declare class BrowserProcessor extends ProcessorBase implements IProcessor {
      * @param {object} win
      *   window.
      */
-    constructor(nav?: INavigator, win?: IWindow);
+    constructor(nav?: Navigator, win?: Window);
     /** @inheritDoc */
     process(context: object): IContext;
 }
-export { BrowserProcessor, IBrowserInfo, IMemoryInfo, INavigator, IPerformance, IWindow, };
+export { BrowserProcessor, IBrowserInfo, IMemoryInfo, };

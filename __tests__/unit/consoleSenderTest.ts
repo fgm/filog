@@ -6,9 +6,9 @@
 
 import NullFn from "../../src/NullFn";
 import { ConsoleSender } from "../../src/Senders/ConsoleSender";
-import {ISender} from "../../src/Senders/ISender";
+import { ISender } from "../../src/Senders/ISender";
 
-let savedConsole;
+let savedConsole: any;
 
 function testConsoleSender() {
   beforeEach(() => {
@@ -37,7 +37,8 @@ function testConsoleSender() {
     ];
 
     invalid.forEach((c) => {
-      console = c as Console;
+      // We explicitly pass data with invalid type to test runtime checks.
+      (console as any) = c /* as Console */;
       let sender: ISender | null = null;
       expect(() => {
         sender = new ConsoleSender();

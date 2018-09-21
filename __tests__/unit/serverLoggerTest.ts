@@ -30,6 +30,7 @@ import {
   TEST_SOURCE,
   TestSender,
 } from "./types";
+import {SinonSpy} from "sinon";
 
 const MAGIC = "xyzzy";
 
@@ -72,7 +73,7 @@ const testConstructor = () => {
 };
 
 const testConnect = () => {
-  let connectSpy;
+  let connectSpy: SinonSpy;
   const mockWebApp = {
     connectHandlers: {
       use: NullFn,
@@ -137,11 +138,9 @@ const testBuildContext = () => {
 };
 
 const testLogExtended = () => {
-  let buildContextSpy;
-  let defaultContextSpy;
+  let defaultContextSpy: SinonSpy;
 
   beforeAll(() => {
-    buildContextSpy = sinon.spy(ServerLogger.prototype, "getInitialContext");
     defaultContextSpy = sinon.spy(ServerLogger.prototype, "defaultContext");
   });
 
@@ -167,9 +166,11 @@ const testLogExtended = () => {
     const t1 = + new Date();
     const result: IResult = sender.result;
     expect(result).toHaveProperty("context.timestamp.server.log");
-    const actual = result.context.timestamp.server.log;
-    expect(actual).toBeGreaterThanOrEqual(t0);
-    expect(actual).toBeLessThanOrEqual(t1);
+    // Just checked at previous line.
+    const actualTs: ITimestamps = result.context.timestamp!;
+    const actualLogTs = actualTs.server.log;
+    expect(actualLogTs).toBeGreaterThanOrEqual(t0);
+    expect(actualLogTs).toBeLessThanOrEqual(t1);
   });
 
   test("Should factor source timestamp", () => {
@@ -190,7 +191,8 @@ const testLogExtended = () => {
     expect(result).toHaveProperty(`context.${KEY_TS}`);
     expect(result).toHaveProperty(`context.${KEY_TS}.${TEST_SOURCE}`);
     expect(result).toHaveProperty(`context.${KEY_TS}.${TEST_SOURCE}.${clientTsKey}`);
-    const actual = result.context[KEY_TS][TEST_SOURCE][clientTsKey];
+    // Just checked at previous line.
+    const actual = result.context[KEY_TS]![TEST_SOURCE][clientTsKey];
     expect(actual).toBe(t0);
   });
 
@@ -252,7 +254,8 @@ const testLogExtended = () => {
     expect(actualContext).not.toHaveProperty(KEY_DETAILS);
     expect(actualContext).not.toHaveProperty(ClientSide);
     expect(actualContext).toHaveProperty(KEY_TS);
-    const actualTs: ITimestamps = actualContext[KEY_TS];
+    // Just checked at previous line.
+    const actualTs: ITimestamps = actualContext[KEY_TS]!;
     expect(actualTs).toHaveProperty(`${ServerSide}.log`);
 
     expect(actualContext).toMatchObject(expectedContext);

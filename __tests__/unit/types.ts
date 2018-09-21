@@ -28,25 +28,27 @@ interface IConstructor extends Function {
 interface IResult {
   level?: LogLevel.Levels;
   message?: string;
-  context?: IContext;
+  context: IContext;
 }
 
 /**
  * A Sender class storing results internally, for review by tests.
  */
 class TestSender implements ISender {
-  public result: IResult = {};
+  public result: IResult = { context: {} };
   public isEmpty: boolean = true;
 
-  public send(level, message, context): void {
+  public send(level: LogLevel.Levels, message: string, context: IContext): void {
     this.result = { level, message, context };
     this.isEmpty = false;
   }
 }
 
-const newLogStrategy: StrategyFactory = (sender: TestSender) => ({
+const newLogStrategy: StrategyFactory = (sender?: ISender) => ({
   ...newEmptyStrategy(),
-  selectSenders: () => [sender],
+  selectSenders: sender
+    ? () => [sender]
+    : () => [],
 });
 
 export {
