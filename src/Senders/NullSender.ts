@@ -2,9 +2,9 @@
  * @fileOverview NulllSender class.
  */
 
-import {ISender} from "./ISender";
 import {IContext} from "../IContext";
 import * as LogLevel from "../LogLevel";
+import {ISender} from "./ISender";
 
 /**
  * NullSender defines an explicit null sender.

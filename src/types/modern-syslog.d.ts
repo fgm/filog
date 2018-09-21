@@ -21,22 +21,22 @@ declare module "modern-syslog" {
 
   // tslint:disable-next-line
   export interface facility {
-    kern: number,
-    user: number,
-    mail: number,
-    daemon: number,
-    auth: number,
-    syslog: number,
-    lpr: number,
-    news: number,
-    uucp: number,
-    clock: number,
-    authpriv: number,
-    ftp: number,
-    ntp: number,
-    logaudit: number,
-    logalert: number,
-    cron: number,
+    kern: number;
+    user: number;
+    mail: number;
+    daemon: number;
+    auth: number;
+    syslog: number;
+    lpr: number;
+    news: number;
+    uucp: number;
+    clock: number;
+    authpriv: number;
+    ftp: number;
+    ntp: number;
+    logaudit: number;
+    logalert: number;
+    cron: number;
     LOG_LOCAL0: number;
     LOG_LOCAL1: number;
     LOG_LOCAL2: number;
