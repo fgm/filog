@@ -1,4 +1,11 @@
 # FiLog changelog
+
+## 0.2 series
+### 0.2.1
+
+* Converted to TypeScript, source and tests (#63)
+
+
 ## 0.1 series
 
 ### 0.1.18

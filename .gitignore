@@ -1,11 +1,10 @@
 # Generated files.
-coverage/
-lib/
-libts/
+/coverage/
+/lib/
+/lib/__tests__
+/out/
 node_modules/
 npm-debug.log
-lib/__tests__
-out/
 yarn-error.log
 
 # NPM Pack

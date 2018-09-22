@@ -3,7 +3,7 @@ FiLog: a Meteor 1.4-1.7 logging package
 
 [![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
 [![CodeCov Test Coverage](https://codecov.io/gh/fgm/filog/branch/master/graph/badge.svg)](https://codecov.io/gh/fgm/filog)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/fgm/filog/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/fgm/filog/?branch=master)
+[![codebeat badge](https://codebeat.co/badges/b1379317-2bc2-4059-b640-c393f3ad20ea)](https://codebeat.co/projects/github-com-fgm-filog-63ts-source_processor)
 [![Known Vulnerabilities](https://snyk.io/test/github/fgm/filog/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fgm/filog?targetFile=package.json)
 
 Based upon NPM packages::
