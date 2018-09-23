@@ -31,7 +31,10 @@ class RoutingProcessor extends ProcessorBase implements IProcessor {
    *   The processed context object.
    */
   public process(context: IContext): IContext {
-    const result = Object.assign({}, context, { routing: { location: window.location } });
+    const result: IContext = {
+      ...context,
+      ...{ routing: { location: window.location } },
+    };
     return result;
   }
 }

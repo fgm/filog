@@ -62,7 +62,11 @@ declare class MeteorUserProcessor extends ProcessorBase implements IProcessor {
      *   A user object, possibly for an anonymous account.
      */
     getUser(): User;
-    /** @inheritdoc */
+    /**
+     * @inheritdoc
+     *
+     * @see ServerLogger.logExtended()
+     */
     process(context: IContext): IContext;
 }
 export { MeteorUserProcessor, };

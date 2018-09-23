@@ -9,7 +9,8 @@ import { ProcessorBase } from "./ProcessorBase";
 
 import stack from "callsite";
 import User = Meteor.User;
-import {IContext, KEY_SOURCE} from "../IContext";
+import { IContext, KEY_SOURCE} from "../IContext";
+import { ServerSide } from "../Loggers/ServerLogger";
 
 interface IPackage {
   "accounts-base": {
@@ -23,6 +24,7 @@ interface ICallSite extends stack.CallSite {
 }
 
 declare var Package: IPackage;
+
 /**
  * MeteorUserProcessor adds Meteor account information to log events.
  *
@@ -169,7 +171,11 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
     return result;
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   *
+   * @see ServerLogger.logExtended()
+   */
   public process(context: IContext): IContext {
     const user = this.getUser();
 
@@ -178,14 +184,15 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
       delete user.services.resume;
     }
 
-    // Overwrite any previous userId information in context. Unlike client or
-    // mobile information, a straight server-side log context is not rebuilt by
-    // a call to logExtended, so it needs to be set directly in place under a
-    // platform key.
-    const userContext = (context[KEY_SOURCE] === this.platform)
+    // Overwrite any previous userId information in context.
+    //
+    // Unlike client or mobile information, a straight server-side log context
+    // is not rebuilt by a call to logExtended, so it needs to be set directly
+    // in place under a platform key.
+    const userContext = (context[KEY_SOURCE] === this.platform && this.platform === ServerSide)
       ? { [this.platform]: { user } }
       : { user };
-    let result = Object.assign({}, context, userContext);
+    let result: IContext = { ...context, ... userContext };
 
     if (this.postProcess) {
       result = this.postProcess(result);

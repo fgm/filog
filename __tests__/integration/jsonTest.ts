@@ -2,6 +2,11 @@ import axios from "axios";
 
 import endPoint from "./harness";
 
+interface IJsonTestObject {
+  integer: (...args: number[]) => number;
+  domainZone: () => string;
+}
+
 function testValidJson() {
   test("should accept valid JSON posts", () => {
     // Pseudo-random complex value from http://beta.json-generator.com/
@@ -14,12 +19,12 @@ function testValidJson() {
           age: "{{integer(20, 40)}}",
           balance: "{{floating(1000, 4000, 2, '$0,0.00')}}",
           company: "{{company().toUpperCase()}}",
-          email(tags) {
+          email(tags: IJsonTestObject) {
             // Email tag is deprecated, because now you can produce an email as simple as this:
             return (this.name.first + "." + this.name.last + "@" + this.company + tags.domainZone()).toLowerCase();
           },
           eyeColor: "{{random('blue', 'brown', 'green')}}",
-          favoriteFruit(tags) {
+          favoriteFruit(tags: IJsonTestObject) {
             const fruits = ["apple", "banana", "strawberry"];
             return fruits[tags.integer(0, fruits.length - 1)];
           },
@@ -31,7 +36,7 @@ function testValidJson() {
               },
             },
           ],
-          greeting(tags) {
+          greeting(tags: IJsonTestObject) {
             return "Hello, " + this.name.first + "! You have " + tags.integer(5, 10) + " unread messages.";
           },
           guid: "{{guid()}}",

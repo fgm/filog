@@ -29,7 +29,7 @@ function testMeteorUserProcessor() {
   const forcedUserId = 42;
   const postProcessorUpdate = (data: {} ) => {
     // Do not use IUserSubContext, we want to validate runtime checks agains
-    // invalid user structure, which the compiler would not allow.
+    // invalid user structure, which the TS compiler would not allow.
     const result: { server?: { user?: any }} = Object.assign({}, data);
     if (result.server) {
       result.server.user = forcedUserId;
@@ -37,7 +37,7 @@ function testMeteorUserProcessor() {
     return result;
   };
 
-  test("should accept a collection name", () => {
+  test("MeteorUserProcess supports post-processors", () => {
     const data = {
       anything: "goes",
       // Actual contexts always have a "source" top-level key, added by

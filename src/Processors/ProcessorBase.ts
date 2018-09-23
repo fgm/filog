@@ -13,7 +13,7 @@ import {IProcessor} from "./IProcessor";
 class ProcessorBase implements IProcessor {
   /** @inheritDoc */
   public process(context: IContext): IContext {
-    return context as IContext;
+    return context;
   }
 }
 
