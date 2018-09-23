@@ -25,23 +25,23 @@
   },
   "description": "A logger client for errors/exceptions in Meteor JS projects",
   "devDependencies": {
+    "@types/callsite": "^1.0.30",
+    "@types/jest": "^23.3.1",
+    "@types/meteor": "^1.4.19",
+    "@types/sinon": "^5.0.2",
     "axios": "^0.18.0",
-    "babel-cli": "^6.24.0",
-    "babel-core": "^6.24.0",
-    "babel-jest": "^22.4.3",
-    "babel-polyfill": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-stage-0": "^6.22.0",
     "eslint": "^4.19.1",
     "eslint-plugin-react": "^7.7.0",
     "growl": "^1.9.2",
     "ink-docstrap": "^1.3.0",
     "install": "^0.11.0",
-    "jest": "^22.4.3",
+    "jest": "^23.5.0",
     "jsdoc": "^3.4.3",
     "npm": "^6.0.0",
-    "regenerator-runtime": "^0.11.1",
-    "sinon": "^5.0.3"
+    "sinon": "^5.0.3",
+    "ts-jest": "^23.1.4",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.1"
   },
   "engineStrict": true,
   "engines": {
@@ -74,14 +74,16 @@
   },
   "scripts": {
     "clean": "rm -fr coverage node_modules",
+    "ts-compile": "rm -fr lib src/*.js src/*/*.js; tsc -p tsconfig.json",
     "compile": "rm -fr lib/* ; rm -fr node_modules ; meteor npm i && meteor npm run test-compile",
     "doc": "rm -fr out ; jsdoc -c jsdoc.json",
-    "test-ci": "npm run test-compile && time -p jest --coverage test/unit",
-    "test-compile": "time -p babel --presets env,stage-0 -d lib/ src/",
-    "test-integration": "meteor npm run test-compile && time -p jest test/integration",
-    "test-unit": "meteor npm run test-compile && time -p jest test/unit",
-    "test": "meteor npm run test-compile && time -p jest test/*",
-    "cover": "meteor npm run test-compile && time -p jest --coverage test/**/*"
+    "test-ci":          "       npm run test-compile && time -p jest --coverage __tests__/unit/test.ts",
+    "test-compile": "time -p tsc",
+    "test-integration": "meteor npm run test-compile && time -p jest            __tests__/integration/test.ts",
+    "test-unit":        "meteor npm run test-compile && time -p jest            __tests__/unit/test.ts",
+    "test":             "meteor npm run test-compile && time -p jest            __tests__/**/test.*",
+    "cover":            "meteor npm run test-compile && time -p jest --coverage __tests__/**/test.*"
   },
+  "typings": "lib/index.d.ts",
   "version": "0.1.18"
 }
