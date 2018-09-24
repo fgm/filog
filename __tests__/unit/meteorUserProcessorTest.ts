@@ -1,6 +1,9 @@
-import {IContext} from "../../src/IContext";
-import {ServerSide} from "../../src/Loggers/ServerLogger";
-import {IProcessor} from "../../src/Processors/IProcessor";
+import _ from "meteor/underscore";
+
+import { IContext } from "../../src/IContext";
+import { ClientSide } from "../../src/Loggers/ClientLogger";
+import { ServerSide } from "../../src/Loggers/ServerLogger";
+import { IProcessor } from "../../src/Processors/IProcessor";
 import { MeteorUserProcessor } from "../../src/Processors/MeteorUserProcessor";
 
 interface IUserSubContext {
@@ -67,6 +70,31 @@ function testMeteorUserProcessor() {
     expect(resultUpdated).toHaveProperty(ServerSide);
     const serverSideUpdated: IUserSubContext = resultUpdated[ServerSide]!;
     expect(serverSideUpdated.user).toBe(forcedUserId);
+  });
+
+  test.each([
+    [ClientSide, ClientSide, ["user"]],
+    [ClientSide, ServerSide, ["user"]],
+    [ServerSide, ServerSide, ["server", "user"]],
+    // ServerSide, ClientSide : may not happen.
+  ])("User data for %s events logged on %s is inserted as '%s'.", (source, platform, path) => {
+    const data = {
+      anything: "goes",
+      source,
+    };
+    (global as any).Package = mockAccountsPackage;
+    const processorRaw: MeteorUserProcessor = new MeteorUserProcessor(mockMeteor as typeof Meteor);
+    processorRaw.platform = platform;
+    const resultRaw: IMeteorAccountContext = processorRaw.process(data);
+
+    // Tiny subset of lodash get.
+    const get = (o: object, strings: string[]) => {
+      return strings.reduce((accu, curr) => {
+        return typeof accu === "undefined" ? undefined : accu[curr];
+      }, o);
+    };
+    const gotten: any = get(resultRaw, path);
+    expect(gotten).toBeDefined();
   });
 }
 
