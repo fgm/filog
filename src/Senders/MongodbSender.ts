@@ -35,7 +35,7 @@ class MongodbSender implements ISender {
 
   /** @inheritDoc */
   public send(level: LogLevel.Levels, message: string, context: IContext): void {
-    const defaultedContext: IContext = { ...context, timestamp: {} };
+    const defaultedContext: IContext = { timestamp: {}, ...context };
     const doc = { level, message, context: {} as IContext };
 
     // It should contain a timestamp.{side} object if it comes from any Logger.

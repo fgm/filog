@@ -1,7 +1,7 @@
 import sinon = require("sinon");
 
 import * as MM from "meteor/mongo";
-import {IContext, KEY_TS} from "../../src/IContext";
+import {IContext, ITimestamps, KEY_TS} from "../../src/IContext";
 import * as LogLevel from "../../src/LogLevel";
 import { MongodbSender } from "../../src/Senders/MongodbSender";
 
@@ -75,12 +75,13 @@ function testMongoDbSender() {
     const before = +new Date();
     const level: LogLevel.Levels = LogLevel.Levels.WARNING;
     const message = "message";
-    const context: IContext = {
-      [KEY_TS]: {
-        whatever: {
-          rocks: 1480849124018,
-        },
+    const tsInitial: ITimestamps = {
+      whatever: {
+        rocks: 1480849124018,
       },
+    };
+    const context: IContext = {
+      [KEY_TS]: tsInitial,
     };
 
     sender.send(level, message, context);
@@ -93,13 +94,18 @@ function testMongoDbSender() {
     // Message is passed.
     expect(callArgs.message).toBe(message);
 
-    const timestamp = callArgs.context[KEY_TS].server.send;
+    // Preserves existing timestamps.
+    const actualTsInitial: ITimestamps = callArgs.context[KEY_TS];
+    expect(actualTsInitial).toMatchObject(tsInitial);
+
+    // Adds its own timestamping.
+    const tsStamping = callArgs.context[KEY_TS].server.send;
     // A numeric store timestamp is passed.
-    expect(typeof timestamp).toBe("number");
+    expect(typeof tsStamping).toBe("number");
     // Timestamp is later than 'before'.
-    expect(timestamp >= before).toBe(true);
+    expect(tsStamping >= before).toBe(true);
     // Timestamp is earlier than 'after'.
-    expect(timestamp <= after).toBe(true);
+    expect(tsStamping <= after).toBe(true);
   });
 }
 
