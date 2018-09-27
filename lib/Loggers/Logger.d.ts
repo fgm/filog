@@ -11,7 +11,7 @@ import { ILogger } from "./ILogger";
  */
 declare class Logger implements ILogger {
     strategy: IStrategy;
-    static readonly METHOD: string;
+    static readonly METHOD = "filog:log";
     static readonly side: string;
     /**
      * Map a syslog level to its standard name.
