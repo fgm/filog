@@ -13,8 +13,8 @@ const ConsoleSender = class extends SenderBase {
   /**
    * @constructor
    *
-   * @param {String} devMode
-   *   Optional: Print only short logs, omitting the context
+   * @param {Boolean} devMode
+   *   Optional: Print only short logs, omitting the context. Defaults to false.
    */
   constructor(devMode = false) {
     super();
@@ -42,7 +42,8 @@ const ConsoleSender = class extends SenderBase {
 
     if (this.devMode) {
       method(LogLevel.Names[level], message);
-    } else {
+    }
+    else {
       method(LogLevel.Names[level], message, context);
     }
   }
