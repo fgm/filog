@@ -1,4 +1,4 @@
-FiLog: a Meteor 1.4-1.7 logging package
+FiLog: a Meteor 1.6-1.8 logging package
 =======================================
 
 [![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
@@ -55,7 +55,8 @@ Configuration and usage
     - `MongodbSender`: store the event in a collection in the Meteor MongoDB
       database instance (or the minimongo on the client).
     - `NullSender`: ignore the message.
-    - `SyslogSender`: send the event to syslog (server) or ignore it (client).
+    - `SyslogSender`: send the event to syslog, on server only: including it on
+      client will fail.
     - `TeeSender`: send the event to all sender instances passed to its 
       constructor as an array. Useful to send logs to multiple destinations.
   - instantiate a sending "strategy": instance of a class derived from

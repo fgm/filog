@@ -4,6 +4,9 @@
     "email": "fgm@osinet.fr",
     "url": "http://blog.riff.org"
   },
+  "browser": {
+    "./lib/Senders/SyslogSender": false
+  },
   "contributors": [
     {
       "name": "Ilari Patrikka",

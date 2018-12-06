@@ -18,18 +18,14 @@ import { ConsoleSender } from "./Senders/ConsoleSender";
 import { MeteorClientHttpSender } from "./Senders/MeteorClientHttpSender";
 import { MeteorClientMethodSender } from "./Senders/MeteorClientMethodSender";
 import { MongodbSender } from "./Senders/MongodbSender";
+/* modern-syslog is not usable on the client side, because it fails to load
+ * its compiled binary dependency. It is removed by the bundler because of the
+ * "browser" key in package.json.
+ */
+import { SyslogSender } from "./Senders/SyslogSender";
 import { NullSender } from "./Senders/NullSender";
 import { SenderBase } from "./Senders/SenderBase";
 import { TeeSender } from "./Senders/TeeSender";
-
-/* modern-syslog is not usable on the client side, because it fails to load
- * its compiled binary dependency.
- *
- * @type {NullSender|SyslogSender}
- */
-const SyslogSender = Meteor.isServer
-  ? require("./Senders/SyslogSender").default
-  : NullSender;
 
 export {
   InvalidArgumentException,
