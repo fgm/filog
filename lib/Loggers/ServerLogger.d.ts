@@ -2,6 +2,7 @@
  * @fileOverview Server-side Logger.
  */
 /// <reference types="node" />
+/// <reference types="meteor" />
 import * as connect from "connect";
 import { IncomingMessage, ServerResponse } from "http";
 import { WebApp } from "meteor/webapp";

@@ -1,4 +1,5 @@
 /** global: Package */
+/// <reference types="meteor" />
 /**
  * @fileOverview Meteor user Processor class.
  */

@@ -12,10 +12,14 @@ interface IMemoryInfo {
 
 }
 
+// Name is required for browser compatibility.
+// tslint:disable-next-line
 interface Performance {
   memory?: IMemoryInfo;
 }
 
+// Name is required for browser compatibility.
+// tslint:disable-next-line
 interface Window {
   navigator?: Navigator;
   performance: Performance;
@@ -27,6 +31,8 @@ interface IBrowserInfo {
   userAgent: string;
 }
 
+// Name is required for browser compatibility.
+// tslint:disable-next-line
 interface Navigator {
   platform?: string;
   userAgent?: string;

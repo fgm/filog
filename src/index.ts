@@ -1,31 +1,24 @@
-import InvalidArgumentException from "./InvalidArgumentException";
-import * as LogLevel from "./LogLevel";
+import { InvalidArgumentException } from "./indexBrowser";
+import { LogLevel } from "./indexBrowser";
+import { ClientLogger } from "./indexBrowser";
+import { Logger } from "./indexBrowser";
+import { ServerLogger } from "./indexBrowser";
+import { BrowserProcessor } from "./indexBrowser";
+import { MeteorUserProcessor } from "./indexBrowser";
+import { ProcessorBase } from "./indexBrowser";
+import { RoutingProcessor } from "./indexBrowser";
+import { LeveledStrategy } from "./indexBrowser";
+import { StrategyBase } from "./indexBrowser";
+import { TrivialStrategy } from "./indexBrowser";
+import { ConsoleSender } from "./indexBrowser";
+import { MeteorClientHttpSender } from "./indexBrowser";
+import { MeteorClientMethodSender } from "./indexBrowser";
+import { MongodbSender } from "./indexBrowser";
+import { NullSender } from "./indexBrowser";
+import { SenderBase } from "./indexBrowser";
+import { TeeSender } from "./indexBrowser";
 
-import { ClientLogger } from "./Loggers/ClientLogger";
-import { Logger } from "./Loggers/Logger";
-import { ServerLogger } from "./Loggers/ServerLogger";
-
-import { BrowserProcessor } from "./Processors/BrowserProcessor";
-import { MeteorUserProcessor } from "./Processors/MeteorUserProcessor";
-import { ProcessorBase } from "./Processors/ProcessorBase";
-import { RoutingProcessor } from "./Processors/RoutingProcessor";
-
-import { LeveledStrategy } from "./Strategies/LeveledStrategy";
-import { StrategyBase } from "./Strategies/StrategyBase";
-import { TrivialStrategy } from "./Strategies/TrivialStrategy";
-
-import { ConsoleSender } from "./Senders/ConsoleSender";
-import { MeteorClientHttpSender } from "./Senders/MeteorClientHttpSender";
-import { MeteorClientMethodSender } from "./Senders/MeteorClientMethodSender";
-import { MongodbSender } from "./Senders/MongodbSender";
-/* modern-syslog is not usable on the client side, because it fails to load
- * its compiled binary dependency. It is removed by the bundler because of the
- * "browser" key in package.json.
- */
 import { SyslogSender } from "./Senders/SyslogSender";
-import { NullSender } from "./Senders/NullSender";
-import { SenderBase } from "./Senders/SenderBase";
-import { TeeSender } from "./Senders/TeeSender";
 
 export {
   InvalidArgumentException,

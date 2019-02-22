@@ -1,4 +1,5 @@
 /** global: HTTP, Meteor */
+/// <reference types="meteor" />
 import { ISender } from "./ISender";
 /**
  * MeteorClientHttpSender send data from the client to the server over HTTP.

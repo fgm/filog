@@ -11,14 +11,14 @@ import {ServerLogger} from "../Loggers/ServerLogger";
 import * as LogLevel from "../LogLevel";
 import {ISender} from "./ISender";
 
-type Serializer = (doc: object) => string;
-
 interface ISyslogContext {
   message: string;
   level: LogLevel.Levels;
   facility?: modernSyslog.facility;
   context?: IContext;
 }
+
+type Serializer = (doc: ISyslogContext) => string;
 
 /**
  * SyslogSender sends messages to a syslog server.
@@ -66,7 +66,7 @@ class SyslogSender implements ISender {
     syslogFacility: number | null = null,
     public syslog: any, // modernSyslog,
     formatOptions?: {},
-    serialize = null,
+    serialize: Serializer | null = null,
   ) {
     const programName = path.basename(process.argv[1]);
     const actualIdent = ident || programName;

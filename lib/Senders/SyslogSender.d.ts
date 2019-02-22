@@ -5,13 +5,13 @@ import modernSyslog = require("modern-syslog");
 import { IContext } from "../IContext";
 import * as LogLevel from "../LogLevel";
 import { ISender } from "./ISender";
-declare type Serializer = (doc: object) => string;
 interface ISyslogContext {
     message: string;
     level: LogLevel.Levels;
     facility?: modernSyslog.facility;
     context?: IContext;
 }
+declare type Serializer = (doc: ISyslogContext) => string;
 /**
  * SyslogSender sends messages to a syslog server.
  *
@@ -52,7 +52,7 @@ declare class SyslogSender implements ISender {
      * @see modern-syslog/core.cc
      */
     constructor(ident: string | null | undefined, syslogOptions: number | null | undefined, syslogFacility: number | null | undefined, syslog: any, // modernSyslog,
-    formatOptions?: {}, serialize?: null);
+    formatOptions?: {}, serialize?: Serializer | null);
     /**
      * @inheritDoc
      */

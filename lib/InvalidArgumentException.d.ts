@@ -1,4 +1,4 @@
-interface InvalidArgumentException extends Error {
+declare class InvalidArgumentException extends Error {
+    constructor(message?: string);
 }
-declare const InvalidArgumentException: new (message: string) => InvalidArgumentException;
 export default InvalidArgumentException;
