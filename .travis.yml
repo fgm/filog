@@ -13,6 +13,26 @@ node_js:
   - 10
 
 before_script:
+  # Install meteor
+  - curl https://install.meteor.com | /bin/sh
+  # Add meteor to path (instead of asking for sudo in the Travis container)
+  # We can then use the faster container infrastructure - http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+  - export PATH=$HOME/.meteor:$PATH
+  # Ensure NODE_MODULE_VERSION matches Meteor.
+  - meteor npm i -g yarn
+  - meteor yarn
+  - meteor yarn ts-compile
+  # Start the test harness.
+  - cd test_harness
+  - date
+  - meteor yarn
+  - date
+  - meteor run --port 3100&
+  - METEOR_PID=$!
+  # Need to wait for Meteor availability before the integration tests can run.
+  - sleep 30
+  - cd ..
+
   # Codecov preparation.
   - npm install -g codecov
 
@@ -21,10 +41,21 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter -d before-build
 
+  - date
+
+cache:
+  directories:
+    - node_modules
+    - test_harness/node_modules
+
 script:
-  yarn test-ci
+  meteor yarn test-ci
 
 after_script:
+  - date
+  # Stop the test harness.
+  - kill $METEOR_PID
+
   # CodeCode report.
   - codecov
 

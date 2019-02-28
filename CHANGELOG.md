@@ -4,7 +4,7 @@
 ### 0.2.1
 
 * Converted to TypeScript, source and tests (#63)
-
+* Added a test_harness to support integration tests in CI.
 
 ## 0.1 series
 

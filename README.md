@@ -159,31 +159,12 @@ Then you can run :
 * both tests with `meteor npm run test`
 * both tests including coverage generation with `meteor npm run cover`
  
-To run integration tests, you need to run the harness project in one terminal, 
-and the tests in another one, and the project needs to have Filog configured.
+To run integration tests, you need to run the provided test_harness project in
+one terminal, and the tests in another one. Alternatively, you could also roll
+your own bespoke test harness, which will need to have Filog configured.
 
 
-#### Example server-side code in the harness project
-
-    /**
-     * @file server/main.js
-     */
-
-    import { Meteor } from 'meteor/meteor';
-    import { Mongo } from "meteor/mongo";
-    import { WebApp } from "meteor/webapp";
-
-    import {
-      ServerLogger,
-      MongodbSender,
-      TrivialStrategy
-    } from "filog";
-    
-    Meteor.startup(() => {
-      const sender = new MongodbSender(Mongo);
-      const strategy = new TrivialStrategy(sender);
-      global.logger = new ServerLogger(strategy, WebApp);
-    });
+#### Example server-side code in the test_harness/ directory
 
 This file is needed to allow Filog to operate on the `/logger` URL: otherwise, 
 Meteor will handle it natively and return a 200 with the default application 
@@ -192,16 +173,23 @@ page, failing the integration tests.
 
 #### Terminal 1
 
-    $ cd (my_project)
-    $ meteor run --port 3000
+```bash
+cd (filog_dir)/test_harness
+meteor run --port 3100
+```
+
+This example uses port 3100 to avoid conflicting with existing applications on
+the default Meteor port (3000). To use another port, be sure to change it in 
+`__tests__/integration/harness.ts` too.
+
 
 #### Terminal 2
 
-    $ cd (my_project)
-    $ cd imports/filog
-    $ meteor npm run compile
-    $ meteor npm run test-integration
-    $ meteor npm run test
-    $ meteor npm run cover
+```bash
+cd (filog_dir)
+meteor npm run compile
+meteor npm run test
+meteor npm run cover
+```
 
 **TIP** Reading the `.travis.yml` file can be useful too.
