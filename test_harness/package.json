@@ -6,8 +6,8 @@
   },
   "meteor": {
     "mainModule": {
-      "client": "imports/client/main.js",
-      "server": "imports/server/main.js"
+      "client": "client.js",
+      "server": "server.js"
     }
   },
   "name": "filog_test_harness",

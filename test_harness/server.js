@@ -3,15 +3,13 @@
  */
 
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from "meteor/mongo";
 import { WebApp } from "meteor/webapp";
 
-import { ServerLogger } from "filog";
-import { MongodbSender } from "filog";
+import {ConsoleSender, ServerLogger} from "filog";
 import { TrivialStrategy } from "filog";
 
 Meteor.startup(() => {
-  const sender = new MongodbSender(Mongo);
+  const sender = new ConsoleSender();
   const strategy = new TrivialStrategy(sender);
   global.logger = new ServerLogger(strategy, WebApp);
 });

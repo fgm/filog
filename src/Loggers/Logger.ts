@@ -2,6 +2,8 @@
  * @fileOverview Base Logger class.
  */
 
+import * as util from "util";
+
 import TraceKit from "tracekit";
 
 import {
@@ -92,6 +94,35 @@ class Logger implements ILogger {
   }
 
   /**
+   * Return a plain message string from any shape of document.
+   *
+   * @param doc
+   *   Expect it to be an object with a "message" key with a string value, but
+   *   accept anything.
+   *
+   * @returns
+   *   A string, as close to the string representation of doc.message as
+   *   feasible.
+   */
+  public static stringifyMessage(doc: any): string {
+    if (typeof doc === "string") {
+      return doc;
+    }
+
+    const rawMessage = doc.message;
+
+    if (rawMessage) {
+      if (typeof rawMessage === "string") {
+        return rawMessage;
+      } else if (typeof rawMessage.toString === "function") {
+        return rawMessage.toString();
+      }
+    }
+
+    return util.inspect(doc);
+  }
+
+  /**
    * Ensure a log level is in the allowed value set.
    *
    * While this is useless for TS code, JS code using the compiled version of
@@ -173,7 +204,7 @@ class Logger implements ILogger {
    * Disarm the subscriber.
    *
    * In most cases, we do not want to disarm immediately: a stack trace being
-   * build may take several hundred milliseconds, and we would lose it.
+   * built may take several hundred milliseconds, and we would lose it.
    *
    * @param {Number} delay
    *   The delay before actually disarming, in milliseconds.
@@ -250,7 +281,7 @@ class Logger implements ILogger {
     const c3 = this.process(c2);
     const c4 = this.source(c3, preservedTop, initialKeys);
 
-    this.send(this.strategy, level, String(message), c4);
+    this.send(this.strategy, level, Logger.stringifyMessage(message), c4);
   }
 
   /**

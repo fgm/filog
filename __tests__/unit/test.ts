@@ -23,6 +23,7 @@ describe("Unit", () => {
     describe("test context sourcing", testContextSourcing);
   });
   describe("Logger", () => {
+    describe("stringifyMessage", testStringifyMessage);
     describe("validate log levels", testLogLevels);
     describe("validate log level names", testLogLevelNames);
     describe("logging does not modify context", testImmutableContext);
@@ -36,7 +37,6 @@ describe("Unit", () => {
     describe("objectifyContext", testObjectifyContext);
     describe("logExtended", testLogExtended);
     describe("setUpConnect", testConnect);
-    describe("stringifyMessage", testStringifyMessage);
     describe("serializeDeepObject", testSerializeDeepObject);
   });
   describe("Senders", () => {

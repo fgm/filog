@@ -3,14 +3,13 @@
  */
 
 // Node.JS packages: this is server-side code.
+import {IncomingMessage, ServerResponse} from "http";
 import * as os from "os";
 import process from "process";
-import * as util from "util";
 
 // Meteor imports.
 import * as connect from "connect";
-import { IncomingMessage, ServerResponse } from "http";
-import { WebApp } from "meteor/webapp";
+import {WebApp} from "meteor/webapp";
 
 // Package imports.
 import {
@@ -97,35 +96,6 @@ class ServerLogger extends Logger implements ILogger {
       context = { value: rawContext };
     }
     return context;
-  }
-
-  /**
-   * Return a plain message string from any shape of document.
-   *
-   * @param doc
-   *   Expect it to be an object with a "message" key with a string value, but
-   *   accept anything.
-   *
-   * @returns
-   *   A string, as close to the string representation of doc.message as
-   *   feasible.
-   */
-  public static stringifyMessage(doc: any): string {
-    if (typeof doc === "string") {
-      return doc;
-    }
-
-    const rawMessage = doc.message;
-
-    if (rawMessage) {
-      if (typeof rawMessage === "string") {
-        return rawMessage;
-      } else if (typeof rawMessage.toString === "function") {
-        return rawMessage.toString();
-      }
-    }
-
-    return util.inspect(doc);
   }
 
   public enableMethod: boolean = true;
@@ -227,7 +197,7 @@ class ServerLogger extends Logger implements ILogger {
           const doc = JSON.parse(body);
           // RFC 5424 Table 2: 7 == debug.
           const level = (typeof doc.level !== "undefined") ? parseInt(doc.level, 10) : 7;
-          const message = ServerLogger.stringifyMessage(doc);
+          const message = Logger.stringifyMessage(doc);
           if (typeof doc.context === "undefined") {
             doc.context = {};
           }
@@ -289,7 +259,7 @@ class ServerLogger extends Logger implements ILogger {
     const c3 = this.process(c2);
     const c4 = this.source(c3, preservedTop, initialKeys);
 
-    this.send(this.strategy, level, String(message), c4);
+    this.send(this.strategy, level, Logger.stringifyMessage(message), c4);
   }
 
   /**

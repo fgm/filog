@@ -6,7 +6,16 @@ FiLog: a Meteor 1.6-1.8 logging package
 [![codebeat badge](https://codebeat.co/badges/b1379317-2bc2-4059-b640-c393f3ad20ea)](https://codebeat.co/projects/github-com-fgm-filog-63ts-source_processor)
 [![Known Vulnerabilities](https://snyk.io/test/github/fgm/filog/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fgm/filog?targetFile=package.json)
 
-Based upon NPM packages::
+FiLog is a highly configurable isomorphic logger for Meteor applications,
+supporting configurable logging strategies and custom processing and log sending
+destinations.
+
+Out of the box, it can log to the console (browser, server), the Meteor database,
+any Syslog server, and includes a "tee" logger to send to multiple destinations.
+On the browser, it can log to its own Meteor server over DDP, or to a
+centralized FiLog log aggregation server over HTTP.
+
+FiLog is based upon low-level NPM packages::
 
 * Stack capture and standardization: https://www.npmjs.com/package/tracekit
 * Meteor user capture in call stack: https://www.npmjs.com/package/callsite

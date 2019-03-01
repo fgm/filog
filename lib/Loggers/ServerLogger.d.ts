@@ -3,8 +3,8 @@
  */
 /// <reference types="node" />
 /// <reference types="meteor" />
-import * as connect from "connect";
 import { IncomingMessage, ServerResponse } from "http";
+import * as connect from "connect";
 import { WebApp } from "meteor/webapp";
 import { IContext } from "../IContext";
 import * as LogLevel from "../LogLevel";
@@ -46,18 +46,6 @@ declare class ServerLogger extends Logger implements ILogger {
      *   - Scalar contexts are returned as { value: <original value> }
      */
     static objectifyContext(rawContext: any): any;
-    /**
-     * Return a plain message string from any shape of document.
-     *
-     * @param doc
-     *   Expect it to be an object with a "message" key with a string value, but
-     *   accept anything.
-     *
-     * @returns
-     *   A string, as close to the string representation of doc.message as
-     *   feasible.
-     */
-    static stringifyMessage(doc: any): string;
     enableMethod: boolean;
     logRequestHeaders: boolean;
     hostname: string;

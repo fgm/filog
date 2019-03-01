@@ -49,6 +49,18 @@ declare class Logger implements ILogger {
      */
     static stamp(context: IContext, op: string, side: keyof ITimestamps): void;
     /**
+     * Return a plain message string from any shape of document.
+     *
+     * @param doc
+     *   Expect it to be an object with a "message" key with a string value, but
+     *   accept anything.
+     *
+     * @returns
+     *   A string, as close to the string representation of doc.message as
+     *   feasible.
+     */
+    static stringifyMessage(doc: any): string;
+    /**
      * Ensure a log level is in the allowed value set.
      *
      * While this is useless for TS code, JS code using the compiled version of
@@ -100,7 +112,7 @@ declare class Logger implements ILogger {
      * Disarm the subscriber.
      *
      * In most cases, we do not want to disarm immediately: a stack trace being
-     * build may take several hundred milliseconds, and we would lose it.
+     * built may take several hundred milliseconds, and we would lose it.
      *
      * @param {Number} delay
      *   The delay before actually disarming, in milliseconds.
