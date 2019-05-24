@@ -23,25 +23,28 @@ import {ILogger} from "./ILogger";
 
 // const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
-const SIDE = "unknown";
+const MESSAGE_MAX_LENGTH: number = 8192;
+const SIDE: string = "unknown";
+const SNIP_MARKER: string = "[…]";
 
 /**
  * Logger is the base class for loggers.
  */
 class Logger implements ILogger {
+
   public static readonly METHOD = "filog:log";
   public static readonly side: string = SIDE;
 
   /**
    * Map a syslog level to its standard name.
    *
-   * @param {Number} level
+   * @param level
    *   An RFC5424 level.
    *
-   * @returns {String}
+   * @returns
    *   The english name for the level.
    */
-  public static levelName(level: number) {
+  public static levelName(level: number): string {
     let numericLevel = Math.round(level);
     if (numericLevel < LogLevel.EMERGENCY || isNaN(numericLevel)) {
       numericLevel = LogLevel.EMERGENCY;
@@ -105,21 +108,43 @@ class Logger implements ILogger {
    *   feasible.
    */
   public static stringifyMessage(doc: any): string {
-    if (typeof doc === "string") {
-      return doc;
-    }
-
-    const rawMessage = doc.message;
-
-    if (rawMessage) {
-      if (typeof rawMessage === "string") {
-        return rawMessage;
-      } else if (typeof rawMessage.toString === "function") {
-        return rawMessage.toString();
+    const customStringify = (input: any): string|null => {
+      if (typeof input === "undefined") {
+        return null;
       }
+
+      if (typeof input === "string") {
+        return input;
+      }
+
+      // Use toString() at this point only if it is not the default version on Object.prototype.
+      if (typeof input.toString === "function"
+        && input.toString !== Object.prototype.toString
+        && input.toString !== Array.prototype.toString
+      ) {
+        return input.toString();
+      }
+
+      return null;
+    };
+
+    let out = customStringify(doc);
+    if (typeof out === "string") {
+      return out;
     }
 
-    return util.inspect(doc);
+    const message = doc.message;
+    out = customStringify(message);
+    if (typeof out === "string") {
+      return out;
+    }
+
+    const inspected = util.inspect(doc);
+    const result = inspected.length > MESSAGE_MAX_LENGTH
+      ? inspected.substring(0, MESSAGE_MAX_LENGTH - 3) + SNIP_MARKER
+      : inspected;
+
+    return result;
   }
 
   /**
@@ -130,7 +155,7 @@ class Logger implements ILogger {
    *
    * @see Logger.log()
    *
-   * @param {Number} requestedLevel
+   * @param requestedLevel
    *   A RFC5424 level.
    *
    * @throws InvalidArgumentException
@@ -152,7 +177,7 @@ class Logger implements ILogger {
   /**
    * @constructor
    *
-   * @param {StrategyBase} strategy
+   * @param strategy
    *   The sender selection strategy to apply.
    *
    */
@@ -166,7 +191,7 @@ class Logger implements ILogger {
   /**
    * Arm the report subscriber.
    *
-   * @returns {void}
+   * @returns
    *
    * @see Logger#reportSubscriber
    */
@@ -206,12 +231,12 @@ class Logger implements ILogger {
    * In most cases, we do not want to disarm immediately: a stack trace being
    * built may take several hundred milliseconds, and we would lose it.
    *
-   * @param {Number} delay
+   * @param delay
    *   The delay before actually disarming, in milliseconds.
    *
    * @returns {void}
    */
-  public disarm(delay = 2000) {
+  public disarm(delay: number = 2000) {
     setTimeout(() => {
       this.tk.report.unsubscribe(this.reportSubscriber);
     }, delay);
@@ -341,9 +366,9 @@ class Logger implements ILogger {
    *   A message context, possibly including a message_details key to separate
    *   data passed to the log() call from data added by processors.
    *
-   * @returns {void}
+   * @returns
    */
-  public send(strategy: IStrategy, level: LogLevel.Levels, message: string, sentContext: {}) {
+  public send(strategy: IStrategy, level: LogLevel.Levels, message: string, sentContext: {}): void {
     const senders = strategy.selectSenders(level, message, sentContext);
     senders.forEach((sender) => {
       sender.send(level, message, sentContext);

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@babel/runtime": "^7.1.5",
+    "@babel/runtime": "^7.4.5",
     "filog": "../",
     "meteor-node-stubs": "^0.4.1"
   },

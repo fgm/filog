@@ -25,9 +25,10 @@ function testStringifyMessage() {
       [{ message: "foo" }, "foo"],
       [{ message: 25 }, "25"],
       [{ message: "foo", a: "A" }, 'foo'],
-      // Do not specialize other keys.
+      // Do not specialize other keys (notice the "s").
       [{ messages: "foo", a: "A" }, "{ messages: 'foo', a: 'A' }"],
       // Apply toString().
+      [o, JSON.stringify(value)],
       [{ message: o }, JSON.stringify(value)],
       [{ message: { toString: () => "Hello" } }, "Hello"],
       // Default formatting.

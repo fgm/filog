@@ -196,9 +196,9 @@ the default Meteor port (3000). To use another port, be sure to change it in
 
 ```bash
 cd (filog_dir)
-meteor npm run compile
-meteor npm run test
-meteor npm run cover
+meteor yarn run compile
+meteor yarn run test
+meteor yarn run cover
 ```
 
 **TIP** Reading the `.travis.yml` file can be useful too.

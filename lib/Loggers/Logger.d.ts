@@ -16,10 +16,10 @@ declare class Logger implements ILogger {
     /**
      * Map a syslog level to its standard name.
      *
-     * @param {Number} level
+     * @param level
      *   An RFC5424 level.
      *
-     * @returns {String}
+     * @returns
      *   The english name for the level.
      */
     static levelName(level: number): string;
@@ -68,7 +68,7 @@ declare class Logger implements ILogger {
      *
      * @see Logger.log()
      *
-     * @param {Number} requestedLevel
+     * @param requestedLevel
      *   A RFC5424 level.
      *
      * @throws InvalidArgumentException
@@ -81,7 +81,7 @@ declare class Logger implements ILogger {
     /**
      * @constructor
      *
-     * @param {StrategyBase} strategy
+     * @param strategy
      *   The sender selection strategy to apply.
      *
      */
@@ -89,7 +89,7 @@ declare class Logger implements ILogger {
     /**
      * Arm the report subscriber.
      *
-     * @returns {void}
+     * @returns
      *
      * @see Logger#reportSubscriber
      */
@@ -114,7 +114,7 @@ declare class Logger implements ILogger {
      * In most cases, we do not want to disarm immediately: a stack trace being
      * built may take several hundred milliseconds, and we would lose it.
      *
-     * @param {Number} delay
+     * @param delay
      *   The delay before actually disarming, in milliseconds.
      *
      * @returns {void}
@@ -196,7 +196,7 @@ declare class Logger implements ILogger {
      *   A message context, possibly including a message_details key to separate
      *   data passed to the log() call from data added by processors.
      *
-     * @returns {void}
+     * @returns
      */
     send(strategy: IStrategy, level: LogLevel.Levels, message: string, sentContext: {}): void;
     /**
