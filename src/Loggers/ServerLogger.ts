@@ -101,6 +101,7 @@ class ServerLogger extends Logger implements ILogger {
   public enableMethod: boolean = true;
   public logRequestHeaders: boolean = true;
   public hostname: string;
+  // Preserve the legacy Filog default, but allow configuration.
   public maxReqListeners: number = 11;
   public output: WriteStream;
   public servePath: string = "/logger";
@@ -130,25 +131,22 @@ class ServerLogger extends Logger implements ILogger {
     super(strategy);
     this.output = process.stdout;
     this.side = ServerSide;
-    const defaultParameters: IServerLoggerConstructorParameters = {
-      enableMethod: true,
-      logRequestHeaders: true,
-      // Preserve the legacy Filog default, but allow configuration.
-      maxReqListeners: 11,
-      servePath: "/logger",
-      verbose: false,
-    };
 
-    // Loop on defaults, not arguments, to avoid injecting any random junk.
-    for (const key in defaultParameters) {
-      if (defaultParameters.hasOwnProperty(key)) {
-        const k = key as keyof IServerLoggerConstructorParameters;
-        const value = (typeof parameters[k] !== "undefined")
-          ? parameters[k]
-          : defaultParameters[k];
-        // We took care NOT to have undefined, so tell it to the compiler.
-        this[k] = value!;
-      }
+      // XXX Use a loop again: TS3.4 broke the previous loop with no obvious fix.
+    if (typeof parameters.enableMethod !== "undefined") {
+      this.enableMethod = parameters.enableMethod;
+    }
+    if (typeof parameters.logRequestHeaders !== "undefined") {
+      this.logRequestHeaders = parameters.logRequestHeaders;
+    }
+    if (typeof parameters.maxReqListeners !== "undefined") {
+      this.maxReqListeners = parameters.maxReqListeners;
+    }
+    if (typeof parameters.servePath !== "undefined") {
+      this.servePath = parameters.servePath;
+    }
+    if (typeof parameters.verbose !== "undefined") {
+      this.verbose = parameters.verbose;
     }
 
     this.hostname = os.hostname();

@@ -74,13 +74,13 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
    *   An account object initialized for anonymous.
    *
    */
-  public getAnonymousAccount(id = 0) {
+  public getAnonymousAccount(id: string = "0"): User {
     return {
       _id: id,
       emails: [],
       profile: {},
       services: {},
-      username: null,
+      username: undefined,
     };
   }
 
@@ -139,10 +139,11 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
    *   A user object, possibly for an anonymous account.
    */
   public getUser(): User {
-    let result;
+    let result: User;
     // We ruled out other platforms beyond client and server in constructor.
     if (this.meteor.isClient) {
-      result = this.meteor.user();
+      const maybeUser = this.meteor.user();
+      result = maybeUser ? maybeUser : this.getAnonymousAccount();
     } else {
       // In methods, get this.userId from logger caller.
       const id = this.v8getUserId();
@@ -150,16 +151,17 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
         if (!this.userCache[id]) {
           const user = this.meteor.users.findOne({ _id: id });
           this.userCache[id] = (typeof user === "undefined")
-            ? this.getAnonymousAccount(Number(id))
+            ? this.getAnonymousAccount(String(id))
             : user;
         }
         result = this.userCache[id];
       } else {
         // In publish functions, may work with reactive-publish
         // @see https://github.com/meteor/meteor/issues/5462
-        let user;
+        let user: User;
         try {
-          user = this.meteor.user();
+          const maybeUser = this.meteor.user();
+          user = maybeUser ? maybeUser : this.getAnonymousAccount();
         } catch (e) {
           // Worst case: provide a default anonymous account.
           user = this.getAnonymousAccount();

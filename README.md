@@ -159,14 +159,14 @@ you have a working harness project using Filog, exposed on
 
 Start by compiling the package:
 
-* `meteor run compile`
+* `meteor yarn run ts-compile`
 
 Then you can run :
 
-* just unit tests with `meteor npm run test-unit` 
-* just integration tests with `meteor npm run test-integration`
-* both tests with `meteor npm run test`
-* both tests including coverage generation with `meteor npm run cover`
+* just unit tests with `meteor yarn run test-unit` 
+* just integration tests with `meteor yarn run test-integration`
+* both tests with `meteor yarn run test`
+* both tests including coverage generation with `meteor yarn run cover`
  
 To run integration tests, you need to run the provided test_harness project in
 one terminal, and the tests in another one. Alternatively, you could also roll

@@ -35,13 +35,7 @@ declare class MeteorUserProcessor extends ProcessorBase implements IProcessor {
      *   An account object initialized for anonymous.
      *
      */
-    getAnonymousAccount(id?: number): {
-        _id: number;
-        emails: never[];
-        profile: {};
-        services: {};
-        username: null;
-    };
+    getAnonymousAccount(id?: string): User;
     /**
      * Get this.userId on the logger caller.
      *

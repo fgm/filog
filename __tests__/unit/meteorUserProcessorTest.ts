@@ -1,5 +1,3 @@
-import _ from "meteor/underscore";
-
 import { IContext } from "../../src/IContext";
 import { ClientSide } from "../../src/Loggers/ClientLogger";
 import { ServerSide } from "../../src/Loggers/ServerLogger";
@@ -77,14 +75,18 @@ function testMeteorUserProcessor() {
     [ClientSide, ServerSide, ["user"]],
     [ServerSide, ServerSide, ["server", "user"]],
     // ServerSide, ClientSide : may not happen.
-  ])("User data for %s events logged on %s is inserted as '%s'.", (source, platform, path) => {
+  ])("User data for %s events logged on %s is inserted as '%s'.",
+      (source: string|string[], platform: string|string[], path: string|string[]): void => {
+    expect(typeof source).toBe("string");
+    expect(typeof platform).toBe("string");
+    expect(path).toBeInstanceOf(Array);
     const data = {
       anything: "goes",
-      source,
+      source: source as string,
     };
     (global as any).Package = mockAccountsPackage;
     const processorRaw: MeteorUserProcessor = new MeteorUserProcessor(mockMeteor as typeof Meteor);
-    processorRaw.platform = platform;
+    processorRaw.platform = platform as string;
     const resultRaw: IMeteorAccountContext = processorRaw.process(data);
 
     // Tiny subset of lodash get.
@@ -93,7 +95,7 @@ function testMeteorUserProcessor() {
         return typeof accu === "undefined" ? undefined : accu[curr];
       }, o);
     };
-    const gotten: any = get(resultRaw, path);
+    const gotten: any = get(resultRaw, path as string[]);
     expect(gotten).toBeDefined();
   });
 }
