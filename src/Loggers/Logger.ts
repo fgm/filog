@@ -24,7 +24,7 @@ import {ILogger} from "./ILogger";
 // const logMethodNames = ["log", "debug", "info", "warn", "error", "_exception" ];
 
 const MESSAGE_MAX_LENGTH: number = 8192;
-const SIDE: string = "unknown";
+const SIDE: string = "unknown_side";
 const SNIP_MARKER: string = "[…]";
 
 /**
