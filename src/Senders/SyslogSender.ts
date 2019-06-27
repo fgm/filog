@@ -5,9 +5,9 @@
 import modernSyslog = require("modern-syslog");
 import * as path from "path";
 import * as util from "util";
-import {IContext, KEY_TS} from "../IContext";
+import {IContext, ITimestamps, KEY_TS} from "../IContext";
 import {Logger} from "../Loggers/Logger";
-import {ServerLogger} from "../Loggers/ServerLogger";
+import {ServerSide} from "../Loggers/ServerLogger";
 import * as LogLevel from "../LogLevel";
 import {ISender} from "./ISender";
 
@@ -105,7 +105,7 @@ class SyslogSender implements ISender {
     }
 
     // doc.context.timestamp.server is known to exist from above.
-    Logger.stamp(doc.context, "send", ServerLogger.side);
+    Logger.stamp(doc.context, "send", ServerSide as keyof ITimestamps);
     this.syslog.log(level, this.serialize(doc));
   }
 
