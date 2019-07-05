@@ -3,8 +3,11 @@
 ## 0.2 series
 ### 0.2.1
 
-* Converted to TypeScript, source and tests (#63)
-* Added a test_harness to support integration tests in CI.
+* Split context by side (client/server).
+* Better stringifying process, supporting objects with a message key (#63, #24).
+* Converted to TypeScript 3.4, source and tests (#63).
+* Added a test_harness to support integration tests in CI (#24).
+* Fixed MongoDBSender overwriting preexisting timestamps.
 
 ## 0.1 series
 

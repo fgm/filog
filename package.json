@@ -70,7 +70,7 @@
   },
   "scripts": {
     "clean": "rm -fr coverage node_modules",
-    "ts-compile": "rm -fr lib src/*.js src/*/*.js; tsc -p tsconfig.json",
+    "ts-compile":       "rm -fr lib src/*.js src/*/*.js; tsc -p tsconfig.json",
     "ts-compile-tests": "rm -fr lib src/*.js src/*/*.js; tsc -p tsconfig_test.json",
     "ts-lint": "tslint -p tsconfig.json",
     "compile": "rm -fr lib/* ; rm -fr node_modules ; meteor npm i && meteor npm run test-compile",
@@ -78,9 +78,9 @@
     "test-ci": "time -p jest --coverage __tests__/**/test.ts",
     "test-compile": "time -p tsc",
     "test-integration": "meteor npm run test-compile && time -p jest            __tests__/integration/test.ts",
-    "test-unit": "meteor npm run test-compile && time -p jest            __tests__/unit/test.ts",
-    "test": "meteor npm run test-compile && time -p jest            __tests__/**/test.*",
-    "cover": "meteor npm run test-compile && time -p jest --coverage __tests__/**/test.*"
+    "test-unit":        "meteor npm run test-compile && time -p jest            __tests__/unit/test.ts",
+    "test":             "meteor npm run test-compile && time -p jest            __tests__/**/test.*",
+    "cover":            "meteor npm run test-compile && time -p jest --coverage __tests__/**/test.*"
   },
   "typings": "lib/index.d.ts",
   "version": "0.2.1"
