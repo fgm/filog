@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false,                 /* Raise error on expressions and declarations with an implied 'any' type. */
+  },
+  "include": [
+    "__tests__/**/*"
+  ],
+  "lib": [
+    "es2017",
+    "dom"
+  ]
+}

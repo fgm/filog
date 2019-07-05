@@ -10,15 +10,15 @@ filter:
 build:
   nodes:
     analysis:
-      tests:
-        override:
-          - js-scrutinizer-run
-          -
-            command: eslint-run
-            use_website_config: false
-      environment:
-        node:
-          version: 8.11.1
+#      tests:
+#        override:
+#          - js-scrutinizer-run
+#          -
+#            command: eslint-run
+#            use_website_config: false
+#      environment:
+#        node:
+#          version: 8.11.
     tests: true
 
 # Not needed: we use the CodeClimate coverage badge anyway.

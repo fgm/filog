@@ -1,0 +1,19 @@
+coverage:
+  notify:
+    slack:
+      default:
+        branches: null
+        flags: null
+        only_pulls: false
+        paths: null
+        threshold: 0.0
+        url: https://hooks.slack.com/services/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
+  parsers:
+    javascript:
+      enable_partials: true
+  precision: 1
+  range: 70..95
+  round: down
+
+ignore:
+  - "^test/"  # ignore folders and all its contents

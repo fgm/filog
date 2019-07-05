@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@babel/runtime": "^7.4.5",
+    "filog": "../",
+    "meteor-node-stubs": "^0.4.1"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client.js",
+      "server": "server.js"
+    }
+  },
+  "name": "filog_test_harness",
+  "private": true,
+  "scripts": {
+    "start": "meteor run"
+  }
+}

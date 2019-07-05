@@ -1,4 +1,14 @@
 # FiLog changelog
+
+## 0.2 series
+### 0.2.1
+
+* Split context by side (client/server).
+* Better stringifying process, supporting objects with a message key (#63, #24).
+* Converted to TypeScript 3.4, source and tests (#63).
+* Added a test_harness to support integration tests in CI (#24).
+* Fixed MongoDBSender overwriting preexisting timestamps.
+
 ## 0.1 series
 
 ### 0.1.18
@@ -59,7 +69,7 @@
 
 ### 0.1.10 / 0.1.9
 
-* MongoDbSender can now take an existing collection instead of just a name
+* MongodbSender can now take an existing collection instead of just a name
 * Allow logging client request headers
 * New TrivialStrategy for simple configurations
 * New documentation site on [https://fgm.github.io/filog](https://fgm.github.io/filog)
@@ -97,7 +107,7 @@
 
 * New Syslog sender using modern-syslog
 * Fixed server-side double escaping in message strings
-* Improved collection handling in MongoDbSender
+* Improved collection handling in MongodbSender
 
 ### 0.1.1
 

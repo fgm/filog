@@ -1,12 +1,21 @@
-FiLog: a Meteor 1.4-1.6 logging package
+FiLog: a Meteor 1.6-1.8 logging package
 =======================================
 
 [![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/f380bfd73a491c472221/test_coverage)](https://codeclimate.com/github/fgm/filog/test_coverage)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/fgm/filog/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/fgm/filog/?branch=master)
+[![CodeCov Test Coverage](https://codecov.io/gh/fgm/filog/branch/master/graph/badge.svg)](https://codecov.io/gh/fgm/filog)
+[![codebeat badge](https://codebeat.co/badges/b1379317-2bc2-4059-b640-c393f3ad20ea)](https://codebeat.co/projects/github-com-fgm-filog-63ts-source_processor)
 [![Known Vulnerabilities](https://snyk.io/test/github/fgm/filog/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fgm/filog?targetFile=package.json)
 
-Based upon NPM packages::
+FiLog is a highly configurable isomorphic logger for Meteor applications,
+supporting configurable logging strategies and custom processing and log sending
+destinations.
+
+Out of the box, it can log to the console (browser, server), the Meteor database,
+any Syslog server, and includes a "tee" logger to send to multiple destinations.
+On the browser, it can log to its own Meteor server over DDP, or to a
+centralized FiLog log aggregation server over HTTP.
+
+FiLog is based upon low-level NPM packages::
 
 * Stack capture and standardization: https://www.npmjs.com/package/tracekit
 * Meteor user capture in call stack: https://www.npmjs.com/package/callsite
@@ -55,7 +64,8 @@ Configuration and usage
     - `MongodbSender`: store the event in a collection in the Meteor MongoDB
       database instance (or the minimongo on the client).
     - `NullSender`: ignore the message.
-    - `SyslogSender`: send the event to syslog (server) or ignore it (client).
+    - `SyslogSender`: send the event to syslog, on server only: including it on
+      client will fail.
     - `TeeSender`: send the event to all sender instances passed to its 
       constructor as an array. Useful to send logs to multiple destinations.
   - instantiate a sending "strategy": instance of a class derived from
@@ -149,40 +159,21 @@ you have a working harness project using Filog, exposed on
 
 Start by compiling the package:
 
-* `meteor run compile`
+* `meteor yarn run ts-compile`
 
 Then you can run :
 
-* just unit tests with `meteor npm run test-unit` 
-* just integration tests with `meteor npm run test-integration`
-* both tests with `meteor npm run test`
-* both tests including coverage generation with `meteor npm run cover`
+* just unit tests with `meteor yarn run test-unit` 
+* just integration tests with `meteor yarn run test-integration`
+* both tests with `meteor yarn run test`
+* both tests including coverage generation with `meteor yarn run cover`
  
-To run integration tests, you need to run the harness project in one terminal, 
-and the tests in another one, and the project needs to have Filog configured.
+To run integration tests, you need to run the provided test_harness project in
+one terminal, and the tests in another one. Alternatively, you could also roll
+your own bespoke test harness, which will need to have Filog configured.
 
 
-#### Example server-side code in the harness project
-
-    /**
-     * @file server/main.js
-     */
-
-    import { Meteor } from 'meteor/meteor';
-    import { Mongo } from "meteor/mongo";
-    import { WebApp } from "meteor/webapp";
-
-    import {
-      ServerLogger,
-      MongodbSender,
-      TrivialStrategy
-    } from "filog";
-    
-    Meteor.startup(() => {
-      const sender = new MongodbSender(Mongo);
-      const strategy = new TrivialStrategy(sender);
-      global.logger = new ServerLogger(strategy, WebApp);
-    });
+#### Example server-side code in the test_harness/ directory
 
 This file is needed to allow Filog to operate on the `/logger` URL: otherwise, 
 Meteor will handle it natively and return a 200 with the default application 
@@ -191,14 +182,23 @@ page, failing the integration tests.
 
 #### Terminal 1
 
-    $ cd (my_project)
-    $ meteor run --port 3000
+```bash
+cd (filog_dir)/test_harness
+meteor run --port 3100
+```
+
+This example uses port 3100 to avoid conflicting with existing applications on
+the default Meteor port (3000). To use another port, be sure to change it in 
+`__tests__/integration/harness.ts` too.
+
 
 #### Terminal 2
 
-    $ cd (my_project)
-    $ cd imports/filog
-    $ meteor npm run compile
-    $ meteor npm run test-integration
-    $ meteor npm run test
-    $ meteor npm run cover
+```bash
+cd (filog_dir)
+meteor yarn run compile
+meteor yarn run test
+meteor yarn run cover
+```
+
+**TIP** Reading the `.travis.yml` file can be useful too.
