@@ -19,10 +19,6 @@ interface IPackage {
   };
 }
 
-interface ICallSite extends stack.CallSite {
-  receiver: any;
-}
-
 declare var Package: IPackage;
 
 /**
@@ -103,10 +99,9 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
     let result = "";
     for (const frame of stackValue) {
       // Work around v8 bug 1164933005
-      const klass = (frame as ICallSite).receiver
+      const klass = frame.getTypeName instanceof Function
         ? frame.getTypeName()
         : null;
-
       switch (state) {
         case "below-logger":
           if (klass === "ServerLogger") {
@@ -114,7 +109,7 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
           }
           break;
 
-        case "1":
+        case "in-logger":
           if (klass !== "ServerLogger") {
             state = "in-caller";
           }
@@ -124,7 +119,8 @@ class MeteorUserProcessor extends ProcessorBase implements IProcessor {
           break;
       }
       if (state === "in-caller") {
-        result = String(frame.getThis().userId);
+        const that = frame.getThis();
+        result = String(that ? that.userId : null);
         break;
       }
     }
