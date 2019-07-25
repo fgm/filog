@@ -5,6 +5,7 @@ FiLog: a Meteor 1.6-1.8 logging package
 [![CodeCov Test Coverage](https://codecov.io/gh/fgm/filog/branch/master/graph/badge.svg)](https://codecov.io/gh/fgm/filog)
 [![codebeat badge](https://codebeat.co/badges/b1379317-2bc2-4059-b640-c393f3ad20ea)](https://codebeat.co/projects/github-com-fgm-filog-63ts-source_processor)
 [![Known Vulnerabilities](https://snyk.io/test/github/fgm/filog/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fgm/filog?targetFile=package.json)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffgm%2Ffilog.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffgm%2Ffilog?ref=badge_shield)
 
 FiLog is a highly configurable isomorphic logger for Meteor applications,
 supporting configurable logging strategies and custom processing and log sending
@@ -202,3 +203,7 @@ meteor yarn run cover
 ```
 
 **TIP** Reading the `.travis.yml` file can be useful too.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffgm%2Ffilog.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffgm%2Ffilog?ref=badge_large)
