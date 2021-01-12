@@ -1,3 +1,6 @@
+# IDE
+/.idea
+
 # Generated files.
 /coverage/
 #/lib/

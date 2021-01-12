@@ -4,13 +4,12 @@ env:
   global:
     - CC_TEST_REPORTER_ID=c33e0157337760958191e73532ea32aca9e54dee6edd7a941e84f0e33bbe3165
 
-matrix:
-  allow_failures:
-    - node_js: 10
+#matrix:
+#  allow_failures:
+#    - node_js: 14
 
 node_js:
-  - 8
-  - 10
+  - 12
 
 before_script:
   # Install meteor

@@ -1,5 +1,5 @@
-FiLog: a Meteor 1.6-1.8 logging package
-=======================================
+FiLog: a Meteor 1.9 logging package
+===================================
 
 [![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
 [![CodeCov Test Coverage](https://codecov.io/gh/fgm/filog/branch/master/graph/badge.svg)](https://codecov.io/gh/fgm/filog)
@@ -185,6 +185,7 @@ page, failing the integration tests.
 
 ```bash
 cd (filog_dir)/test_harness
+meteor yarn
 meteor run --port 3100
 ```
 
@@ -197,6 +198,7 @@ the default Meteor port (3000). To use another port, be sure to change it in
 
 ```bash
 cd (filog_dir)
+meteor yarn
 meteor yarn run compile
 meteor yarn run test
 meteor yarn run cover

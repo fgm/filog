@@ -1,4 +1,3 @@
-/// <reference types="meteor" />
 /**
  * @fileOverview MongoDB Sender class.
  */

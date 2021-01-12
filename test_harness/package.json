@@ -1,8 +1,18 @@
 {
+  "author": {
+    "name": "Frederic G. MARAND",
+    "email": "fgm@osinet.fr",
+    "url": "http://blog.riff.org"
+  },
   "dependencies": {
     "@babel/runtime": "^7.4.5",
     "filog": "../",
     "meteor-node-stubs": "^0.4.1"
+  },
+  "engineStrict": true,
+  "engines": {
+    "node": "12.*",
+    "npm": ">=2.0"
   },
   "meteor": {
     "mainModule": {

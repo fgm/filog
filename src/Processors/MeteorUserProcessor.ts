@@ -32,7 +32,7 @@ declare var Package: IPackage;
  */
 class MeteorUserProcessor extends ProcessorBase implements IProcessor {
   public platform: string;
-  public userCache: { [key: string]: object };
+  public userCache: { [key: string]: User };
 
   /**
    * @param meteor

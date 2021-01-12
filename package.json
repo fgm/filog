@@ -46,10 +46,12 @@
   },
   "engineStrict": true,
   "engines": {
+    "node": "12.*",
     "npm": ">=2.0"
   },
   "engines#1": "We specify npm >= 2 to get proper local dependency support in",
   "engines#2": "application itself ; this is not a package dependency per se.",
+  "engines#3": "We specify node 12.* to avoid modern_syslog NODE_MODULE_VERSION issues.",
   "homepage": "https://github.com/FGM/filog",
   "keywords": [
     "log",

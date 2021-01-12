@@ -17,7 +17,7 @@ declare class MeteorUserProcessor extends ProcessorBase implements IProcessor {
     postProcess: ((r: {}) => {}) | null;
     platform: string;
     userCache: {
-        [key: string]: object;
+        [key: string]: User;
     };
     /**
      * @param meteor
