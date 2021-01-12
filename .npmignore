@@ -1,2 +1,22 @@
+# IDE, OS
+.DS_Store
+/.idea
+
 # Source files are not needed for distribution.
 src/
+__tests__/
+
+# Generated files.
+/cc-test-reporter
+/coverage/
+/out/
+node_modules/
+npm-debug.log
+yarn-error.log
+# NPM Pack
+filog*.tgz
+
+# Version lock files
+npm-shrinkwrap.json
+package-lock.json
+yarn.lock

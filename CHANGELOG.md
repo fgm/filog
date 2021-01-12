@@ -1,6 +1,13 @@
 # FiLog changelog
 
 ## 0.2 series
+### 0.2.2
+
+* Meteor 1.9 support. Dropped pre-1.9 support. Node 12.* required.
+* No significant code changes
+* The `doc` NPM script now works, using TypeDoc instead of JSDoc  
+* TypeScript 4.1, TSLint 6, TypeDoc 0.2, Jest 26, Sinon 9, Axios 0.21 (security release)
+
 ### 0.2.1
 
 * Split context by side (client/server).
