@@ -29,7 +29,7 @@ before_script:
   - meteor run --port 3100&
   - METEOR_PID=$!
   # Need to wait for Meteor availability before the integration tests can run.
-  - sleep 30
+  - sleep 90
   - cd ..
 
   # Codecov preparation.

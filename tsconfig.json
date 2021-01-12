@@ -71,5 +71,11 @@
   "exclude": [
     "lib",
     "node_modules"
-  ]
+  ],
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "exclude": ["lib/**", "node_modules/**", "out/**"],
+    "excludeExternals": true,
+    "out": "out"
+  }
 }

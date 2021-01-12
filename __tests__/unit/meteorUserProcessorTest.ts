@@ -6,7 +6,7 @@ import { MeteorUserProcessor } from "../../src/Processors/MeteorUserProcessor";
 
 interface IUserSubContext {
   user: {
-    services: {},
+    services?: {},
   };
 }
 
