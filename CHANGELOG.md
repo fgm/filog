@@ -1,12 +1,24 @@
 # FiLog changelog
 
+## 0.3 series
+### 0.3.1
+
+* Meteor 2 support. Dropped 1.x support. Node 14.* required.
+* No significant code changes
+* Major dependency updates
+  * Node 12 → 14, NPM 6 → 7
+* Many minor dependency or patch updates:
+  * Modern Syslog 1.1.4 → 1.2.0
+  * Tracekit 0.4.4 → 0.4.6
+  * TypeScript 4.3, TypeDoc 0.21, Jest 27, Sinon 11, Tar 4.4.16 -> 6.1.4 (security release)
+
 ## 0.2 series
 ### 0.2.2
 
 * Meteor 1.9 support. Dropped pre-1.9 support. Node 12.* required.
 * No significant code changes
 * The `doc` NPM script now works, using TypeDoc instead of JSDoc  
-* TypeScript 4.1, TSLint 6, TypeDoc 0.2, Jest 26, Sinon 9, Axios 0.21 (security release)
+* TypeScript 4.1, TSLint 6, TypeDoc 0.20, Jest 26, Sinon 9, Axios 0.21 (security release)
 
 ### 0.2.1
 

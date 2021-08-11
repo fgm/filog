@@ -1,5 +1,5 @@
-FiLog: a Meteor 1.9 logging package
-===================================
+FiLog: a Meteor 2 logging package
+=================================
 
 [![Build Status](https://travis-ci.org/fgm/filog.svg?branch=master)](https://travis-ci.org/fgm/filog)
 [![CodeCov Test Coverage](https://codecov.io/gh/fgm/filog/branch/master/graph/badge.svg)](https://codecov.io/gh/fgm/filog)

@@ -9,7 +9,7 @@ env:
 #    - node_js: 14
 
 node_js:
-  - 12
+  - 14
 
 before_script:
   # Install meteor
