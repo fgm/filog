@@ -205,7 +205,7 @@ class ServerLogger extends Logger implements ILogger {
           }
           const {
             [KEY_DETAILS]: details,
-            // tslint:disable-next-line
+            // eslint-disable-next-line
             ...nonDetails
           } = context;
           this.logExtended(level, message, nonDetails, ClientSide);

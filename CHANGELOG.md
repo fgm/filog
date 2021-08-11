@@ -10,6 +10,7 @@
 * Many minor dependency or patch updates:
   * Modern Syslog 1.1.4 → 1.2.0
   * Tracekit 0.4.4 → 0.4.6
+  * ESLint with plugins replaces deprecated TSLint
   * TypeScript 4.3, TypeDoc 0.21, Jest 27, Sinon 11, Tar 4.4.16 -> 6.1.4 (security release)
 
 ## 0.2 series
