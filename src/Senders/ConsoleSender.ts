@@ -4,7 +4,7 @@
  * Because this file is about actually using the console, it has to disable the
  * no-console rule.
  */
-/* tslint:disable:no-console */
+/* eslint-disable no-console */
 
 import {IContext} from "../IContext";
 import * as LogLevel from "../LogLevel";

@@ -29,7 +29,7 @@ import { TeeSender } from "../Senders/TeeSender";
  * @type {NullSender|SyslogSender}
  */
 const SyslogSender = Meteor.isServer
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   ? require("../Senders/SyslogSender").SyslogSender
   : NullSender;
 

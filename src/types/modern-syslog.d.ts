@@ -1,5 +1,5 @@
 declare module "modern-syslog" {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   export interface level {
     LOG_LEVEL0: number;
     LOG_LEVEL1: number;
@@ -19,7 +19,7 @@ declare module "modern-syslog" {
     debug: number;
   }
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   export interface facility {
     kern: number;
     user: number;
@@ -47,7 +47,7 @@ declare module "modern-syslog" {
     LOG_LOCAL7: number;
   }
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   export interface option {
     LOG_PID: number;
   }
